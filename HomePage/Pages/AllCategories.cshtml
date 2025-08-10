@@ -1,0 +1,23 @@
+﻿@page
+@model HomePage.Pages.AllCategoriesModel
+@{
+    ViewData["Title"] = "Alla kategorier";
+}
+
+<div class="page-wrapper">
+    <a href="Category">Ny kategori</a>
+    <div class="food-grid">
+        @foreach (var food in Model.AllCategories)
+        {
+            <div class="food-row">
+                <div class="food-grid-cell">
+                    <a href="Category?categoryId=@food.Key">
+                        @food.Name
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>

@@ -1,0 +1,105 @@
+﻿@page
+@model HomePage.Pages.SpendingModel
+@{
+    ViewData["Title"] = "Spenderande";
+}
+
+<div class="page-wrapper" style="gap: 12px">
+    <input type="hidden" id="groupjsonholder" value="@Model.GroupOptionsJson"/>
+    <input type="hidden" id="chosenMonth" value="@Model.ChosenMonth" />
+    <div class="filters-wrapper" style="margin-top: 8px;">
+        <div class="input-wrapper">
+            <span>Månad:</span>
+            <select onchange="updateFilters()" id="month">
+                @foreach (var monthPair in Model.MonthsToChoose)
+                {
+                    if (monthPair.key == Model.ChosenMonth)
+                    {
+                        <option value="@monthPair.key" selected> @monthPair.value</option>
+                    }
+                    else
+                    {
+                        <option value="@monthPair.key"> @monthPair.value</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+    <span class="spending-total">Totalt: @Model.Total</span>
+    <button class="sectionButton" onclick="newGroup()">Ny grupp</button>
+    @foreach (var group in Model.SpendingGroups) {
+        <div class="spending-group" onclick="editGroup('@group.Id')" style="background-color: @group.Color">
+            <div class="spending-group-header">
+                <span class="spending-group-title">@group.Name: @group.Total </span>
+            </div>
+            
+            @foreach (var item in group.Entries.OrderByDescending(x => x.ConvertedDate)) {
+                <div class="spending-entry-wrapper" onclick="setItemGroup(event, '@item.Key')">
+                    <span class="spending-group-entry place-entry">@item.Place</span>
+                    <span class="spending-group-entry date-entry">@DateHelper.KeyWithZerosFromKey(item.Date)</span>
+                    <span class="spending-group-entry amount-entry">@item.Amount</span>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>
+<script>
+    function updateFilters() {
+        const month = $('#month').val()
+        window.location = '/Spending?dateMonth=' + month
+    }
+
+    function setItemGroup(e, key) {
+        const options = JSON.parse($('#groupjsonholder').val())
+        const optionButtons = options.map(x => ({
+            text: x.label,
+            action: () => setItemToGroup(key, x.id)
+        }))
+
+        let buttons = [({text: 'Ingen', action: () => setItemToGroup(key, null)})]
+        buttons = buttons.concat(optionButtons)
+
+        buttons.push({text: 'Avbryt', action: () => Popup.closePopup()})
+        Alert.openDialog('Flytta till grupp', buttons)
+        e.stopPropagation()
+        return false
+    }
+
+    function setItemToGroup(key, group) {
+         $.ajax({
+            type: "POST",
+            data: {
+                action: 'MoveGroup',
+                itemKey: key,
+                groupId: group
+            },
+            url: "/Endpoint",
+            success: (e) => {
+                window.location.reload()
+            }
+        });
+    }
+
+    /*function toggleGroup(elem) {
+        const group = $(elem).closest('.spending-group')[0]
+        if (group.classList.contains('closed')) {
+            group.classList.remove('closed')
+        } else {
+            group.classList.add('closed')
+        }
+    }*/
+
+    function newGroup() {
+        const chosenMonth = $('#chosenMonth').val()
+        window.location = 'CreateSpendingGroup?returnDate=' + chosenMonth
+    }
+
+    function editGroup(groupId) {
+        if (groupId) {
+            const chosenMonth = $('#chosenMonth').val()
+            window.location = 'CreateSpendingGroup?groupId=' + groupId + '&returnDate=' + chosenMonth
+        }
+    }
+</script>

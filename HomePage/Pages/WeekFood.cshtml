@@ -1,0 +1,131 @@
+﻿@page
+@model HomePage.Pages.WeekFoodModel
+@{
+    ViewData["Title"] = "Veckans mat";
+}
+<button type="button" onclick="makeShoppingList()" style="position: absolute; top: 5px; right: 5px; display: none;">Skapa handlingslista</button>
+<div class="page-wrapper mainscreen">
+    <div class="goal-wrapper">
+        @foreach (var goal in Model.WeekGoals.OrderBy(x => x.IsBad)) {
+            <span style="@goal.Style">
+                @goal.Category: @goal.Completed/@goal.Goal
+            </span>
+        }
+    </div>
+
+    <div class="week-food-header">
+        <a href="WeekFood?@Model.PrevWeekQs">Föregående vecka</a>
+        <span>Vecka @Model.Week</span>
+        <a href="WeekFood?@Model.NextWeekQs">Nästa vecka</a>
+    </div>
+
+    <input type="hidden" id="loggedInPerson" value="@Model.LoggedInPerson" />
+    <div class="food-grid">
+        @foreach (var dayFood in Model.DayFoods) {
+            <div class="food-row">
+                <span class="weekday-cell food-grid-cell"> @DateHelper.WeekNumberToString[(int)dayFood.Day.DayOfWeek] @dayFood.Day.Day/@dayFood.Day.Month</span>
+                <div class="food-cell food-grid-cell">
+                    @if (!string.IsNullOrEmpty(dayFood.Food?.RecipeUrl))
+                    {
+                        <div class="recipelinkplaceholder" linkurl="@dayFood.Food?.RecipeUrl"></div>
+                    }
+                    @if (dayFood.Food?.InFolder == true)
+                    {
+                        <span class="recipe-button">📗</span>
+                    }
+                    @if(string.IsNullOrEmpty(dayFood.FoodId)) {
+                        <a href="CreateDayFood?@DateHelper.FormatDateForQueryString(dayFood.Day)">Lägg till mat</a>
+                    }
+                    else if (!Model.IsLoggedIn || Model.FoodRankings[DateHelper.ToKey(dayFood.Day)].Any(x => !string.IsNullOrEmpty(x.FoodId))) {
+                        <span>@dayFood.Food.Name</span>
+                    }
+                    else {
+                        <a href="CreateDayFood?@DateHelper.FormatDateForQueryString(dayFood.Day)">@dayFood.Food.Name</a>
+                    }
+                </div>
+                @foreach (var ranking in Model.FoodRankings[DateHelper.ToKey(dayFood.Day)]) {
+                    if (Model.IsInFuture(ranking.Day)) {
+                        <span class="food-grid-cell" > </span>
+                    }
+                    else {
+                        <span class="food-grid-cell" onclick="makeRanking('@ranking.Day', '@ranking.Person')"> @ranking.Person: @ranking.RankingText</span>
+                    }
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>
+<script src="~/js/StarRanker.js" asp-append-version="true"></script>
+<script>
+    function makeShoppingList() {
+        $.ajax({
+            type: "POST",
+            url: "/Endpoint",
+            data: {
+                action: "shoppingList"
+            },
+            success: (e) => {
+            const createNotes = () => {
+                const noteWrapper = document.createElement('div');
+                const noteElement = document.createElement('span')
+                const listText = e.list
+                noteElement.innerText = listText
+                noteWrapper.className = 'note-wrapper'
+                noteWrapper.appendChild(noteElement)
+
+                const copyButton = document.createElement('button');
+                copyButton.type = 'button';
+                copyButton.style.top = '25px'
+                copyButton.style.position = 'absolute'
+                copyButton.innerText = 'Kopiera'
+                copyButton.onclick = (e) => {
+                    navigator.clipboard.writeText(listText).then(() => {
+                        alert("Kopierat!");
+                    }).catch(err => {
+                        alert("Kunde inte kopiera");
+                    });
+
+                    e.stopPropagation()
+                    return false
+                }
+                noteWrapper.appendChild(copyButton);
+                return noteWrapper
+            }
+
+            Popup.putOnOverLay(createNotes(), true, () => { Popup.closePopup(); })
+            }
+        });
+    }
+
+     function makeRanking(date, person) {
+         const loggedInPerson = $('#loggedInPerson').val()
+         if (!loggedInPerson) {
+             window.location.href = 'Login'
+             return
+         }
+
+         if (person != loggedInPerson) {
+             return
+         }
+
+        const ranker = StarRanker.create(r => submitRanking(date, person, r))
+        Alert.openDialogWithElement(ranker, [
+            {text: 'Avbryt', action: () => {Popup.closePopup();}}
+        ])
+    }
+
+    function submitRanking(date, person, ranking) {
+         $.ajax({
+            type: "POST",
+            url: "/WeekFood",
+            data: {
+                date: date,
+                person: person,
+                ranking: ranking
+            },
+            success: (e) => window.location.reload()
+        });
+    }
+</script>

@@ -1,0 +1,68 @@
+﻿@page
+@model HomePage.Pages.CalendarModel
+@{
+    ViewData["Title"] = "Kalender";
+}
+
+<div class="calendar-wrapper">
+    <button class="calendar-nav-button left" onclick="window.location.href = 'Calendar?@Model.PrevWeekQs'">&lt;</button>
+    <button class="calendar-nav-button right" onclick="window.location.href = 'Calendar?@Model.NextWeekQs'">&gt;</button>
+    @foreach (var day in Model.DayModels) {
+        <div class="calendar-day">
+            <div class="calendar-day-header-wrapper">
+                <span class="calendar-day-header">@day.DayText</span>
+                <button class="new-calendar-activity" onclick="window.location.href = 'CreateActivity?date=@DateHelper.ToKey(day.Day)'">➕</button>
+            </div>
+           
+            <div class="calendar-activity-wrapper">
+                @foreach (var activity in day.Activities) {
+                    <div 
+                        class="calendar-activity" 
+                        style="background-color: @Person.HtmlColorFromPerson(activity.Person); height: calc(@activity.HeightInPercentage% - 22px);" 
+                        onclick="window.location.href = 'CreateActivity?activityId=@activity.Key'"
+                        rowspan=@activity.DurationInDays>
+                        <span class="calendar-activity-text">@activity.ReplacedText(day.Day.Year)</span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<script src="~/js/homeButton.js"></script>
+<script>
+    document.body.firstElementChild.className = ''
+    document.body.firstElementChild.firstElementChild.className = ''
+
+    var widthList = {}
+    for (const wrapper of document.querySelectorAll('.calendar-activity-wrapper')) {
+        let currentSlot = 1
+        let expectedSlot = 1
+        for (const activity of wrapper.querySelectorAll('.calendar-activity')) {
+            while (true) {
+                if (widthList[currentSlot] && widthList[currentSlot] > 0) {
+                    currentSlot++
+                } else { break }
+            }
+
+            const diff = currentSlot - expectedSlot
+            if (diff > 0) {
+                activity.style.marginLeft = (diff * 94) + 'px' 
+            }
+
+            const rowSpan = activity.getAttribute('rowspan')
+            if (rowSpan > 1) {
+                widthList[currentSlot] = rowSpan
+            }
+
+            currentSlot++
+            expectedSlot = currentSlot
+        }
+
+        for (let i = 0; i < 10; i++) {
+            if (widthList[i]) {
+                widthList[i]--
+            }
+        }
+    }
+</script>

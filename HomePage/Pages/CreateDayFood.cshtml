@@ -1,0 +1,62 @@
+﻿@page
+@model HomePage.Pages.CreateDayFoodModel
+@{
+    ViewData["Title"] = "Skapa mat";
+}
+
+<div class="page-wrapper mainscreen">
+    <input type="hidden" id="datekey" value="@Model.DateQs" />
+    <input type="hidden" id="datekeyFoW" value="@Model.DateQsFirstOfWeek" />
+    <form class="dayfood-form" method="post" id="theForm">
+        <input type="hidden" name="day" value="@Model.DateKey" id="dateKeyCompact"/>
+        <input type="hidden" name="delete" id="deleteHidden" value="" />
+        <div class="input-wrapper">
+            <input type="text" value="@Model.CurrentFilter" placeholder="filtrera..." onchange="updateTextFilter(this.value)" />
+            <button type="button">Sök</button>
+        </div>
+        <div class="input-wrapper">
+            <select name="foodId" style="max-width: 80vw" id="foodSelector">
+                @foreach (var food in Model.ExistingFood) {
+                    if (food.Key == Model.FoodIdFromQueryString || (Model.FoodIdFromQueryString == null && Model.DayFood?.FoodId == food.Key)) {
+                        <option value="@food.Key" selected> @food.Name</option>
+                    } else {
+                        <option value="@food.Key"> @food.Name</option>
+                    }
+                }
+            </select>
+            <a href="CreateFood?date=@Model.DateKey">Ny maträtt</a>
+        </div>
+        <div class="input-wrapper">
+            <a href="#" onclick="editFood()">Ändra mat</a>
+        </div>
+
+        <div class="button-wrapper">
+            <input type="submit" value="Spara mat" />
+            @if (Model.CanDelete)
+            {
+                <button type="button" onclick="deleteFood()">Ta bort</button>
+            }
+            <button type="button" onclick="window.location.href = '/WeekFood?' + $('#datekeyFoW').val()">Avbryt</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function updateTextFilter(value) {
+        const date = document.querySelectorAll('#datekey')[0].value
+        window.location = '/CreateDayFood?' + date + '&filter=' + value
+    }
+
+     function deleteFood() {
+        $('#deleteHidden').val('true')
+        document.getElementById('theForm').submit();
+    }
+
+    function editFood() {
+        const selectedFood = $('#foodSelector').val()
+        const date = document.querySelectorAll('#dateKeyCompact')[0].value
+        if (selectedFood) {
+            window.location = '/CreateFood?date=' + date + '&foodId=' + selectedFood
+        }
+    }
+</script>

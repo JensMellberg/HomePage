@@ -1,0 +1,72 @@
+﻿@page
+@model HomePage.Pages.CreateMovieModel
+@{
+    ViewData["Title"] = "Skapa film";
+}
+
+<div class="page-wrapper mainscreen">
+    <form class="dayfood-form" method="post">
+        <input type="hidden" name="id" value="@Model.Movie.Key" />
+        <div class="input-wrapper">
+            <span>Sök</span>
+            <input type="text" id="searchtext"/>
+            <button type="button" class="sectionButton" onclick="search()">Sök</button>
+        </div>
+        <div class="input-wrapper">
+            <span>Namn</span>
+            <input type="text" name="name" id="nameField" required value="@Model.Movie.Name" />
+        </div>
+        <div class="input-wrapper">
+            <span>Årtal</span>
+            <input type="number" name="year" id="yearField" required value="@Model.Movie.Year" />
+        </div>
+        <div class="input-wrapper">
+            <span>Poster url</span>
+            <input type="text" name="imageUrl" id="imageUrl" required value="@Model.Movie.ImageUrl" />
+        </div>
+
+        <div class="button-wrapper">
+            <input type="submit" value="Spara" />
+            <button type="button" onclick="window.location.href = '/Movies'">Avbryt</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function search() {
+        const text = $('#searchtext').val()
+        const urlEncoded = encodeURIComponent(text)
+        $.ajax({
+            type: "POST",
+            url: 'EndPoint',
+            data: {
+                action: 'MovieSearch',
+                movieSearch: urlEncoded
+            },
+            success: (d) => onSearchResponse(d)
+        });
+    }
+
+    function onSearchResponse(jsonString) {
+        const d = JSON.parse(jsonString)
+        const buttons = d.d.filter(x => x.qid === 'movie').slice(0, 5).map(x => ({
+            text: x.l + ' (' + (x.y || 'Okänd') + ')',
+            action: () => fillFields(x)
+        }))
+
+       buttons.push(({text: 'Avbryt', action: () => Popup.closePopup()}))
+       Alert.openDialog('Alternativ', buttons)
+       $('.alertBox').css('top', '15px')
+    }
+
+    function fillFields(data) {
+        Popup.closePopup()
+        $('#nameField').val(data.l)
+        if (data.y) {
+            $('#yearField').val(data.y)
+        }
+        if (data.i && data.i.imageUrl) {
+            $('#imageUrl').val(data.i.imageUrl)
+        }
+    }
+</script>

@@ -1,0 +1,121 @@
+﻿@page
+@model HomePage.Pages.AllFoodsModel
+@{
+    ViewData["Title"] = "All mat";
+}
+
+<div class="page-wrapper">
+    <a href="CreateFood">Ny maträtt</a>
+    <div class="filters-wrapper">
+        <input type="text" value="@Model.CurrentFilter" placeholder="filtrera..." onchange="updateTextFilter(this.value)" />
+        <button type="button" onclick="showPicker()">Kategorier</button>
+        <div class="input-wrapper">
+            <span>Sortera på:</span>
+            <select onchange="updateSorting(this.value)">
+                @foreach (var sorting in Model.SortingOptions)
+                {
+                    if (sorting.Item1 == Model.CurrentSorting)
+                    {
+                        <option value="@sorting.Item1.ToString()" selected> @sorting.Item2</option>
+                    }
+                    else
+                    {
+                        <option value="@sorting.Item1.ToString()"> @sorting.Item2</option>
+                    }
+                }
+            </select>
+        </div>
+        
+        <input type="hidden" value="@Model.CurrentSorting.ToString()" id="currentSorting" />
+        <input type="hidden" value="@Model.CurrentFilter" id="currentfilter" />
+        <input type="hidden" value="@Model.CurrentCategories" id="currentCategories" />
+    </div>
+   
+    <div class="food-grid">
+        @foreach (var food in Model.AllFoods) {
+            <div class="food-row">
+                <div class="food-grid-cell">
+                    @if (!string.IsNullOrEmpty(food.RecipeUrl)) {
+                        <div class="recipelinkplaceholder" linkurl="@food.RecipeUrl"></div>
+                    }
+                    @if (food.InFolder)
+                    {
+                        <span class="recipe-button">📗</span>
+                    }
+                    <a href="CreateFood?foodId=@food.Key">
+                        @food.Name (@food.CategoriyIds.Count)
+                    </a>
+                </div>
+                @foreach (var ranking in Model.FoodRankings[food.Key]) {
+                    <span class="food-grid-cell">
+                        @ranking
+                    </span>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>
+<script src="~/js/CategoryPicker.js" asp-append-version="true"></script>
+<script>
+    window.addEventListener("beforeunload", function () {
+        sessionStorage.setItem("scrollPos", window.scrollY);
+    });
+
+    window.addEventListener("load", function () {
+        const scrollPos = sessionStorage.getItem("scrollPos");
+        if (scrollPos !== null) {
+            document.documentElement.style.scrollBehavior = "auto";
+            window.scrollTo(0, parseInt(scrollPos));
+            document.documentElement.style.scrollBehavior = "";
+        }
+    });
+
+     function showPicker() {
+        $.ajax({
+            type: "POST",
+            url: "/Category",
+            data: {
+                foodId: '00000000-0000-0000-0000-000000000000'
+            },
+            success: (e) => showPickerLocal(e)
+        });
+    }
+
+    function showPickerLocal(categories) {
+        const currentSelectedString = document.querySelectorAll('#currentCategories')[0].value
+
+        if (currentSelectedString) {
+            const currentSelected = currentSelectedString.split(',')
+            for (const category of currentSelected) {
+                categories.filter(x => x.id == category)[0].isSelected = true
+            }
+        }
+
+        CategoryPicker.createPicker(categories, (x) => updateFoodCategories(x))
+    }
+
+    function updateFoodCategories(categories) {
+        const idList = categories.map(x => x.id).join(',');
+        document.querySelectorAll('#currentCategories')[0].value = idList;
+        updateFilters()
+    }
+
+    function updateTextFilter(value) {
+        document.querySelectorAll('#currentfilter')[0].value = value;
+        updateFilters()
+    }
+
+    function updateSorting(value) {
+        document.querySelectorAll('#currentSorting')[0].value = value;
+        updateFilters()
+    }
+
+    function updateFilters() {
+        const categories = document.querySelectorAll('#currentCategories')[0].value
+        const textFilter = document.querySelectorAll('#currentfilter')[0].value
+        const sorting = document.querySelectorAll('#currentSorting')[0].value
+        window.location = '/AllFoods?filter=' + textFilter + '&categoryFilter=' + categories + '&sorting=' + sorting
+    }
+</script>

@@ -1,0 +1,57 @@
+﻿@page
+@model HomePage.Pages.CreateActivityModel
+@{
+    ViewData["Title"] = "Skapa aktivitet";
+}
+
+<div class="page-wrapper mainscreen">
+    <form class="dayfood-form" id="theForm" method="post">
+        <input type="hidden" name="activityId" value="@Model.Activity.Key" />
+        <input type="hidden" name="delete" id="deleteHidden" value="" />
+        <div class="input-wrapper">
+            <span>Datum</span>
+            <input type="date" name="date" required value="@Model.Activity.Date" />
+        </div>
+        <div class="input-wrapper">
+            <span>Text</span>
+            <input type="text" name="text" required value="@Model.Activity.Text" />
+        </div>
+        <div class="input-wrapper">
+            <span>Person</span>
+            <select name="person" id="personselect" required>
+                <option value="Jens">Jens</option>
+                <option value="Anna">Anna</option>
+                <option value="Both">Båda</option>
+            </select>
+        </div>
+        <div class="input-wrapper">
+            <span>Längd (dagar)</span>
+            <input type="number" name="duration" required value="@Model.Activity.DurationInDays" />
+        </div>
+        <div class="input-wrapper">
+            <span>Återkommande</span>
+            <input type="checkbox" name="isreoccuring" checked="@Model.Activity.IsReoccuring" />
+        </div>
+
+        <div class="button-wrapper">
+            <input type="submit" value="Spara" />
+            @if (!Model.IsNew) {
+                <button type="button" onclick="deleteActivity()">Ta bort</button>
+            }
+            <button type="button" onclick="window.history.back();">Avbryt</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function deleteActivity() {
+        $('#deleteHidden').val('true')
+        document.getElementById('theForm').submit();
+    }
+
+    for (const e of document.getElementById('personselect').children) { 
+        if (e.value == '@Model.Activity.Person') {
+            e.setAttribute('selected', true)
+        }
+    }
+</script>

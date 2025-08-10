@@ -1,0 +1,42 @@
+﻿@page
+@model HomePage.Pages.ToDoModel
+@{
+    ViewData["Title"] = "Att göra";
+}
+
+<div class="page-wrapper">
+    <a href="CreateToDo">Ny aktivitet</a>
+    <div class="food-grid">
+        @foreach (var toDo in Model.ToDos)
+        {
+            <div class="food-row">
+                <div class="food-grid-cell">
+                    <a href="CreateToDo?Id=@toDo.Key">
+                        @toDo.Name
+                    </a>
+                </div>
+                <div class="food-grid-cell">
+                    @if (toDo.IsCompleted) {
+                        <span>✅</span>
+                    } else {
+                        <input type="checkbox" class="todo-checkbox" onchange="markCompleted('@toDo.Key')"/>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>
+<script>
+    function markCompleted(id) {
+         $.ajax({
+            type: "POST",
+            url: "/ToDo",
+            data: {
+                itemId: id
+            },
+            success: (e) => window.location.reload()
+        });
+    }
+</script>

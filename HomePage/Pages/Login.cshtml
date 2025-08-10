@@ -1,0 +1,44 @@
+﻿@page
+@model HomePage.Pages.LoginModel
+@{
+    ViewData["Title"] = "Logga in";
+}
+
+<div class="page-wrapper mainscreen">
+    <div class="dayfood-form" method="post">
+        <span>Logga in</span>
+        <div class="input-wrapper">
+            <span>Lösenord</span>
+            <input type="password" id="password" required/>
+        </div>
+
+        <div class="button-wrapper">
+            <button type="button" onclick="logIn();">Logga in</button>
+            <button type="button" onclick="window.history.back();">Avbryt</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function logIn() {
+        const password = $('#password').val()
+        $.ajax({
+            type: "POST",
+            url: "/Login",
+            data: {
+                password: password
+            },
+            success: (e) => {
+                if (!e.success) {
+                    Alert.openAlert('Fel lösenord');
+                } else {
+                    if (e.url) {
+                        window.location.href = e.url;
+                    }
+                    
+                    window.location.href = '/Index'
+                }
+            }
+        });
+    }
+</script>

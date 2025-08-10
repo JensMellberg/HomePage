@@ -1,0 +1,28 @@
+﻿@page
+@model HomePage.Pages.CategoryModel
+@{
+    ViewData["Title"] = "Skapa kategori";
+}
+
+<div class="page-wrapper mainscreen">
+    <form class="dayfood-form" method="post">
+        <input type="hidden" name="categoryId" value="@Model.Category.Key" />
+        <div class="input-wrapper">
+            <span>Namn</span>
+            <input type="text" name="name" required value="@Model.Category.Name" />
+        </div>
+        <div class="input-wrapper">
+            <span>Mål per vecka</span>
+            <input type="number" name="weekgoal" value="@Model.Category.GoalPerWeekText" />
+        </div>
+        <div class="input-wrapper">
+            <span>Max per vecka</span>
+            <input type="number" name="weekgoalmax" value="@Model.Category.BadGoalPerWeekText" />
+        </div>
+       
+        <div class="button-wrapper">
+            <input type="submit" value="Spara kategori" />
+            <button type="button" onclick="window.history.back();">Avbryt</button>
+        </div>
+    </form>
+</div>

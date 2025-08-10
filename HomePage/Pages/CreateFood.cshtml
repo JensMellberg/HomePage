@@ -1,0 +1,86 @@
+﻿@page
+@model HomePage.Pages.CreateFoodModel
+@{
+    ViewData["Title"] = "Skapa maträtt";
+}
+
+<div class="page-wrapper mainscreen">
+    <form class="dayfood-form" method="post" id="theForm">
+        <input type="hidden" name="foodId" value="@Model.Food.Key" />
+        <input type="hidden" name="date" value="@Model.DateKey" />
+        <input type="hidden" name="delete" id="deleteHidden" value="" />
+        <div class="input-wrapper">
+            <span>Maträtt</span>
+            <input type="text" name="foodName" required value="@Model.Food.Name"/>
+        </div>
+        <div class="input-wrapper">
+            <span>Länk till recept</span>
+            <input type="text" name="recipeUrl" value="@Model.Food.RecipeUrl" />
+        </div>
+        <div class="input-wrapper">
+            <span>Finns i pärmen</span>
+            <input type="checkbox" name="inFolder" checked="@Model.Food.InFolder" />
+        </div>
+
+        <div class="input-wrapper">
+            <span>Kategorier</span>
+            <input id="categoryids" type="hidden" name="categories" value="@string.Join(',', Model.Food.CategoriyIds ?? [])" />
+            <div onclick="showCategoryPicker('@Model.Food.Key')" class="category-shower">@string.Join(", ", Model.Food.Categories.Select(xa => xa.Name))</div>
+        </div>
+
+        <div class="input-wrapper">
+            <span>Anteckningar</span>
+            <textarea name="notes">@Model.Food.Notes</textarea>
+        </div>
+        
+        <div class="button-wrapper">
+            <input type="submit" value="Spara mat" />
+            @if (!Model.IsNew) {
+                <button type="button" onclick="deleteFood()">Ta bort</button>
+            }
+            <button type="button" onclick="window.history.back();">Avbryt</button>
+        </div>
+    </form>
+</div>
+
+<script src="~/js/StarRanker.js" asp-append-version="true"></script>
+<script src="~/js/CategoryPicker.js" asp-append-version="true"></script>
+<script>
+    var cachedCategories = undefined;
+    function deleteFood() {
+        $('#deleteHidden').val('true')
+        document.getElementById('theForm').submit();
+    }
+
+    function showCategoryPicker(foodId) {
+        if (cachedCategories) {
+            showPicker(cachedCategories);
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/Category",
+            data: {
+                foodId: foodId
+            },
+            success: (e) => showPicker(e)
+        });
+    }
+
+    function showPicker(categories) {
+        cachedCategories = categories;
+        CategoryPicker.createPicker(categories, (x) => updateFoodCategories(x))
+    }
+
+    function updateFoodCategories(chosen) {
+        const textElement = document.querySelectorAll('.category-shower')[0]
+        const idElement = document.querySelectorAll('#categoryids')[0]
+
+        textElement.innerText = chosen.map(x => x.name).join(', ');
+        idElement.value = chosen.map(x => x.id).join(',');
+        for (const categry of cachedCategories) {
+            categry.isSelected = chosen.map(x => x.id).includes(categry.id);
+        }
+    }
+</script>

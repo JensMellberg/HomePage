@@ -1,0 +1,632 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+.styled-button {
+    height: 38px;
+    border-radius: 12px;
+    background-color: #74bd2b;
+}
+
+.red-day .background {
+    border: 10px solid #d11111;
+}
+
+.red-day .day-of-week {
+    color: #d11111;
+}
+
+.theme-day-wrapper {
+    position: absolute;
+    left: 10px;
+    top: 48px;
+    display: flex;
+    flex-direction: column;
+    background-color: #f3f1e8d1;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.theme-day-wrapper:empty {
+    display: none;
+}
+
+.red-day-text {
+
+}
+
+.more-button.closed .more-button-inner {
+    display: none
+}
+
+.more-button {
+    padding: 8px;
+    color: #f3f1e8d1;
+}
+
+.header-link-wrapper .more-button-inner .divider {
+    margin-bottom: 12px;
+    margin-top: 12px;
+    height: 1px;
+    width: 100%;
+}
+
+.more-button-inner {
+    position: absolute;
+    top: 38px;
+    right: 0;
+    background-color: rgb(54 44 115);
+    z-index: 1000;
+    border-radius: 0 0px 8px 8px;
+}
+
+.homepage .theme-day-wrapper .theme-day-text {
+    color: black;
+    text-shadow: none;
+}
+
+.background {
+    top: 38px;
+    position: absolute;
+    z-index: -1;
+    object-fit: contain;
+    height: calc(100vh - 38px);
+    width: calc(100vw - 20px);
+    left: 0;
+}
+
+.homepage span {
+    color: white;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+.header-link-wrapper {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid grey;
+    width: 100%;
+    left: 0;
+    position: absolute;
+    background: rgb(17 7 81);
+}
+
+.header-link-wrapper a {
+    text-decoration: none;
+    height: 20px;
+    padding: 8px;
+    color: #f3f1e8d1;
+}
+
+.header-link-wrapper .divider {
+    width: 1px;
+    background: black;
+    height: 37px;
+    position: relative;
+}
+
+.star-wrapper {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    max-width: 60vw;
+}
+
+.star {
+    font-size: 48px;
+    cursor: pointer;
+}
+
+.star:hover {
+    font-size: 52px;
+}
+
+.filters-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.extra-info-wrapper {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.extra-info-wrapper .width {
+    width: 140px;
+}
+
+.extra-info-wrapper span {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+}
+
+.extra-info-wrapper .heart {
+    font-size: 48px;
+}
+
+.todo-checkbox {
+    min-width: 19px;
+    min-height: 17px;
+}
+
+.profile-photo {
+    background-size: 100% 100%;
+    width: 48px;
+    height: 48px;
+    border-radius: 64px;
+}
+
+.profile-photo.jens {
+    background-image: url(../Jens.png);
+}
+
+.profile-photo.anna {
+    background-image: url(../Anna.png);
+}
+
+.profile-photo.Flower {
+    background-image: url(../Plant.jpg);
+}
+
+.profile-photo.Sink {
+    background-image: url(../Sink.png);
+}
+
+.profile-photo.Eye {
+    background-image: url(../Eye.png);
+}
+
+.profile-photo.Bed {
+    background-image: url(../Bed.jpg);
+}
+
+.profile-photo.Workout {
+    background-image: url(../Workout.png);
+}
+
+.profile-photo.cat {
+    background-image: url(../Cat.png);
+}
+
+.profile-photo.Floss {
+    background-image: url(../Floss.png);
+}
+
+.popupOverlay {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 100vw;
+    background: rgba(214, 209, 209, 0.6);
+}
+
+.popupContent {
+    display: flex;
+    top: 10%;
+    position: relative;
+    left: 10%;
+    width: calc(100% - 10%);
+    height: calc(100% - 10%);
+    background: #fafcff;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.sectionButton {
+    border-radius: 8px;
+    border: none;
+    padding: 8px;
+    min-width: 128px;
+}
+
+.alertBox {
+    position: relative;
+    top: 30%;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    min-width: 224px;
+    min-height: 224px;
+    justify-content: space-between;
+    width: 95vw;
+    background-color: #d7aaaa;
+    border-radius: 12px;
+}
+
+.alertMessage {
+    text-align: center;
+    font-size: 18px;
+}
+
+.category {
+    background-color: #bdbdbd;
+    user-select: none;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.category.selected {
+    background-color: #c76b7c;
+}
+
+.category-picker-inner {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.category-picker {
+    display: flex;
+    flex-direction: column;
+    left: 5%;
+    position: relative;
+    top: 20%;
+    width: 90vw;
+    background-color: azure;
+    padding: 28px;
+    gap: 12px;
+}
+
+.input-wrapper {
+    display: flex;
+    gap: 8px;
+}
+
+.alertButtons {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    max-width: 80vw;
+    flex-wrap: wrap;
+}
+
+.recipelinkplaceholder {
+    display: inline;
+}
+
+.popupOverlay .food-grid {
+    background-color: white;
+    align-self: center;
+    justify-self: center;
+}
+
+.page-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.date-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.day-text {
+    font-size: 128px;
+    margin-bottom: -28px;
+}
+
+.month-text {
+    font-size: 68px;
+}
+
+.day-of-week {
+    font-size: 48px;
+}
+
+.week-food-header {
+    display: flex;
+    width: 100vw;
+    justify-content: space-between;
+    padding: 8px;
+}
+
+.food-grid {
+    margin-top: 20px;
+    border: 1px solid grey;
+    display: table;
+    flex-direction: column;
+    max-height: 80vh;
+    overflow: auto;
+    margin-bottom: 8px;
+}
+
+.food-row {
+    display: table-row;
+    gap: 8px;
+}
+
+.movie-poster {
+    width: 80px;
+    height: 128px;
+}
+
+.seen-counter {
+    position: absolute;
+    top: 0;
+    right: 15px;
+    font-size: 32px;
+}
+
+.category-shower {
+    min-width: 80px;
+    background-color: #d3cece;
+    height: 32px;
+    min-height: fit-content;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.weekday-cell {
+    border-right: 1px solid grey;
+    width: 105px;
+}
+
+.food-grid-cell {
+    padding: 8px;
+    display: table-cell;
+    gap: 4px;
+}
+
+.mainscreen {
+    margin-bottom: -80px;
+    height: 100vh;
+}
+
+.recipe-button {
+    font-size: 12px;
+}
+
+.home-button {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+}
+
+.dayfood-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.calendar-wrapper {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    background-color: #d4f7f7;
+}
+
+.calendar-wrapper button {
+    z-index: 1000
+}
+
+.calendar-day {
+    height: 100%;
+    border-bottom: 2px solid white;
+}
+
+.calendar-day-header-wrapper {
+    position: relative;
+    justify-content: center;
+    display: flex;
+    gap: 4px;
+}
+
+.calendar-nav-button {
+    width: 24px;
+    top: 0px;
+    position: absolute;
+    border-radius: 8px;
+    border: none;
+    background-color: #aaf1f1;
+}
+
+.calendar-wrapper .home-button {
+    left: 48px;
+    top: 0px;
+    border-radius: 8px;
+    border: none;
+    background-color: #aaf1f1;
+}
+
+.theme-day-wrapper.calendar-events {
+    left: unset;
+    width: fit-content;
+    right: 30px;
+}
+
+.theme-day-wrapper.calendar-events .calendar-event-text {
+    text-shadow: none
+}
+
+.clock-wrapper {
+    left: unset;
+}
+
+.clock-wrapper span {
+    font-size: 20px;
+}
+
+.calendar-nav-button.right {
+    right: 0;
+}
+
+.calendar-activity-wrapper {
+    display: flex;
+    gap: 4px;
+    height: 100%;
+}
+
+.calendar-activity {
+    border-radius: 8px;
+    width: 90px;
+    min-width: 90px;
+    padding: 4px;
+}
+
+.new-calendar-activity {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    background-color: transparent;
+    border: none;
+}
+
+.chore {
+    border: 2px solid yellow;
+}
+
+.chore.done-today {
+    border-color: green;
+}
+
+.list-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.list-wrapper button {
+    width: fit-content;
+}
+
+.list-wrapper-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 40vh;
+    overflow: auto;
+}
+
+.spending-group {
+    padding: 8px;
+    border-radius: 12px;
+    width: 80vw;
+    display: flex;
+    flex-direction: column;
+}
+
+.spending-entry-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid grey;
+    padding: 4px;
+}
+
+.spending-total {
+    font-size: 32px;
+}
+
+.spending-group-header {
+    font-size: 22px;
+}
+
+.spending-group-entry.place-entry {
+    width: 100%;
+}
+.spending-group-entry.amount-entry {
+    margin-left: auto;
+}
+
+.mainscreen .date-based {
+    display: none;
+}
+
+.mainscreen.isDateBased .date-based {
+    display: flex;
+}
+
+.isDateBased .not-date-based {
+    display: none;
+}
+
+textarea {
+    width: 100%;
+}
+
+.note-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    padding: 12px;
+}
+
+.note-wrapper span {
+    background-color: white;
+    padding: 4px;
+    border: 1px solid black;
+}
+
+.image-taken-text {
+    position: absolute;
+    left: 15px;
+    bottom: 15px;
+}
+
+.image-taken-text span{
+    font-size: 24px;
+}
+
+.image-text-text.hidden {
+    display: none;
+}
+
+.pictures-wrapper {
+    margin-top: 25px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pictures-wrapper img {
+    width: 84px;
+    height: 84px;
+}
+
+.picture-wrapper {
+    position: relative;
+}
+
+.picture-wrapper button {
+    position: absolute;
+    right: -5px;
+    top: -5px;
+    width: 28px;
+    height: 24px;
+    font-size: 8px;
+}
+
+.goal-wrapper {
+    top: 50px;
+    position: absolute;
+    display: flex;
+    gap: 16px;
+    margin-left: 4px;
+    font-size: 12px;
+}

@@ -1,0 +1,232 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Idag";
+}
+
+<div class="header-link-wrapper">
+    <a href="/WeekFood?@Model.FixWeekQs">Veckans mat</a>
+    <div class="divider"></div>
+    <a href="/AllFoods">Maträtter</a>
+    <div class="divider"></div>
+    <a href="/Calendar?@Model.FixWeekQs">Kalender</a>
+    <div class="divider"></div>
+    <div class="more-button closed" onclick="if (this.classList.contains('closed')) this.classList.remove('closed'); else this.classList.add('closed');">
+        ...mer
+        <div class="more-button-inner">
+            <a href="/AllCategories">Kategorier</a>
+            <div class="divider"></div>
+            <a href="/Statistics">Statistik</a>
+            <div class="divider"></div>
+            <a href="/ToDo">Att göra</a>
+            <div class="divider"></div>
+            <a href="/Spending">Spenderande</a>
+            <div class="divider"></div>
+            <a href="/Movies">Filmer man borde ha sett</a>
+            <div class="divider"></div>
+            <a href="/Pictures">Bilder</a>
+        </div>
+    </div>
+</div>
+
+<div class="page-wrapper mainscreen homepage @Model.WrapperClass">
+    <img src="@Model.ImageUrl" class="background" />
+    <div class="theme-day-wrapper">
+        @if (!string.IsNullOrEmpty(Model.RedDay?.DayName))
+        {
+            <span class="red-day-text">@Model.RedDay.DayName</span>
+        }
+        @foreach(var themeDay in Model.ThemeDays) {
+            <span class="theme-day-text">@themeDay.DayName</span>
+        }
+    </div>
+    <div class="theme-day-wrapper clock-wrapper">
+        <span id="clock"></span>
+    </div>
+    <div class="theme-day-wrapper calendar-events">
+        @foreach (var activity in Model.Activities)
+        {
+            <span class="calendar-event-text" style="color: @Person.HtmlTextColorFromPerson(activity.Person)">@activity.ReplacedText(DateTime.Now.Year)</span>
+        }
+    </div>
+
+    @if (Model.TodayFood != null) {
+        <div class="input-wrapper">
+            <span style="font-size: 18px">Mat: @Model.TodayFood.Name</span>
+            @if (!string.IsNullOrEmpty(Model.TodayFood.RecipeUrl))
+            {
+                <div class="recipelinkplaceholder" linkurl="@Model.TodayFood.RecipeUrl"></div>
+            }
+            @if (!string.IsNullOrEmpty(Model.TodayFood.Notes))
+            {
+                <div class="notesplaceholder" notes="@Model.TodayFood.Notes"></div>
+            }
+        </div>
+    }
+
+    <input type="hidden" id="datekey" />
+    <input type="hidden" id="freeDays" value="@Model.NoFoodDaysList"/>
+    @if (!string.IsNullOrEmpty(Model.AnniverseryString)) {
+        <div class="extra-info-wrapper">
+            <span class="heart">❤️</span>
+            <span>@Model.AnniverseryString</span>
+        </div>
+    }
+    <div class="date-wrapper">
+        <span class="day-text">@Model.Day</span>
+        <span class="month-text">@Model.Month</span>
+        <span class="day-of-week">@Model.DayOfWeek</span>
+    </div>
+    @if (Model.JensIcons.Count > 0) {
+        <div class="extra-info-wrapper width">
+        <div class="profile-photo jens"></div>
+        @foreach (var icon in Model.JensIcons)
+        {
+            @Html.Raw(icon.Html)
+        }
+        </div>
+    }
+    @if (Model.AnnaIcons.Count > 0)
+    {
+        <div class="extra-info-wrapper width">
+        <div class="profile-photo anna"></div>
+        @foreach (var icon in Model.AnnaIcons)
+        {
+            @Html.Raw(icon.Html)
+        }
+        </div>
+    }
+    <button type="button" class="styled-button" onclick="randomizeFood()">Slumpa mat</button>
+    @if (string.IsNullOrEmpty(Model.ImageTaken)) {
+        <div class="image-taken-text hidden">
+            <span></span>
+        </div>
+    } else {
+        <div class="image-taken-text">
+            <span>@Model.ImageTaken</span>
+        </div>
+    }
+</div>
+
+<script>
+    var currentDayNbr = new Date().getDate()
+    document.body.style.backgroundColor = 'rgb(20 12 69)'
+    setTimeout(() => updateImage(), @Model.MilliSecondsUntilNextPicture)
+    updateClock()
+    for (const empty of document.querySelectorAll('.theme-day-wrapper')) {
+        if (empty.children.length === 0) {
+            empty.remove()
+        }
+    }
+
+    for (const choreIcon of document.querySelectorAll('.chore')) {
+        const wasDoneToday = choreIcon.getAttribute('was-done-today');
+        if (wasDoneToday == 'True') {
+            choreIcon.classList.add('done-today');
+            continue;
+        }
+
+        const choreValue = choreIcon.getAttribute('chore-value');
+        choreIcon.onclick = () => {
+            $.ajax({
+                type: "POST",
+                data: {
+                    action: choreValue
+                },
+                url: "/Endpoint",
+                success: () => {
+                    window.location.reload()
+                }
+            });
+        }
+    }
+
+    function zeroIfSmall(value) {
+        if (value < 10) {
+            return '0' + value.toString()
+        }
+
+        return value
+    }
+
+    function updateClock() {
+        const now = new Date()
+        const timeString = zeroIfSmall(now.getHours()) + ':' + zeroIfSmall(now.getMinutes())
+        document.getElementById('clock').textContent = timeString
+        const seconds = now.getSeconds()
+        setTimeout(() => updateClock(), 60000 - seconds * 1000)
+    }
+
+    function updateImage() {
+        if (new Date().getDate() !== currentDayNbr) {
+            window.location.reload()
+            return;
+        }
+
+         $.ajax({
+            type: "POST",
+            data: {
+                action: 'ImageUrl'
+            },
+            url: "/Endpoint",
+            success: (e) => {
+                $('.background').attr('src', e.url)
+                const wrapper = $('.image-taken-text')
+                if (e.taken) {
+                    wrapper.toggleClass('hidden', false)
+                    wrapper.find('span').text(e.taken)
+                } else {
+                    wrapper.toggleClass('hidden', true)
+                }
+            }
+        });
+
+        setTimeout(() => updateImage(), 30000)
+    }
+
+    function randomizeFood() {
+        $.ajax({
+            type: "POST",
+            url: "/Index",
+            success: (e) => { 
+                showFoodDialog(e.id, e.food)
+            }
+        });
+    }
+
+    function showFoodDialog(id, name) {
+        Alert.openDialog('Jag föreslår ' + name + '! Låter det gott?', [
+            {text: 'Ja tack!', action: () => {Popup.closePopup(); openDaySelector(id)}},
+            {text: 'Nä, slumpa en ny!', action: () => {Popup.closePopup(); randomizeFood();}},
+            {text: 'Avbryt', action: () => {Popup.closePopup();}}
+        ])
+    }
+
+    function openDaySelector(id) {
+        const freeDays = $('#freeDays').val().split(',');
+        const buttons = freeDays.map(x => ({
+            text: dateKeyToText(x),
+            action: () => addFoodForToday(id, x)
+        }));
+
+        buttons.push(({text: 'Avbryt', action: () => {Popup.closePopup();}}))
+        Alert.openDialog('Vilken dag vill ni äta det?', buttons)
+    }
+
+    function dateKeyToText(key) {
+        const tokens = key.split('-')
+        return tokens[2] + '/' + tokens[1]
+    }
+
+    function addFoodForToday(id, date) {
+         $.ajax({
+            type: "POST",
+            url: "/Index",
+            data: {
+                date: date,
+                foodId: id
+            },
+            success: (e) => window.location = e.redirectUrl
+        });
+    }
+</script>

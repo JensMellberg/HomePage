@@ -1,0 +1,79 @@
+﻿@page
+@model HomePage.Pages.StatisticsModel
+@{
+    ViewData["Title"] = "Statistik";
+}
+
+<div class="page-wrapper">
+    <div class="filters-wrapper" style="margin-top: 8px;">
+        <div class="input-wrapper">
+            <span>Från och med:</span>
+            <input id="fromDate" type="date" value="@Model.FromDate" onchange="updateFilters()" />
+        </div>
+        <div class="input-wrapper">
+            <span>Till och med:</span>
+            <input id="toDate" type="date" value="@Model.ToDate" onchange="updateFilters()" />
+        </div>
+        <div class="input-wrapper">
+            <span>Typ av statistik:</span>
+            <select onchange="updateFilters()" id="stattype">
+                @foreach (var statType in Model.StatisticOptions)
+                {
+                    if (statType.Item1 == Model.CurrentType)
+                    {
+                        <option value="@statType.Item1.ToString()" selected> @statType.Item2</option>
+                    }
+                    else
+                    {
+                        <option value="@statType.Item1.ToString()"> @statType.Item2</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+   
+    <div class="food-grid">
+        @foreach (var row in Model.GridData) {
+            <div class="food-row">
+                @foreach (var cell in row)
+                {
+                    @if (cell.DrillDown != null) {
+                        <div class="drilldown-wrapper" onclick="showGrid(this)">
+                            <span class="food-grid-cell">🔍</span>
+                            <div class="food-grid" style="display: none">
+                                @foreach (var row2 in cell.DrillDown)
+                                {
+                                    <div class="food-row">
+                                        @foreach (var cell2 in row2) {
+                                            <span class="food-grid-cell">@cell2.Text</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else {
+                        <span class="food-grid-cell">@cell.Text</span>
+                    }
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>
+
+<script>
+    function updateFilters() {
+        const from = document.querySelectorAll('#fromDate')[0].value
+        const to = document.querySelectorAll('#toDate')[0].value
+        const statType = document.querySelectorAll('#stattype')[0].value
+        window.location = '/Statistics?fromDate=' + from + '&toDate=' + to + '&type=' + statType
+    }
+
+    function showGrid(wrapper) {
+        const grid = $(wrapper).find('.food-grid').get(0)
+        $(grid).show()
+        Popup.putOnOverLay(grid, true, () => { wrapper.appendChild(grid); Popup.closePopup(); $(grid).hide() })
+    }
+</script>

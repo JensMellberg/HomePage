@@ -1,0 +1,36 @@
+﻿@page
+@model HomePage.Pages.PicturesModel
+@{
+    ViewData["Title"] = "Bilder";
+}
+
+<div class="page-wrapper">
+    <a href="/NewPicture">Lägg till bilder</a>
+    <span style="position: absolute; right: 15px; top: 5px;">@Model.TotalFileSize</span>
+    <div class="pictures-wrapper">
+        @foreach (var url in Model.AllPictures) {
+            <div class="picture-wrapper">
+                <img src="Pictures/@url" />
+                @if (Model.IsLoggedIn) {
+                    <button type="button" onclick="removePicture('@url', this)">❌</button>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>
+<script>
+    function removePicture(url, target) {
+         $.ajax({
+            type: "POST",
+            data: {
+                url: url
+            },
+            url: "/Pictures",
+            success: (e) => {
+                target.parentElement.remove()
+            }
+        });
+    }
+</script>

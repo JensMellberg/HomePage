@@ -1,0 +1,19 @@
+﻿@page
+@model HomePage.Pages.NewPictureModel
+@{
+    ViewData["Title"] = "Lägg till bilder";
+}
+
+<div class="page-wrapper mainscreen">
+    <form class="dayfood-form" id="theForm" method="post" enctype="multipart/form-data">
+        <div class="input-wrapper">
+            <span>Ladda upp bilder</span>
+            <input asp-for="Uploads" type="file" multiple />
+        </div>
+
+        <div class="button-wrapper">
+            <input type="submit" value="Spara" />
+            <button type="button" onclick="window.location.href = '/Pictures'">Avbryt</button>
+        </div>
+    </form>
+</div>

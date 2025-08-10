@@ -1,0 +1,104 @@
+﻿@page
+@model HomePage.Pages.CreateSpendingGroupModel
+@{
+    ViewData["Title"] = "Skapa grupp";
+}
+
+<div class="page-wrapper mainscreen" id="pagewrapper">
+    <form class="dayfood-form" id="theForm" method="post">
+        <input type="hidden" name="groupId" value="@Model.Group.Key" />
+        <input type="hidden" name="returnDate" value="@Model.ReturnDate" />
+        <input type="hidden" name="delete" id="deleteHidden" value="" />
+        <input type="hidden" name="patterns" id="patterns" value="" />
+        <div class="input-wrapper">
+            <span>Namn</span>
+            <input type="text" name="place" required value="@Model.Group.Name" />
+        </div>
+        <div class="input-wrapper">
+            <span>Ignorera mot totalen</span>
+            <input name="ignoreTowardsTotal" type="checkbox" checked="@Model.Group.IgnoreTowardsTotal" />
+        </div>
+        <div class="input-wrapper">
+            <span>Färg</span>
+            <input name="color" type="color" required value="@Model.Group.Color" />
+        </div>
+        <div class="input-wrapper">
+            <span>Tillfällig grupp</span>
+            <input name="isDateBased" id="isDateBased" type="checkbox" checked="@Model.Group.IsDateBasedGroup" onchange="toggleDateBased()" />
+        </div>
+        <div class="input-wrapper not-date-based">
+            <span>Sorteringsordning</span>
+            <input name="sortOrder" type="number" required value="@Model.Group.SortOrder" style="width: 48px"/>
+        </div>
+        <div class="list-wrapper not-date-based">
+            <span>Transaktionsmönster</span>
+            <button type="button" class="sectionButton" onclick="newPattern()">Nytt mönster</button>
+            <div class="list-wrapper-inner">
+                @foreach (var pattern in Model.Group.Patterns)
+                {
+                    <input type="text" class="pattern-text" required value="@pattern" onchange="updatePatterns()" />
+                }
+            </div>
+        </div>
+        <div class="input-wrapper date-based">
+            <span>Startdatum</span>
+            <input name="startDate" type="date" required value="@DateHelper.KeyWithZerosFromKey(Model.Group.StartDate)" id="startDate" />
+        </div>
+        <div class="input-wrapper date-based">
+            <span>Slutdatum</span>
+            <input name="endDate" type="date" required value="@DateHelper.KeyWithZerosFromKey(Model.Group.EndDate)" id="endDate" />
+        </div>
+
+        <div class="button-wrapper">
+            <input type="submit" value="Spara" />
+            @if (!Model.IsNew)
+            {
+                <button type="button" onclick="deleteGroup()">Ta bort</button>
+            }
+            <button type="button" onclick="window.history.back();">Avbryt</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    toggleDateBased()
+
+    function deleteGroup() {
+        $('#deleteHidden').val('true')
+        document.getElementById('theForm').submit();
+    }
+
+    function toggleDateBased() {
+        const isDateBased = document.getElementById('isDateBased').checked
+        if (!isDateBased) {
+            document.getElementById('pagewrapper').classList.remove('isDateBased')
+            document.getElementById('startDate').removeAttribute('required')
+            document.getElementById('endDate').removeAttribute('required')
+        } else {
+            document.getElementById('pagewrapper').classList.add('isDateBased')
+            document.getElementById('startDate').setAttribute('required', true)
+            document.getElementById('endDate').setAttribute('required', true)
+        }
+    }
+
+    function newPattern() {
+        const wrapper = $('.list-wrapper-inner')[0]
+        const newTextBox = document.createElement('input')
+        newTextBox.type = 'text'
+        newTextBox.required = true
+        newTextBox.className = 'pattern-text'
+        newTextBox.onchange = () => updatePatterns()
+        wrapper.insertBefore(newTextBox, wrapper.firstElementChild)
+    }
+
+    function updatePatterns() {
+        const patterns = []
+        for (const elem of document.querySelectorAll('.pattern-text')) {
+            patterns.push(elem.value)
+        }
+
+        document.getElementById('patterns').value = patterns.join('¤')
+    }
+
+    updatePatterns()
+</script>

@@ -1,0 +1,63 @@
+﻿@page
+@model HomePage.Pages.MoviesModel
+@{
+    ViewData["Title"] = "Filmer";
+}
+
+<div class="page-wrapper">
+    <span class="seen-counter">@Model.SeenCounter</span>
+    <a href="CreateMovie">Ny film</a>
+    <button class="sectionButton" type="button" onclick="randomizeMovie()">Slumpa film</button>
+    <input type="hidden" value="@Model.AllMoviesJson" id="moviesJson" />
+    <div class="food-grid">
+        @foreach (var movie in Model.Movies)
+        {
+            <div class="food-row">
+                <div class="food-grid-cell">
+                    <img class="movie-poster" src="@movie.ImageUrl"/>
+                </div>
+                <div class="food-grid-cell">
+                    <a href="CreateMovie?Id=@movie.Key">
+                        @movie.Name
+                    </a>
+                </div>
+                <div class="food-grid-cell">
+                    <span>@movie.Year</span>
+                </div>
+                <div class="food-grid-cell">
+                    @if (movie.IsCompleted)
+                    {
+                        <span>✅</span>
+                    }
+                    else
+                    {
+                        <input type="checkbox" class="todo-checkbox" onchange="markCompleted('@movie.Key')" />
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>
+<script>
+    function markCompleted(id) {
+         $.ajax({
+            type: "POST",
+            url: "/Movies",
+            data: {
+                itemId: id
+            },
+            success: (e) => window.location.reload()
+        });
+    }
+
+    function randomizeMovie() {
+        const moviesJson = JSON.parse($('#moviesJson').val())
+        const randomMovie = moviesJson[Math.floor(Math.random()*moviesJson.length)].Name
+        const buttons = []
+       buttons.push(({text: 'Nä, slumpa en ny', action: () => { Popup.closePopup(); randomizeMovie()}}))
+       buttons.push(({text: 'Avbryt', action: () => Popup.closePopup()}))
+       Alert.openDialog('Jag föreslår ' + randomMovie + '!', buttons)
+    }
+</script>

@@ -1,0 +1,20 @@
+﻿@page
+@model HomePage.Pages.CreateToDoModel
+@{
+    ViewData["Title"] = "Skapa att göra";
+}
+
+<div class="page-wrapper mainscreen">
+    <form class="dayfood-form" method="post">
+        <input type="hidden" name="id" value="@Model.ToDo.Key" />
+        <div class="input-wrapper">
+            <span>Namn</span>
+            <input type="text" name="name" required value="@Model.ToDo.Name" />
+        </div>
+
+        <div class="button-wrapper">
+            <input type="submit" value="Spara" />
+            <button type="button" onclick="window.location.href = '/ToDo';">Avbryt</button>
+        </div>
+    </form>
+</div>
