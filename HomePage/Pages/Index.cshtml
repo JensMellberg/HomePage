@@ -25,6 +25,8 @@
             <a href="/Movies">Filmer man borde ha sett</a>
             <div class="divider"></div>
             <a href="/Pictures">Bilder</a>
+            <div class="divider"></div>
+            <a href="/WordMixStats">Ordmix</a>
         </div>
     </div>
 </div>
@@ -108,6 +110,8 @@
     }
 </div>
 
+<script src="~/js/Firework.js" asp-append-version="true"></script>
+<script src="~/js/Streak.js" asp-append-version="true"></script>
 <script>
     var currentDayNbr = new Date().getDate()
     document.body.style.backgroundColor = 'rgb(20 12 69)'
@@ -120,6 +124,12 @@
     }
 
     for (const choreIcon of document.querySelectorAll('.chore')) {
+        const streak = parseInt(choreIcon.getAttribute('streak'))
+        const streakIcon = document.createElement('span')
+        streakIcon.className = 'streak-icon'
+        choreIcon.appendChild(streakIcon)
+        updateStreakIcon(streakIcon, streak)
+
         const wasDoneToday = choreIcon.getAttribute('was-done-today');
         if (wasDoneToday == 'True') {
             choreIcon.classList.add('done-today');
@@ -127,17 +137,44 @@
         }
 
         const choreValue = choreIcon.getAttribute('chore-value');
-        choreIcon.onclick = () => {
+        choreIcon.onclick = (e) => {
+            //let clientX = e.clientX
+            //let clientY = e.clientY
+            //window.showStreak(3, clientX, clientY)
+            //return
             $.ajax({
                 type: "POST",
                 data: {
                     action: choreValue
                 },
                 url: "/Endpoint",
-                success: () => {
-                    window.location.reload()
+                success: (data) => {
+                    updateStreakIcon(streakIcon, data.streak)
+                    choreIcon.classList.add('done-today')
+                    let clientX = e.clientX
+                    let clientY = e.clientY
+                    let counter = 3
+                    makeFirework(clientX, clientY, counter)
+                    //window.showStreak(data.streak, clientX, clientY)
+                    choreIcon.onclick = () => true
                 }
             });
+        }
+    }
+
+    function updateStreakIcon(icon, count) {
+        icon.innerText = count
+        if (count > 0) {
+            icon.style.display = 'flex'
+        } else {
+            icon.style.display = 'none'
+        }
+    }
+
+    function makeFirework(clientX, clientY, counter) {
+        createFirework(clientX, clientY)
+        if (counter > 0) {
+            setTimeout(() => createFirework(clientX, clientY, counter - 1), 150)
         }
     }
 

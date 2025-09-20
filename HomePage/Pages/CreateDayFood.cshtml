@@ -8,6 +8,7 @@
     <input type="hidden" id="datekey" value="@Model.DateQs" />
     <input type="hidden" id="datekeyFoW" value="@Model.DateQsFirstOfWeek" />
     <form class="dayfood-form" method="post" id="theForm">
+        <input type="hidden" id="sideDishIds" name="sideDishIds" value="@string.Join(",", Model.DayFood.SideDishIds)" />
         <input type="hidden" name="day" value="@Model.DateKey" id="dateKeyCompact"/>
         <input type="hidden" name="delete" id="deleteHidden" value="" />
         <div class="input-wrapper">
@@ -29,6 +30,29 @@
         <div class="input-wrapper">
             <a href="#" onclick="editFood()">Ändra mat</a>
         </div>
+        <span>Tillbehör</span>
+        <div id="existingSideDishes">
+            @foreach (var sideDishId in Model.DayFood.SideDishIds) {
+                <div class="input-wrapper">
+                    <select style="max-width: 80vw" sideDishId="@sideDishId" class="sideDishSelect" onchange="updateSideDishHidden()">
+                    </select>
+                    <button type="button" class="recipe-button" onclick="deleteSideDish(this)">X</button>
+                </div>
+            }
+        </div>
+        <div class="input-wrapper">
+            <select style="max-width: 80vw" sideDishId="" id="newSideDish" class="sideDishSelect" onchange="newSideDishOnChange()">
+                <option value=""></option>
+                @foreach (var food in Model.SideDishes)
+                {
+                    <option value="@food.Key"> @food.Name</option>
+                }
+            </select>
+        </div>
+        <div class="input-wrapper">
+            <span>Vegetarisk</span>
+            <input type="checkbox" name="isVego" checked="@Model.DayFood.IsVego" />
+        </div>
 
         <div class="button-wrapper">
             <input type="submit" value="Spara mat" />
@@ -42,6 +66,50 @@
 </div>
 
 <script>
+    const allSelects = document.querySelectorAll('.sideDishSelect')
+    Array.from(allSelects).forEach(e => {
+        const selected = e.getAttribute('sideDishId')
+        if (!selected) {
+            return
+        }
+
+        initSideDishSelect(e, e.getAttribute('sideDishId'))
+    });
+
+    function updateSideDishHidden() {
+        const allSideDishSelects = document.querySelectorAll('.sideDishSelect')
+        const newValue = Array.from(allSideDishSelects).map(e => e.value).filter(e => e).join(',')
+        $('#sideDishIds').val(newValue)
+    }
+
+    function newSideDishOnChange() {
+        const newSideDishSelect = $('#newSideDish')
+        const selectedId = newSideDishSelect.val()
+        newSideDishSelect.val('')
+        const newSelect = document.createElement('select')
+        newSelect.classList = 'sideDishSelect'
+        newSelect.onchange = () => updateSideDishHidden()
+        initSideDishSelect(newSelect, selectedId)
+        const wrapper = document.createElement('div')
+        wrapper.classList = 'input-wrapper'
+        wrapper.appendChild(newSelect)
+
+        const deleteButton = document.createElement('button')
+        deleteButton.innerText = 'X'
+        deleteButton.click = e => deleteSideDish(e.target)
+        deleteButton.classList = 'recipe-button'
+        deleteButton.type = 'button'
+        wrapper.appendChild(deleteButton)
+
+        $('#existingSideDishes').append(wrapper)
+        updateSideDishHidden()
+    }
+
+    function deleteSideDish(e) {
+        e.parentElement.remove()
+        updateSideDishHidden()
+    }
+
     function updateTextFilter(value) {
         const date = document.querySelectorAll('#datekey')[0].value
         window.location = '/CreateDayFood?' + date + '&filter=' + value
@@ -58,5 +126,18 @@
         if (selectedFood) {
             window.location = '/CreateFood?date=' + date + '&foodId=' + selectedFood
         }
+    }
+
+    function initSideDishSelect(element, selectedId) {
+        Array.from(document.getElementById('newSideDish').options).forEach(option => {
+            if (!option.value) {
+                return
+            }
+            const newOption = document.createElement('option')
+            newOption.text = option.text
+            newOption.value = option.value
+            newOption.selected = option.value === selectedId
+            element.appendChild(newOption)
+        });
     }
 </script>

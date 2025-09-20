@@ -1,0 +1,135 @@
+﻿@page
+@model HomePage.Pages.CurrentWordMixModel
+@{
+    ViewData["Title"] = "Dagens ordmix";
+}
+
+<div class="word-mix-top-bar" style="margin-top: 1px;">
+<div class="word-mix-score-wrapper">
+    <button onclick="window.location.href='WordMixStats'" style="height: 32px; margin-top: 8px;">Tillbaka</button>
+    @if (Model.LoggedInPerson == Person.Jens.Name) {
+        <div class="profile-photo jens"></div>
+    } else {
+        <div class="profile-photo anna"></div>
+    }
+    <span id="bestScore">@Model.ConvertScore(Model.CurrentBest)</span>
+</div>
+<div class="connection-icon" id="connection-icon"></div>
+    <button type="button" onclick="alert(validateBoard())" style="height: 32px; margin-top: 8px;">
+        Spela
+    </button>
+</div>
+
+<div class="word-mix-grid" id="grid">
+
+</div>
+<div class="word-mix-storage-wrapper" id="storage">
+
+</div>
+
+<script src="~/js/WordMixGrid.js" asp-append-version="true"></script>
+<script src="~/js/WordList.js" asp-append-version="true"></script>
+<script>
+    drawGrid(5, window.outerWidth - 5, 50, document.getElementById('grid'))
+    document.getElementById('storage').appendChild(makeStorage())
+    if ('@Model.BoardString') {
+        initializeWordMix(decodeForClient('@Model.BoardString'), '@Model.AvailableLetters')
+    } else {
+        initializeWordMixFromStorage('@Model.AvailableLetters')
+    }
+
+    debugger
+    addWords('@Model.ExtraWords')
+    
+    bindEvents()
+
+    recordCallback = (s, b) => newScore(s, b)
+    var bestScore = @Model.CurrentBest
+    var connectionStatus = true
+    var queuedRequest = null
+    setInterval(() => verifyConnection(), 5000)
+    var storageReq = localStorage.getItem("wordrequest")
+    if (storageReq) {
+        const tokens = storageReq.split('|')
+        queuedRequest = {score: parseInt(tokens[0]), board: tokens[1] }
+    }
+
+    setTimeout(() => trySendFromQueue(), 500)
+
+    function trySendFromQueue() {
+        if (queuedRequest && connectionStatus) {
+            updateServer(queuedRequest.score, queuedRequest.board, () => {
+                if (queuedRequest.score > bestScore) {
+                    bestScore = queuedRequest.score
+                    document.getElementById('bestScore').innerText = queuedRequest.score.toString()
+                }
+
+                queuedRequest = null
+                localStorage.setItem("wordrequest", '')
+                alert('Servern har meddelats om ett resultat som sparades när du var offline.')
+            }, () => {
+                setTimeout(trySendFromQueue(), 5000)
+            })
+        }
+    }
+
+    function verifyConnection() {
+        const icon = document.getElementById('connection-icon')
+        $.ajax({
+                type: "POST",
+                data: {
+                    ping: true
+                },
+                url: "/CurrentWordMix",
+                success: (data) => {
+                    if (data.success && !connectionStatus) {
+                        $(icon).toggleClass('offline', false)
+                        connectionStatus = true
+                        trySendFromQueue()
+                    }
+                },
+                error: () => {
+                    connectionStatus = false
+                    $(icon).toggleClass('offline', true)
+                }
+            });
+    }
+
+    function newScore(score, boardString) {
+        if (score > bestScore) {
+            bestScore = score
+            document.getElementById('bestScore').innerText = score.toString()
+            if (!connectionStatus) {
+                queueRequest(score, boardString)
+            } else {
+                updateServer(score, boardString, () => true, () => queueRequest(score, boardString))
+            }
+        }
+    }
+
+    function queueRequest(score, boardString) {
+        if (queuedRequest && queuedRequest.score > score) {
+            return
+        }
+
+        queuedRequest = {score: score, board: boardString }
+        localStorage.setItem("wordrequest", score + '|' + boardString)
+    }
+
+    function updateServer(score, boardString, onSuccess, onFail) {
+        $.ajax({
+                type: "POST",
+                data: {
+                    score: score,
+                    letters: boardString
+                },
+                url: "/CurrentWordMix",
+                success: (data) => {
+                    if (data.success) {
+                        onSuccess()
+                    }
+                },
+                error: () => onFail()
+            });
+    }
+</script>

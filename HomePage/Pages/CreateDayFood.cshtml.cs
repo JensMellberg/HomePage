@@ -18,6 +18,8 @@ namespace HomePage.Pages
 
         public List<Food> ExistingFood { get; set; }
 
+        public List<Food> SideDishes { get; set; }
+
         public string FoodIdFromQueryString { get; set; }
 
         public bool CanDelete { get; set; }
@@ -37,8 +39,14 @@ namespace HomePage.Pages
             var existingDayFood = new DayFoodRepository().TryGetValue(DateKey);
             CanDelete = existingDayFood != null && CanBeDeleted(DateKey);
             DayFood = existingDayFood ?? new DayFood { Day = date };
-            ExistingFood = new FoodRepository().GetValues().Values
+            var allFoods = new FoodRepository().GetValues().Values;
+            ExistingFood = allFoods
+                .Where(x => !x.IsSideDish)
                 .Where(x => Regex?.IsMatch(x.Name) ?? true)
+                .OrderBy(x => x.Name)
+                .ToList();
+            SideDishes = allFoods
+                .Where(x => x.IsSideDish)
                 .OrderBy(x => x.Name)
                 .ToList();
             FoodIdFromQueryString = foodId;
@@ -48,10 +56,10 @@ namespace HomePage.Pages
             return Page();
         }
 
-        public IActionResult OnPost(string day, string foodId, string delete)
+        public IActionResult OnPost(string day, string foodId, string delete, string sideDishIds, string isVego)
         {
             var date = DateHelper.FromKey(day);
-            var dayFood = new DayFood { Day = date, FoodId = foodId };
+            var dayFood = new DayFood { Day = date, FoodId = foodId, SideDishIds = (sideDishIds ?? "").Split(',').ToList(), IsVego = isVego == "on" };
 
             if (!string.IsNullOrEmpty(delete) && this.CanBeDeleted(day))
             {

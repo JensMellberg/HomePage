@@ -11,6 +11,8 @@ namespace HomePage.Pages
 
         public bool IsNew { get; set; }
 
+        public bool CanSplit { get; set; }
+
         public IActionResult OnGet(string foodId, string date)
         {
             this.TryLogIn();
@@ -29,13 +31,14 @@ namespace HomePage.Pages
             {
                 Food = new FoodRepository().TryGetValue(foodId) ?? new Food();
                 IsNew = !this.CanDelete(foodId);
+                CanSplit = IsNew;
             }
 
             Food.LoadCategories([Food]);
             return Page();
         }
 
-        public IActionResult OnPost(string foodId, string foodName, string date, string recipeUrl, string categories, string delete, string notes, string ingredients, string inFolder)
+        public IActionResult OnPost(string foodId, string foodName, string date, string recipeUrl, string categories, string delete, string notes, string ingredients, string inFolder, string isSideDish)
         {
             if (!string.IsNullOrEmpty(delete) && this.CanDelete(foodId))
             {
@@ -55,13 +58,14 @@ namespace HomePage.Pages
                 }*/
                 var food = new Food 
                 { 
-                    Key = foodId, 
-                    Name = foodName, 
-                    RecipeUrl = recipeUrl, 
-                    CategoriyIds = categoriesList, 
+                    Key = foodId,
+                    Name = foodName,
+                    RecipeUrl = recipeUrl,
+                    CategoriyIds = categoriesList,
                     Notes = notes,
                     /*Ingredients = actualIngredientsList*/
-                    InFolder = inFolder == "on"
+                    InFolder = inFolder == "on",
+                    IsSideDish = isSideDish == "on"
                 };
                 new FoodRepository().SaveValue(food);
             }
@@ -76,7 +80,7 @@ namespace HomePage.Pages
 
         private bool CanDelete(string foodId)
         {
-            return !new DayFoodRepository().GetValues().Values.Any(x => x.FoodId == foodId);
+            return !new DayFoodRepository().GetValues().Values.Any(x => x.FoodId == foodId || x.SideDishIds.Contains(foodId));
         }
     }
 }

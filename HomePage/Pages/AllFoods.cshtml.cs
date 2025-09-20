@@ -16,6 +16,8 @@ namespace HomePage.Pages
     {
         public List<Food> AllFoods { get; set; }
 
+        public List<Food> SideDishes { get; set; }
+
         public Dictionary<string, string[]> FoodRankings { get; set; } = new();
 
         public (Sorting, string)[] SortingOptions = [
@@ -42,11 +44,17 @@ namespace HomePage.Pages
 
             var Regex = string.IsNullOrEmpty(filter) ? null : new Regex("^.*" + filter + ".*$", RegexOptions.IgnoreCase);
             var categoriesList = categoryFilter?.Split(',').ToHashSet();
+            var foodValues = new FoodRepository().GetValues().Select(x => x.Value);
 
-            var allFoods = new FoodRepository().GetValues()
-                .Select(x => x.Value)
+            var allFoods = foodValues
+                .Where(x => !x.IsSideDish)
                 .Where(x => Regex?.IsMatch(x.Name) ?? true)
                 .Where(x => categoriesList == null || categoriesList.All(c => x.CategoriyIds.Contains(c)));
+
+            SideDishes = foodValues
+                .Where(x => x.IsSideDish)
+                .OrderBy(x => x.Name)
+                .ToList();
 
             CurrentCategories = categoryFilter ?? "";
             var allRankings = new FoodRankingRepository().GetValues().Values;
@@ -80,6 +88,12 @@ namespace HomePage.Pages
             else
             {
                 AllFoods = [.. allFoods.OrderByDescending(x => rankingsKeys[x])];
+            }
+
+            var dayFoods = new DayFoodRepository().GetValues().Values;
+            foreach (var food in AllFoods.Concat(SideDishes))
+            {
+                food.UpdateHistory(dayFoods);
             }
 
             string GetRankingString(string person, double average) => person + ": " + (average == 0 ? "-" : average.ToString());

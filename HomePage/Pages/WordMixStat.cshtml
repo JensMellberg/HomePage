@@ -1,0 +1,25 @@
+﻿@page
+@model HomePage.Pages.WordMixStatModel
+@{
+    ViewData["Title"] = "Ordmix";
+}
+<div class="word-mix-top-bar" style="margin-top: 1px;">
+    <div class="word-mix-score-wrapper">
+        <div class="profile-photo @Model.PersonClass"></div>
+        <span id="bestScore">@Model.Score</span>
+    </div>
+    <button onclick="window.location.href='WordMixStats'" style="height: 32px; margin-top: 8px;">Tillbaka</button>
+</div>
+
+<div class="word-mix-grid" id="grid">
+</div>
+<div class="word-mix-storage-wrapper" id="storage">
+</div>
+
+<script src="~/js/WordMixGrid.js" asp-append-version="true"></script>
+<script src="~/js/WordList.js" asp-append-version="true"></script>
+<script>
+    drawGrid(5, window.outerWidth - 5, 50, document.getElementById('grid'))
+    document.getElementById('storage').appendChild(makeStorage())
+    initializeWordMix(decodeForClient('@Model.BoardString'), null)
+</script>

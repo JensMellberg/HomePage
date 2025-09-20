@@ -1,0 +1,30 @@
+﻿@page
+@model HomePage.Pages.FoodHistoryModel
+@{
+    ViewData["Title"] = "Mathistorik";
+}
+
+<div class="page-wrapper">
+    <div class="food-grid">
+        @foreach (var row in Model.HistoryList)
+        {
+            <div class="food-row">
+                <span class="food-grid-cell">@DateHelper.ToNumberedDateString(row.dayFood.Day)</span>
+                <span class="food-grid-cell">@row.dayFood.CombinedName</span>
+                <span class="food-grid-cell">@row.jensRanking</span>
+                @if (!string.IsNullOrEmpty(row.jensNote)) {
+                    <span class="food-grid-cell">
+                        <span style="background: white">@row.jensNote</span>
+                    </span>
+                }
+                <span class="food-grid-cell">@row.annaRanking</span>
+                @if (!string.IsNullOrEmpty(row.annaNote))
+                {
+                    <span class="food-grid-cell">
+                        <span style="background: white">@row.annaNote</span>
+                    </span>
+                }
+            </div>
+        }
+    </div>
+</div>

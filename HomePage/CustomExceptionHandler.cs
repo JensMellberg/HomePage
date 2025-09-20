@@ -16,14 +16,18 @@ namespace HomePage
             Exception exception,
             CancellationToken cancellationToken)
         {
-            var exceptionMessage = exception.Message;
+            AppendError(exception.Message);
+            return ValueTask.FromResult(false);
+        }
+
+        public static void AppendError(string error)
+        {
             if (!File.Exists(Path))
             {
                 File.Create(Path).Close();
             }
 
-            File.AppendAllLines(Path, [exceptionMessage]);
-            return ValueTask.FromResult(false);
+            File.AppendAllLines(Path, [error]);
         }
 
         public static IEnumerable<string> GetErrors()

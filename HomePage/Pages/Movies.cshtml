@@ -4,11 +4,29 @@
     ViewData["Title"] = "Filmer";
 }
 
-<div class="page-wrapper">
+<div class="page-wrapper" style="gap: 2px;">
     <span class="seen-counter">@Model.SeenCounter</span>
     <a href="CreateMovie">Ny film</a>
     <button class="sectionButton" type="button" onclick="randomizeMovie()">Slumpa film</button>
+    <div class="input-wrapper">
+        <span>Sortera på:</span>
+        <select onchange="updateSorting(this.value)">
+            @foreach (var sorting in Model.SortingOptions)
+            {
+                if (sorting.Item1 == Model.CurrentSorting)
+                {
+                    <option value="@sorting.Item1.ToString()" selected> @sorting.Item2</option>
+                }
+                else
+                {
+                    <option value="@sorting.Item1.ToString()"> @sorting.Item2</option>
+                }
+            }
+        </select>
+    </div>
+    <span>Senaste filmen: @Model.LastSeen.Name</span>
     <input type="hidden" value="@Model.AllMoviesJson" id="moviesJson" />
+    <input type="hidden" id="loggedInPerson" value="@Model.LoggedInPerson" />
     <div class="food-grid">
         @foreach (var movie in Model.Movies)
         {
@@ -17,9 +35,20 @@
                     <img class="movie-poster" src="@movie.ImageUrl"/>
                 </div>
                 <div class="food-grid-cell">
-                    <a href="CreateMovie?Id=@movie.Key">
-                        @movie.Name
-                    </a>
+                    @if (movie.IsCompleted) {
+                        <div class="food-grid-cell-inner">
+                            <a href="CreateMovie?Id=@movie.Key">
+                                @movie.Name
+                            </a>
+                            <span onclick="makeRanking('@movie.Key', '@Person.Jens.Name')"> @movie.RankingText(Person.Jens)</span>
+                            <span onclick="makeRanking('@movie.Key', '@Person.Anna.Name')"> @movie.RankingText(Person.Anna)</span>
+                        </div>
+                    }
+                    else {
+                        <a href="CreateMovie?Id=@movie.Key">
+                            @movie.Name
+                        </a>
+                    }
                 </div>
                 <div class="food-grid-cell">
                     <span>@movie.Year</span>
@@ -40,6 +69,7 @@
 </div>
 
 <script src="~/js/homeButton.js" asp-append-version="true"></script>
+<script src="~/js/StarRanker.js" asp-append-version="true"></script>
 <script>
     function markCompleted(id) {
          $.ajax({
@@ -59,5 +89,39 @@
        buttons.push(({text: 'Nä, slumpa en ny', action: () => { Popup.closePopup(); randomizeMovie()}}))
        buttons.push(({text: 'Avbryt', action: () => Popup.closePopup()}))
        Alert.openDialog('Jag föreslår ' + randomMovie + '!', buttons)
+    }
+
+     function makeRanking(movie, person) {
+         const loggedInPerson = $('#loggedInPerson').val()
+         if (!loggedInPerson) {
+             window.location.href = 'Login'
+             return
+         }
+
+         if (person != loggedInPerson) {
+             return
+         }
+
+        const ranker = StarRanker.create((r, n) => submitRanking(movie, person, r), 5, true)
+        Alert.openDialogWithElement(ranker, [
+            {text: 'Avbryt', action: () => {Popup.closePopup();}}
+        ])
+    }
+
+    function submitRanking(movie, person, ranking) {
+         $.ajax({
+            type: "POST",
+            url: "/Movies",
+            data: {
+               itemId: movie,
+               person: person,
+               ranking: ranking
+            },
+            success: (e) => window.location.reload()
+        });
+    }
+
+      function updateSorting(value) {
+        window.location = '/Movies?sorting=' + value
     }
 </script>

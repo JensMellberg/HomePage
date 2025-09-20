@@ -5,6 +5,7 @@ namespace HomePage
 {
     public static class Utils
     {
+        public static string EncodeForClient(this string _this) => _this.Replace('Ä', '.').Replace('Ö', '*');
         public static void CalculateAverages(IEnumerable<FoodRanking> rankings, out double jensAverage, out double annaAverage, out double totalAverage)
         {
             var jensRankings = rankings.Where(x => x.Person == Person.Jens.Name).ToArray();

@@ -21,6 +21,9 @@ namespace HomePage
         [SaveProperty]
         public bool IsReoccuring { get; set; }
 
+        [SaveProperty]
+        public bool IsVacation { get; set; }
+
         public DateTime? DateInCalendar { get; set; }
 
         public string ReplacedText(int yearNow)

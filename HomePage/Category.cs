@@ -13,6 +13,9 @@
         [SaveProperty]
         public bool IsBad { get; set; }
 
+        [SaveProperty]
+        public bool NeedsOnAllSides { get; set; }
+
         public bool HasGoal => GoalPerWeek > 0;
 
         public string GoalPerWeekText => HasGoal && !IsBad ? GoalPerWeek.ToString() : "";

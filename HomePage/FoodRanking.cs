@@ -22,6 +22,11 @@
 
         public string RankingText => string.IsNullOrEmpty(FoodId) ? "-" : Ranking.ToString();
 
+        public string RankingTextWithNote => RankingText + (string.IsNullOrEmpty(Note) ? "" : " " + Note);
+
+        [SaveProperty]
+        public string Note { get; set; }
+
         [SaveProperty]
         public string Day { get; set; }
 

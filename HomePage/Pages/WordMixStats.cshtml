@@ -1,0 +1,73 @@
+﻿@page
+@model HomePage.Pages.WordMixStatsModel
+@{
+    ViewData["Title"] = "Ordmix";
+}
+<div class="page-wrapper" style="height: 100vh;">
+    
+    <div style="display: flex; flex-direction: column; gap: 8px">
+        <a href="CurrentWordMix">Dagens ordmix</a>
+        <div style="position: relative; width: fit-content;">
+            <a href="AddWords">Lägg till ord</a>
+            @if (Model.WaitingForApproval > 0) {
+                <span class="approval-icon">@Model.WaitingForApproval</span>
+            }
+        </div>
+        
+    </div>
+    
+
+    <div class="word-mix-top-bar">
+        <div class="word-mix-score-wrapper">
+            @if (!string.IsNullOrEmpty(Model.JensBoard))
+            {
+                <a class="profile-photo jens" href="CurrentWordMix?board=@Model.JensBoard.EncodeForClient()"></a>
+            }
+            else
+            {
+                <div class="profile-photo jens"></div>
+            }
+            <span>@Model.ConvertScore(Model.JensScore)</span>
+        </div>
+        <div class="word-mix-score-wrapper">
+            <span>@Model.ConvertScore(Model.AnnaScore)</span>
+            @if (!string.IsNullOrEmpty(Model.AnnaBoard))
+            {
+                <a class="profile-photo anna" href="CurrentWordMix?board=@Model.AnnaBoard.EncodeForClient()"></a>
+            }
+            else
+            {
+                <div class="profile-photo anna"></div>
+            }
+        </div>
+    </div>
+    <div class="word-mix-history-outer">
+        @foreach (var history in Model.History) {
+            <div class="word-mix-history-wrapper">
+                <div class="word-mix-score-wrapper">
+                    @if (history.jensScore > 0) {
+                        <a class="profile-photo jens" href="WordMixStat?key=@WordMixResult.MakeId(DateHelper.ToKey(history.date), Person.Jens.Name)"></a>
+                    }
+                    else {
+                        <div class="profile-photo jens"></div>
+                    }
+                    <span>@Model.ConvertScore(history.jensScore)</span>
+                </div>
+                <span>@history.date.Day @DateHelper.MonthNumberToString[history.date.Month]</span>
+                <div class="word-mix-score-wrapper">
+                    <span>@Model.ConvertScore(history.annaScore)</span>
+                    @if (history.annaScore > 0)
+                    {
+                        <a class="profile-photo anna" href="WordMixStat?key=@WordMixResult.MakeId(DateHelper.ToKey(history.date), Person.Anna.Name)"></a>
+                    }
+                    else
+                    {
+                        <div class="profile-photo anna"></div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>

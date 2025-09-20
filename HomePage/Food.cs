@@ -10,6 +10,9 @@ namespace HomePage
         public string Name { get; set; }
 
         [SaveProperty]
+        public bool IsSideDish { get; set; }
+
+        [SaveProperty]
         public string RecipeUrl { get; set; }
 
         [SaveProperty]
@@ -27,6 +30,13 @@ namespace HomePage
         [SaveProperty]
         [SaveAsList]
         public List<string> Ingredients { get; set; } = new List<string>();
+
+        public bool HasHistory { get; set; }
+
+        public void UpdateHistory(IEnumerable<DayFood> dayFoods)
+        {
+            HasHistory = dayFoods.Any(x => x.FoodId == Key || x.SideDishIds.Contains(Key));
+        }
 
         public string ParsedIngredients
         {

@@ -27,7 +27,7 @@ namespace HomePage.Pages
             return Page();
         }
 
-        public IActionResult OnPost(string foodId, string categoryId, string name, string weekgoal, string weekgoalmax)
+        public IActionResult OnPost(string foodId, string categoryId, string name, string weekgoal, string weekgoalmax, string needsOnAllSides)
         {
             if (foodId != null)
             {
@@ -47,7 +47,8 @@ namespace HomePage.Pages
                 var category = new Category { 
                     Key = categoryId, Name = name,
                     GoalPerWeek = string.IsNullOrEmpty(weekgoal) ? (string.IsNullOrEmpty(weekgoalmax) ? 0 : int.Parse(weekgoalmax)) : int.Parse(weekgoal),
-                    IsBad = !string.IsNullOrEmpty(weekgoalmax)
+                    IsBad = !string.IsNullOrEmpty(weekgoalmax),
+                    NeedsOnAllSides = needsOnAllSides == "on"
                 };
                 new CategoryRepository().SaveValue(category);
             }

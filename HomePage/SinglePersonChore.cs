@@ -9,5 +9,7 @@
         protected override void SetLastUpdatedPerson(Settings settings, string person) { }
 
         protected override string GetNextPerson(Settings settings) => PersonName;
+
+        protected override string ConvertStreakPerson(string person) => PersonName;
     }
 }

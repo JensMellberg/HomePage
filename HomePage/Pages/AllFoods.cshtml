@@ -42,6 +42,9 @@
                     {
                         <span class="recipe-button">📗</span>
                     }
+                    @if (food.HasHistory) {
+                        <div class="foodhistoryplaceholder" foodId="@food.Key"></div>
+                    }
                     <a href="CreateFood?foodId=@food.Key">
                         @food.Name (@food.CategoriyIds.Count)
                     </a>
@@ -51,6 +54,26 @@
                         @ranking
                     </span>
                 }
+            </div>
+        }
+    </div>
+    <div class="food-grid">
+        @foreach (var food in Model.SideDishes)
+        {
+            <div class="food-row">
+                <div class="food-grid-cell">
+                    @if (!string.IsNullOrEmpty(food.RecipeUrl))
+                    {
+                        <div class="recipelinkplaceholder" linkurl="@food.RecipeUrl"></div>
+                    }
+                    @if (food.InFolder)
+                    {
+                        <span class="recipe-button">📗</span>
+                    }
+                    <a href="CreateFood?foodId=@food.Key">
+                        @food.Name (@food.CategoriyIds.Count)
+                    </a>
+                </div>
             </div>
         }
     </div>

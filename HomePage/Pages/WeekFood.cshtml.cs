@@ -33,7 +33,8 @@ namespace HomePage.Pages
             var dayFoods = new DayFoodRepository().GetValues();
             var allFoods = new FoodRepository().GetValues();
             var allRankings = new FoodRankingRepository().GetValues();
-            var categoriesWithGoal = new CategoryRepository().GetValues().Values.Where(x => x.HasGoal);
+            var allCategories = new CategoryRepository().GetValues();
+            var categoriesWithGoal = allCategories.Values.Where(x => x.HasGoal);
             var weekGoalsPerCategoryId = categoriesWithGoal.ToDictionary(x => x.Key, x => new WeekGoals
             {
                 Category = x.Name,
@@ -62,7 +63,8 @@ namespace HomePage.Pages
                 if (dayFood != null)
                 {
                     dayFood.Food = allFoods[dayFood.FoodId];
-                    foreach (var category in dayFood.Food.CategoriyIds.Where(weekGoalsPerCategoryId.ContainsKey))
+                    dayFood.LoadSideDishes(allFoods);
+                    foreach (var category in dayFood.GetCategories(allCategories).Select(x => x.Key).Where(weekGoalsPerCategoryId.ContainsKey))
                     {
                         weekGoalsPerCategoryId[category].Completed++;
                     }
@@ -80,7 +82,7 @@ namespace HomePage.Pages
             return Page();
         }
 
-        public IActionResult OnPost(string date, string person, int ranking)
+        public IActionResult OnPost(string date, string person, int ranking, string note)
         {
             if (!SignInRepository.IsLoggedIn(HttpContext.Session) || person != SignInRepository.LoggedInPerson(HttpContext.Session).Name)
             {
@@ -88,7 +90,7 @@ namespace HomePage.Pages
             }
 
             var foodId = new DayFoodRepository().TryGetValue(date).FoodId;
-            var foodRanking = new FoodRanking { Day = date, Person = person, Ranking = ranking, FoodId = foodId };
+            var foodRanking = new FoodRanking { Day = date, Person = person, Ranking = ranking, FoodId = foodId, Note = note };
             new FoodRankingRepository().SaveValue(foodRanking);
             return new OkResult();
         }

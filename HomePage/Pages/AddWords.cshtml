@@ -1,0 +1,89 @@
+﻿@page
+@model HomePage.Pages.AddWordsModel
+@{
+    ViewData["Title"] = "Lägg till ord";
+}
+
+<div class="page-wrapper" style="gap: 12px; margin-top: 12px">
+    <input type="text" id="new-word" />
+    <button type="button" onclick="addWord()">Lägg till</button>
+    <div class="extra-word-outer">
+    @foreach (var word in Model.AllWords) {
+        <div class="extra-word-wrapper" word-key="@word.model.Word">
+             <button type="button" onclick="deleteWord(this)" style="visibility: @Model.VisibilityText(word.canDelete)">X</button>
+             <span>@word.model.Word</span>
+             @if (word.model.JensApproved) {
+                <div class="profile-photo jens"></div>
+             }
+            @if (word.model.AnnaApproved)
+            {
+                <div class="profile-photo anna"></div>
+            }
+            @if (word.canApprove)
+            {
+                <button type="button" onclick="approve(this)">Approve</button>
+            }
+        </div>
+    }
+    </div>
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>
+<script>
+    function addWord() {
+        const word = $('#new-word').val()
+         $.ajax({
+                type: "POST",
+                data: {
+                    action: "new",
+                    word: word
+                },
+                url: "/AddWords",
+                success: (data) => {
+                    if (data.success) {
+                        window.location.reload()
+                    } else {
+                        alert('Ordet finns redan.')
+                    }
+                }
+            });
+    }
+
+    function deleteWord(button) {
+        const word = getWord(button)
+         $.ajax({
+                type: "POST",
+                data: {
+                    action: "delete",
+                    word: word
+                },
+                url: "/AddWords",
+                success: (data) => {
+                    if (data.success) {
+                        window.location.reload()
+                    }
+                }
+            });
+    }
+
+    function approve(button) {
+        const word = getWord(button)
+        $.ajax({
+                type: "POST",
+                data: {
+                    action: "approve",
+                    word: word
+                },
+                url: "/AddWords",
+                success: (data) => {
+                    if (data.success) {
+                        window.location.reload()
+                    }
+                }
+            });
+    }
+
+    function getWord(button) {
+        return button.parentElement.getAttribute('word-key');
+    }
+</script>

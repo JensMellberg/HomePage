@@ -28,6 +28,18 @@ class RecipeLink {
 	}
 }
 
+class FoodHistoryLink {
+	static addLink(parent, foodId) {
+		const button = document.createElement('button');
+		button.classList = 'recipe-button';
+		parent.appendChild(button);
+		button.type = 'button';
+		button.innerText = '🏛️';
+		button.onclick = () => { window.location.href = 'FoodHistory?foodId=' + foodId }
+		return button;
+	}
+}
+
 class NotesPopup {
 	static addLink(parent, notes) {
 		const button = document.createElement('button');
@@ -53,6 +65,12 @@ var holders = document.querySelectorAll('.recipelinkplaceholder')
 for (let i = 0; i < holders.length; i++) {
 	const url = holders[i].getAttribute('linkurl');
 	RecipeLink.addLink(holders[i], url);
+}
+
+var holders = document.querySelectorAll('.foodhistoryplaceholder')
+for (let i = 0; i < holders.length; i++) {
+	const url = holders[i].getAttribute('foodId');
+	FoodHistoryLink.addLink(holders[i], url);
 }
 
 var notesHolders = document.querySelectorAll('.notesplaceholder')

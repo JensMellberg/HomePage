@@ -1,3 +1,4 @@
+using System.Linq;
 using HomePage.Spending;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -70,9 +71,15 @@ namespace HomePage.Pages
             else if (CurrentType == StatisticType.EatenPerDay)
             {
                 var foodRankings = new FoodRankingRepository().GetValues();
+                foreach (var relevantFood in relevantFoods)
+                {
+                    relevantFood.Food = allFoods[relevantFood.FoodId];
+                    relevantFood.LoadSideDishes(allFoods);
+                }
+
                 GridData = relevantFoods.OrderBy(x => x.Day).Select(x => (GridDataCell[])[
-                    new GridDataCell { Text = $"{x.Day.Day}/{x.Day.Month} {x.Day.Year}" },
-                    new GridDataCell { Text = allFoods[x.FoodId].Name },
+                    new GridDataCell { Text = DateHelper.ToNumberedDateString(x.Day) },
+                    new GridDataCell { Text = x.CombinedName },
                     new GridDataCell { Text = $"{Person.Jens.Name}: {GetRanking(Person.Jens.Name, x.Day)}" },
                     new GridDataCell { Text = $"{Person.Anna.Name}: {GetRanking(Person.Anna.Name, x.Day)}" },
                 ]).ToList();
@@ -88,12 +95,20 @@ namespace HomePage.Pages
             }
             else if (CurrentType == StatisticType.Category)
             {
-                var actualFoods = relevantFoods.Select(x => x.FoodId).Select(x => allFoods[x]);
-                GridData = [];
-                foreach (var cat in new CategoryRepository().GetValues().Values)
+                var allCategories = new CategoryRepository().GetValues();
+                var categoriesForDayFood = new Dictionary<string, List<Category>>();
+                foreach (var dayFood in relevantFoods)
                 {
-                    var foods = actualFoods.Where(x => x.CategoriyIds.Contains(cat.Key));
-                    var drilldownGrid = foods.Select(x => (GridDataCell[])[new() { Text = x.Name }]).ToList();
+                    dayFood.Food = allFoods[dayFood.FoodId];
+                    dayFood.LoadSideDishes(allFoods);
+                    categoriesForDayFood.Add(dayFood.Key, dayFood.GetCategories(allCategories));
+                }
+
+                GridData = [];
+                foreach (var cat in allCategories.Values)
+                {
+                    var foods = relevantFoods.Where(x => categoriesForDayFood[x.Key].Contains(cat));
+                    var drilldownGrid = foods.Select(x => (GridDataCell[])[new() { Text = x.CombinedName }]).ToList();
                     GridData.Add([new() { Text = cat.Name }, new() { Text = drilldownGrid.Count.ToString() }, new() { DrillDown = drilldownGrid }]);
                 }
 

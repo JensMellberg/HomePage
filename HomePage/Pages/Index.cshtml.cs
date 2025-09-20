@@ -12,12 +12,14 @@ namespace HomePage.Pages
 
         public bool WasDoneToday { get; set; }
 
+        public int Streak { get; set; }
+
         public string Html {
             get {
                 return Id switch
                 {
                     "Litter" => "<div class=\"profile-photo cat\"></div>",
-                    _ => $"<div class=\"profile-photo {Id} chore\" chore-value=\"{Id}\" was-done-today=\"{WasDoneToday}\"></div>",
+                    _ => $"<div class=\"profile-photo {Id} chore\" chore-value=\"{Id}\" was-done-today=\"{WasDoneToday}\" streak={Streak}></div>",
                 };
             }
         }
@@ -68,13 +70,37 @@ namespace HomePage.Pages
         public void OnGet()
         {
             this.TryLogIn();
-            var today = DateTime.Now;
-            var dummyTimeSpan = today - new DateTime(2020, 10, 15);
+            var today = DateHelper.DateNow;
             Day = today.Day;
             DayOfWeek = DateHelper.WeekNumberToString[(int)today.DayOfWeek];
             Month = DateHelper.MonthNumberToString[today.Month];
+
+            Activities = new CalendarActivityRepository().GetValues().Values.Where(x =>
+            {
+                var startDay = DateHelper.FromKey(x.Date);
+                if (x.IsReoccuring)
+                {
+                    startDay = startDay.AddYears(today.Year - startDay.Year);
+                }
+
+                var lastDay = startDay.AddDays(x.DurationInDays);
+                return today > startDay && today < lastDay;
+            });
+
+            List<string> exemptFromChores = [];
+            if (Activities.Any(x => x.IsVacation && (x.Person == "Both" || x.Person == Person.Jens.Name)))
+            {
+                exemptFromChores.Add(Person.Jens.Name);
+            }
+
+            if (Activities.Any(x => x.IsVacation && (x.Person == "Both" || x.Person == Person.Anna.Name)))
+            {
+                exemptFromChores.Add(Person.Anna.Name);
+            }
+
             (Day % 2 == 0 ? AnnaIcons : JensIcons).Add(new PersonIcon { Id = "Litter" });
             AddChore(SettingsRepository.FlossChore);
+            AddChore(SettingsRepository.FlossChoreJens);
             AddChore(SettingsRepository.FlowerChore);
             AddChore(SettingsRepository.BedSheetChore);
             AddChore(SettingsRepository.WorkoutChore);
@@ -117,31 +143,24 @@ namespace HomePage.Pages
             RedDay = new RedDayRepository().InfoForDate(today);
             //new ThemeDayRepository().UpdateFromJsonFile();
             ThemeDays = new ThemeDayRepository().InfoForDate(today);
-            Activities = new CalendarActivityRepository().GetValues().Values.Where(x =>
-            {
-                var startDay = DateHelper.FromKey(x.Date);
-                if (x.IsReoccuring)
-                {
-                    startDay = startDay.AddYears(today.Year - startDay.Year);
-                }
-
-                var lastDay = startDay.AddDays(x.DurationInDays);
-                return today > startDay && today < lastDay;
-            });
 
             void AddChore(PersonChore chore)
             {
+                chore.TryResetStreak(exemptFromChores);
                 var wasDoneToday = chore.WasDoneToday();
+                
                 if (wasDoneToday != null)
                 {
-                    (wasDoneToday == Person.Anna.Name ? AnnaIcons : JensIcons).Add(new PersonIcon { Id = chore.Id, WasDoneToday = true});
+                    var streak = chore.GetStreak(wasDoneToday);
+                    (wasDoneToday == Person.Anna.Name ? AnnaIcons : JensIcons).Add(new PersonIcon { Id = chore.Id, WasDoneToday = true, Streak = streak });
                     return;
                 }
 
                 var chorePerson = chore.ChorePerson();
                 if (chorePerson != null)
                 {
-                    (chorePerson == Person.Anna.Name ? AnnaIcons : JensIcons).Add(new PersonIcon { Id = chore.Id });
+                    var streak = chore.GetStreak(chorePerson);
+                    (chorePerson == Person.Anna.Name ? AnnaIcons : JensIcons).Add(new PersonIcon { Id = chore.Id, Streak = streak });
                 }
             }
         }
@@ -156,7 +175,7 @@ namespace HomePage.Pages
         {
             if (string.IsNullOrEmpty(foodId))
             {
-                var allFoods = new FoodRepository().GetValues().Values.ToArray();
+                var allFoods = new FoodRepository().GetValues().Values.Where(x => !x.IsSideDish).ToArray();
                 var randomizedFoodIndex = new Random().Next(allFoods.Length);
                 var randomizedFood = allFoods[randomizedFoodIndex];
                 return new JsonResult(new { id = randomizedFood.Key, food = randomizedFood.Name });

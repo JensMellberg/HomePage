@@ -8,6 +8,8 @@ namespace HomePage
 
         public static FlossChore FlossChore => new();
 
+        public static FlossChoreJens FlossChoreJens => new();
+
         public static FlowerChore FlowerChore => new();
 
         public static EyeChore EyeChore => new();

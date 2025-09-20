@@ -26,7 +26,7 @@ namespace HomePage.Pages
             return Page();
         }
 
-        public IActionResult OnPost(string activityId, string date, string text, string person, int duration, string isreoccuring, string delete)
+        public IActionResult OnPost(string activityId, string date, string text, string person, int duration, string isreoccuring, string isvacation, string delete)
         {
             var keyWithoutZeros = DateHelper.KeyFromKeyWithZeros(date);
             if (!string.IsNullOrEmpty(delete))
@@ -34,10 +34,9 @@ namespace HomePage.Pages
                 new CalendarActivityRepository().Delete(activityId);
             } else
             {
-                var activity = new CalendarActivity { Key = activityId, Text = text, Person = person, Date = keyWithoutZeros, DurationInDays = duration, IsReoccuring = isreoccuring == "on" };
+                var activity = new CalendarActivity { Key = activityId, Text = text, Person = person, Date = keyWithoutZeros, DurationInDays = duration, IsReoccuring = isreoccuring == "on", IsVacation = isvacation == "on" };
 
                 new CalendarActivityRepository().SaveValue(activity);
-                
             }
 
             var firstOfWeekDate = DateHelper.GetFirstOfWeek(DateHelper.FromKey(keyWithoutZeros));

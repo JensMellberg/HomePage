@@ -14,6 +14,10 @@
         public string LastFlowerTime { get; set; }
 
         [SaveProperty]
+        [SaveAsList]
+        public List<string> Streaks { get; set; } = new List<string>();
+
+        [SaveProperty]
         public string LastFlowerPerson { get; set; }
 
         [SaveProperty]
@@ -28,6 +32,9 @@
 
         [SaveProperty]
         public string LastFlossTime { get; set; }
+
+        [SaveProperty]
+        public string LastFlossTimeJens { get; set; }
 
         [SaveProperty]
         public string LastWorkoutTime { get; set; }

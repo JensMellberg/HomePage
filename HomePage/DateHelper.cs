@@ -2,15 +2,24 @@
 {
     public static class DateHelper
     {
+        public static DateTime DateNow => DateTime.Now;
+
         public static string FormatDateForQueryString(DateTime date) => $"year={date.Year}&month={date.Month}&day={date.Day}";
 
         public static string ToKey(DateTime date) => $"{date.Year}-{date.Month}-{date.Day}";
 
         public static DateTime FromKey(string key)
         {
+            if (string.IsNullOrEmpty(key))
+            {
+                return DateTime.MinValue;
+            }
+
             var tokens = key.Split('-').Select(int.Parse).ToArray();
             return new DateTime(tokens[0], tokens[1], tokens[2]);
         }
+
+        public static string ToNumberedDateString(DateTime date) => $"{date.Day}/{date.Month} {date.Year}";
 
         public static string KeyWithZerosFromKey(string key)
         {

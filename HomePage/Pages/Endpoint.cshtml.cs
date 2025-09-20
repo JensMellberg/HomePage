@@ -164,27 +164,31 @@ namespace HomePage.Pages
 
             if (action == "Flower")
             {
-                SettingsRepository.FlowerChore.Update();
+                return new JsonResult(new { streak = SettingsRepository.FlowerChore.Update() });
             }
             else if (action == "Floss")
             {
-                SettingsRepository.FlossChore.Update();
+                return new JsonResult(new { streak = SettingsRepository.FlossChore.Update() });
+            }
+            else if (action == "FlossJens")
+            {
+                return new JsonResult(new { streak = SettingsRepository.FlossChoreJens.Update() });
             }
             else if (action == "Bed")
             {
-                SettingsRepository.BedSheetChore.Update();
+                return new JsonResult(new { streak = SettingsRepository.BedSheetChore.Update() });
             }
             else if (action == "Eye")
             {
-                SettingsRepository.EyeChore.Update();
+                return new JsonResult(new { streak = SettingsRepository.EyeChore.Update() });
             }
             else if (action == "Sink")
             {
-                SettingsRepository.SinkChore.Update();
+                return new JsonResult(new { streak = SettingsRepository.SinkChore.Update() });
             }
             else if (action == "Workout")
             {
-                SettingsRepository.WorkoutChore.Update();
+                return new JsonResult(new { streak = SettingsRepository.WorkoutChore.Update() });
             }
 
             return null;

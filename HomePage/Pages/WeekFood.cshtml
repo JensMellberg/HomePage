@@ -37,10 +37,10 @@
                         <a href="CreateDayFood?@DateHelper.FormatDateForQueryString(dayFood.Day)">Lägg till mat</a>
                     }
                     else if (!Model.IsLoggedIn || Model.FoodRankings[DateHelper.ToKey(dayFood.Day)].Any(x => !string.IsNullOrEmpty(x.FoodId))) {
-                        <span>@dayFood.Food.Name</span>
+                        <span>@dayFood.CombinedName</span>
                     }
                     else {
-                        <a href="CreateDayFood?@DateHelper.FormatDateForQueryString(dayFood.Day)">@dayFood.Food.Name</a>
+                        <a href="CreateDayFood?@DateHelper.FormatDateForQueryString(dayFood.Day)">@dayFood.CombinedName</a>
                     }
                 </div>
                 @foreach (var ranking in Model.FoodRankings[DateHelper.ToKey(dayFood.Day)]) {
@@ -110,20 +110,21 @@
              return
          }
 
-        const ranker = StarRanker.create(r => submitRanking(date, person, r))
+        const ranker = StarRanker.create((r, n) => submitRanking(date, person, r, n))
         Alert.openDialogWithElement(ranker, [
             {text: 'Avbryt', action: () => {Popup.closePopup();}}
         ])
     }
 
-    function submitRanking(date, person, ranking) {
+    function submitRanking(date, person, ranking, note) {
          $.ajax({
             type: "POST",
             url: "/WeekFood",
             data: {
                 date: date,
                 person: person,
-                ranking: ranking
+                ranking: ranking,
+                note: note
             },
             success: (e) => window.location.reload()
         });

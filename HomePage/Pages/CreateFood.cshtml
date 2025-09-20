@@ -21,6 +21,10 @@
             <span>Finns i pärmen</span>
             <input type="checkbox" name="inFolder" checked="@Model.Food.InFolder" />
         </div>
+        <div class="input-wrapper">
+            <span>Tillbehör</span>
+            <input type="checkbox" name="isSideDish" checked="@Model.Food.IsSideDish" />
+        </div>
 
         <div class="input-wrapper">
             <span>Kategorier</span>
@@ -39,6 +43,10 @@
                 <button type="button" onclick="deleteFood()">Ta bort</button>
             }
             <button type="button" onclick="window.history.back();">Avbryt</button>
+            @if (Model.CanSplit)
+            {
+                <button type="button" onclick="window.location.href = 'SplitFood?foodId=@Model.Food.Key'">Bryt isär tillbehör</button>
+            }
         </div>
     </form>
 </div>
