@@ -9,6 +9,7 @@
     <div class="filters-wrapper">
         <input type="text" value="@Model.CurrentFilter" placeholder="filtrera..." onchange="updateTextFilter(this.value)" />
         <button type="button" onclick="showPicker()">Kategorier</button>
+        <button type="button" onclick="showIngredientPicker()">Ingredienser</button>
         <div class="input-wrapper">
             <span>Sortera på:</span>
             <select onchange="updateSorting(this.value)">
@@ -29,6 +30,7 @@
         <input type="hidden" value="@Model.CurrentSorting.ToString()" id="currentSorting" />
         <input type="hidden" value="@Model.CurrentFilter" id="currentfilter" />
         <input type="hidden" value="@Model.CurrentCategories" id="currentCategories" />
+        <input type="hidden" value="@Model.CurrentIngredients" id="currentIngredients" />
     </div>
    
     <div class="food-grid">
@@ -81,7 +83,10 @@
 
 <script src="~/js/homeButton.js" asp-append-version="true"></script>
 <script src="~/js/CategoryPicker.js" asp-append-version="true"></script>
+<script src="~/js/IngredientInstance.js" asp-append-version="true"></script>
+<script src="~/js/IngredientPicker.js" asp-append-version="true"></script>
 <script>
+    var possibleIngredients = IngredientInstance.decodePossibleIngredients('@Html.Raw(Model.PossibleIngredients)')
     window.addEventListener("beforeunload", function () {
         sessionStorage.setItem("scrollPos", window.scrollY);
     });
@@ -104,6 +109,13 @@
             },
             success: (e) => showPickerLocal(e)
         });
+    }
+
+    function showIngredientPicker() {
+        const ingredientElement = document.getElementById('ingredients')
+        const existing = document.getElementById('currentIngredients').value.split(',').map(x => ({ id: x }))
+        const categories = '@Html.Raw(string.Join(',', IngredientCategory.Categories.OrderBy(x => x)))'.split(',')
+        IngredientPicker.createPicker(categories, possibleIngredients, null, existing, x => updateIngredients(x))
     }
 
     function showPickerLocal(categories) {
@@ -135,10 +147,17 @@
         updateFilters()
     }
 
+    function updateIngredients(values) {
+        const stringValue = values.map(x => x.id).join(',');
+        document.querySelectorAll('#currentIngredients')[0].value = stringValue;
+        updateFilters()
+    }
+
     function updateFilters() {
         const categories = document.querySelectorAll('#currentCategories')[0].value
         const textFilter = document.querySelectorAll('#currentfilter')[0].value
         const sorting = document.querySelectorAll('#currentSorting')[0].value
-        window.location = '/AllFoods?filter=' + textFilter + '&categoryFilter=' + categories + '&sorting=' + sorting
+        const ingredients = document.querySelectorAll('#currentIngredients')[0].value
+        window.location = '/AllFoods?filter=' + textFilter + '&categoryFilter=' + categories + '&sorting=' + sorting + '&ingredientFilter=' + ingredients
     }
 </script>

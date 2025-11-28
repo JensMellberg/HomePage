@@ -8,6 +8,7 @@
     <form class="dayfood-form" method="post" id="theForm">
         <input type="hidden" name="foodId" value="@Model.Food.Key" />
         <input type="hidden" name="date" value="@Model.DateKey" />
+        <input type="hidden" name="ingredients" value="@Model.Food.ClientEncodedIngredients" id="ingredients" />
         <input type="hidden" name="delete" id="deleteHidden" value="" />
         <div class="input-wrapper">
             <span>Maträtt</span>
@@ -43,21 +44,55 @@
                 <button type="button" onclick="deleteFood()">Ta bort</button>
             }
             <button type="button" onclick="window.history.back();">Avbryt</button>
-            @if (Model.CanSplit)
-            {
-                <button type="button" onclick="window.location.href = 'SplitFood?foodId=@Model.Food.Key'">Bryt isär tillbehör</button>
-            }
+            <button type="button" onclick="showIngredientPicker()">Ingredienser</button>
         </div>
     </form>
 </div>
 
 <script src="~/js/StarRanker.js" asp-append-version="true"></script>
 <script src="~/js/CategoryPicker.js" asp-append-version="true"></script>
+<script src="~/js/IngredientPicker.js" asp-append-version="true"></script>
+<script src="~/js/IngredientInstance.js" asp-append-version="true"></script>
 <script>
     var cachedCategories = undefined;
+    var possibleIngredients = IngredientInstance.decodePossibleIngredients('@Html.Raw(Model.PossibleIngredients)')
+    var unitTypes = JSON.parse('@Html.Raw(Model.AllUnitValues)')
+
     function deleteFood() {
         $('#deleteHidden').val('true')
         document.getElementById('theForm').submit();
+    }
+
+    function decodeIngredients(value) {
+        if (!value) {
+            return []
+        }
+
+        const result = []
+        for (const ingString of value.split('¤')) {
+            const tokens = ingString.split('|')
+            result.push(({ id: tokens[0], amount: Number(tokens[1]), unit: tokens[2], category: tokens[3] }))
+        }
+
+        return result
+    }
+
+    function encodeIngredients(ingredients) {
+        return ingredients.map(x => x.id + '|' + x.amount + '|' + x.unit + '|' + x.category).join('¤')
+    }
+
+    function showIngredientPicker() {
+        const ingredientElement = document.getElementById('ingredients')
+        const encodedIngredients = ingredientElement.value
+        const decodedIngredients = decodeIngredients(encodedIngredients)
+        const categories = '@Html.Raw(string.Join(',', IngredientCategory.Categories.OrderBy(x => x)))'.split(',')
+        IngredientPicker.createPicker(categories, possibleIngredients, unitTypes, decodedIngredients, x => updateIngredients(x))
+    }
+
+    function updateIngredients(ingredients) {
+        const encodedIngredients = encodeIngredients(ingredients)
+        const ingredientElement = document.getElementById('ingredients')
+        ingredientElement.value = encodedIngredients
     }
 
     function showCategoryPicker(foodId) {

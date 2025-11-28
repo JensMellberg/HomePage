@@ -32,6 +32,11 @@ namespace HomePage
 
         public List<Food> SideDishes { get; set; }
 
+        [SaveProperty]
+        public double Portions { get; set; }
+
+        public double PortionMultiplier => Portions == 0 ? 1 : Portions;
+
         public void LoadSideDishes(Dictionary<string, Food> allFoods)
         {
             SideDishes = SideDishIds.Select(x => allFoods[x]).ToList();

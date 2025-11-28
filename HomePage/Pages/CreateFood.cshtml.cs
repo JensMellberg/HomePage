@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -12,6 +13,11 @@ namespace HomePage.Pages
         public bool IsNew { get; set; }
 
         public bool CanSplit { get; set; }
+
+        public string PossibleIngredients { get; set; }
+
+        public string AllUnitValues = JsonSerializer.Serialize(UnitTypes.GetAllUnitValues());
+
 
         public IActionResult OnGet(string foodId, string date)
         {
@@ -34,6 +40,8 @@ namespace HomePage.Pages
                 CanSplit = IsNew;
             }
 
+            PossibleIngredients = new IngredientRepository().ClientEncodedList();
+
             Food.LoadCategories([Food]);
             return Page();
         }
@@ -47,23 +55,15 @@ namespace HomePage.Pages
             else if (!string.IsNullOrEmpty(foodName))
             {
                 var categoriesList = categories?.Split(',').ToList();
-                /*var ingredientsList = ingredients?.Split(',').Select(x => x.Split(':')) ?? [];
-                var actualIngredientsList = new List<string>();
-                foreach (var pair in ingredientsList)
-                {
-                    var ingredient = pair[0].Trim();
-                    var amount = pair[1].Trim();
-                    actualIngredientsList.Add(ingredient);
-                    actualIngredientsList.Add(amount);
-                }*/
-                var food = new Food 
+                var parsedIngredients = ingredients?.Split('¤')?.ToList();
+                var food = new Food
                 { 
                     Key = foodId,
                     Name = foodName,
                     RecipeUrl = recipeUrl,
                     CategoriyIds = categoriesList,
                     Notes = notes,
-                    /*Ingredients = actualIngredientsList*/
+                    Ingredients = parsedIngredients,
                     InFolder = inFolder == "on",
                     IsSideDish = isSideDish == "on"
                 };

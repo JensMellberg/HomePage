@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Veckans mat";
 }
-<button type="button" onclick="makeShoppingList()" style="position: absolute; top: 5px; right: 5px; display: none;">Skapa handlingslista</button>
+<button type="button" onclick="showShoppingList()" style="position: absolute; top: 5px; right: 5px;">Skapa handlingslista</button>
 <div class="page-wrapper mainscreen">
     <div class="goal-wrapper">
         @foreach (var goal in Model.WeekGoals.OrderBy(x => x.IsBad)) {
@@ -59,44 +59,22 @@
 <script src="~/js/homeButton.js" asp-append-version="true"></script>
 <script src="~/js/StarRanker.js" asp-append-version="true"></script>
 <script>
-    function makeShoppingList() {
-        $.ajax({
-            type: "POST",
-            url: "/Endpoint",
-            data: {
-                action: "shoppingList"
-            },
-            success: (e) => {
-            const createNotes = () => {
-                const noteWrapper = document.createElement('div');
-                const noteElement = document.createElement('span')
-                const listText = e.list
-                noteElement.innerText = listText
-                noteWrapper.className = 'note-wrapper'
-                noteWrapper.appendChild(noteElement)
+    function showShoppingList() {
+        const wrapper = document.createElement('div')
+        wrapper.className = 'ingredient-picker-inner'
+        const dateFrom = document.createElement('input')
+        dateFrom.type = 'date'
+        dateFrom.value = '@Html.Raw(Model.ShopListFrom)'
+        wrapper.appendChild(dateFrom)
+        const dateTo = document.createElement('input')
+        dateTo.type = 'date'
+        dateTo.value = '@Html.Raw(Model.ShopListTo)'
+        wrapper.appendChild(dateTo)
 
-                const copyButton = document.createElement('button');
-                copyButton.type = 'button';
-                copyButton.style.top = '25px'
-                copyButton.style.position = 'absolute'
-                copyButton.innerText = 'Kopiera'
-                copyButton.onclick = (e) => {
-                    navigator.clipboard.writeText(listText).then(() => {
-                        alert("Kopierat!");
-                    }).catch(err => {
-                        alert("Kunde inte kopiera");
-                    });
-
-                    e.stopPropagation()
-                    return false
-                }
-                noteWrapper.appendChild(copyButton);
-                return noteWrapper
-            }
-
-            Popup.putOnOverLay(createNotes(), true, () => { Popup.closePopup(); })
-            }
-        });
+        Alert.openDialogWithElement(wrapper, [
+            {text: 'Skapa lista', action: () => { window.location.href = 'CreateShoppingList?from=' + dateFrom.value + '&to=' + dateTo.value; }},
+            {text: 'Avbryt', action: () => {Popup.closePopup();}}
+        ])
     }
 
      function makeRanking(date, person) {

@@ -1,0 +1,78 @@
+﻿@page
+@model HomePage.Pages.CreateShoppingListModel
+@{
+	ViewData["Title"] = "Handlingslista";
+}
+
+<button type="button" onclick="copyShoppingList()">Kopiera</button>
+<button type="button" onclick="addToStorage()">Lägg till i skafferi</button>
+<button type="button" onclick="window.history.back();">Tillbaka</button>
+
+<input type="hidden" value="@Model.ShoppingList" id="shoppingList" />
+
+<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;" id="shoplist">
+</div>
+
+<script src="~/js/IngredientInstance.js" asp-append-version="true"></script>
+<script>
+        var possibleIngredients = IngredientInstance.decodePossibleIngredients('@Html.Raw(Model.PossibleIngredients)')
+        var unitTypes = JSON.parse('@Html.Raw(Model.AllUnitValues)')
+        var categories = '@Html.Raw(string.Join(',', IngredientCategory.Categories.OrderBy(x => x)))'.split(',')
+        var existing = JSON.parse('@Html.Raw(Model.IngredientsJson)')
+        var allRows = []
+        var wrapper = document.getElementById('shoplist')
+        for (const ingredient of existing) {
+            const rowWrapper = document.createElement('div')
+            rowWrapper.className = 'input-wrapper'
+
+            let instance = IngredientInstance.create(categories, possibleIngredients, unitTypes, ingredient.id, ingredient.amount, ingredient.unit, ingredient.category)
+            allRows.push(instance)
+            let elements = instance.createElements(false)
+            let span = document.createElement('span')
+            let ingredientActual = possibleIngredients.find(x => x.id == elements.dropdown.value)
+            span.innerText = ingredientActual.name
+            rowWrapper.appendChild(span)
+            rowWrapper.appendChild(elements.amountBox)
+            rowWrapper.appendChild(elements.unitDropdown)
+            rowWrapper.appendChild(elements.deleteButton)
+            elements.deleteButton.onclick = () => {
+                allRows = allRows.filter(x => x !== instance)
+                rowWrapper.remove()
+                return false
+            }
+
+            wrapper.appendChild(rowWrapper)
+        }
+
+    function copyShoppingList() {
+        const shoppingListText = document.getElementById('shoppingList').value
+        const textarea = document.createElement('textarea');
+        textarea.value = shoppingListText;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = 0;
+        document.body.appendChild(textarea);
+        textarea.select();
+
+        try {
+            document.execCommand('copy');
+            alert('Kopierat!');
+        } catch (err) {
+            console.error('Fallback copy failed:', err);
+        }
+
+        document.body.removeChild(textarea);
+    }
+
+    function addToStorage() {
+           const ingreds = allRows.map(x => x.getIngredient())
+             $.ajax({
+                type: "POST",
+                url: "/CreateShoppingList",
+                data: {
+                    ingredients: ingreds,
+                    action: 'addToStorage'
+                },
+                success: (e) =>  { alert('Tillagt i skafferi!'); $('.input-wrapper').remove() }
+            });
+    }
+</script>

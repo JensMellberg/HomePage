@@ -1,0 +1,34 @@
+﻿@page
+@model HomePage.Pages.IngredientsModel
+@{
+    ViewData["Title"] = "Ingredienser";
+}
+
+<button type="button" onclick="window.location.href = 'FoodStorage'" style="position: absolute; top: 5px; right: 5px;">Till skafferi</button>
+<div class="page-wrapper">
+    <a href="CreateIngredient">Ny ingrediens</a>
+    <div class="food-grid">
+        @foreach (var ingredient in Model.Ingredients)
+        {
+            <div class="food-row">
+                <div class="food-grid-cell">
+                    <a href="CreateIngredient?Id=@ingredient.Key">
+                        @ingredient.Name
+                    </a>
+                </div>
+                <div class="food-grid-cell">
+                    <span>
+                        @ingredient.UnitType
+                    </span>
+                </div>
+                <div class="food-grid-cell">
+                    <span>
+                        @ingredient.CategoryId
+                    </span>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>

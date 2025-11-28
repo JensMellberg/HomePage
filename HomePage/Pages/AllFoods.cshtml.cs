@@ -33,7 +33,11 @@ namespace HomePage.Pages
 
         public string CurrentFilter { get; set; }
 
-        public void OnGet(string filter, string categoryFilter, string sorting)
+        public string CurrentIngredients { get; set; }
+
+        public string PossibleIngredients { get; set; }
+
+        public void OnGet(string filter, string categoryFilter, string sorting, string ingredientFilter)
         {
             this.TryLogIn();
             CurrentFilter = filter;
@@ -44,12 +48,17 @@ namespace HomePage.Pages
 
             var Regex = string.IsNullOrEmpty(filter) ? null : new Regex("^.*" + filter + ".*$", RegexOptions.IgnoreCase);
             var categoriesList = categoryFilter?.Split(',').ToHashSet();
+            var ingredientsList = ingredientFilter?.Split(',').ToHashSet();
             var foodValues = new FoodRepository().GetValues().Select(x => x.Value);
+            var ingredientsRepository = new IngredientRepository();
+            PossibleIngredients = ingredientsRepository.ClientEncodedList();
+            var allIngredients = ingredientsRepository.GetValues();
 
             var allFoods = foodValues
                 .Where(x => !x.IsSideDish)
                 .Where(x => Regex?.IsMatch(x.Name) ?? true)
-                .Where(x => categoriesList == null || categoriesList.All(c => x.CategoriyIds.Contains(c)));
+                .Where(x => categoriesList == null || categoriesList.All(c => x.CategoriyIds.Contains(c)))
+                .Where(x => ingredientsList == null || FoodContainsAllIngredients(x, ingredientsList));
 
             SideDishes = foodValues
                 .Where(x => x.IsSideDish)
@@ -57,6 +66,7 @@ namespace HomePage.Pages
                 .ToList();
 
             CurrentCategories = categoryFilter ?? "";
+            CurrentIngredients = ingredientFilter ?? "";
             var allRankings = new FoodRankingRepository().GetValues().Values;
             var foodKeys = new Dictionary<Food, string>();
             var rankingsKeys = new Dictionary<Food, double>();
@@ -97,6 +107,12 @@ namespace HomePage.Pages
             }
 
             string GetRankingString(string person, double average) => person + ": " + (average == 0 ? "-" : average.ToString());
+
+            bool FoodContainsAllIngredients(Food food, HashSet<string> ingredients)
+            {
+                var parsedIngredients = food.GetParsedIngredientIds().ToHashSet();
+                return ingredients.All(parsedIngredients.Contains);
+            }
         }
     }
 }

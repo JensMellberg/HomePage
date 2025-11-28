@@ -1,0 +1,82 @@
+﻿@page
+@model HomePage.Pages.CreateIngredientModel
+@{
+    ViewData["Title"] = "Skapa ingrediens";
+}
+
+<div class="page-wrapper mainscreen">
+    <form class="dayfood-form" method="post">
+        <input type="hidden" name="id" value="@Model.Ingredient.Key" />
+        <div class="input-wrapper">
+            <span>Namn</span>
+            <input type="text" name="name" required value="@Model.Ingredient.Name" />
+        </div>
+        <div class="input-wrapper">
+            <span>Enhet</span>
+            <select name="unitType" style="max-width: 80vw" id="unitType" onchange='updateUnits()' required>
+                @foreach (var unitType in UnitTypes.GetUnitTypes)
+                {
+                    if (@Model.Ingredient.UnitType == unitType)
+                    {
+                        <option value="@unitType" selected> @unitType</option>
+                    }
+                    else
+                    {
+                        <option value="@unitType"> @unitType</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="input-wrapper">
+            <span>Kategori</span>
+            <select name="category" style="max-width: 80vw" id="category" required>
+                @foreach (var category in IngredientCategory.Categories.OrderBy(x => x))
+                {
+                    if (@Model.Ingredient.CategoryId == category)
+                    {
+                        <option value="@category" selected> @category</option>
+                    }
+                    else
+                    {
+                        <option value="@category"> @category</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="input-wrapper">
+            <span>Basvara</span>
+            <input type="checkbox" checked="@Model.Ingredient.IsStandard" name="isstandard"/>
+        </div>
+        <div class="input-wrapper">
+            <span>Standardmått</span>
+            <input type="number" step="any" style="max-width: 40px" value="@Model.Ingredient.StandardAmount" name="standardamount"/>
+            <select name="standardunit" style="max-width: 80vw" id="unitdropdown" required></select>
+        </div>
+
+        <div class="button-wrapper">
+            <input type="submit" value="Spara" />
+            <button type="button" onclick="window.location.href = '/Ingredients';">Avbryt</button>
+        </div>
+    </form>
+</div>
+<script>
+    var unitTypes = JSON.parse('@Html.Raw(Model.AllUnitValues)')
+    var unitTypeDropdown = document.getElementById('unitType')
+    var unitDropdown = document.getElementById('unitdropdown')
+    updateUnits('@Model.Ingredient.StandardUnit')
+
+    function updateUnits(defaultValue) {
+        const chosenUnitType = unitTypeDropdown.value
+        unitDropdown.innerHTML = ''
+        for (let unit of unitTypes[chosenUnitType]) {
+            const option = document.createElement('option')
+            option.value = unit
+            option.text = unit
+            if (unit == defaultValue) {
+                option.selected = true
+            }
+
+            unitDropdown.appendChild(option)
+        }
+    }
+</script>

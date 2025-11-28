@@ -55,7 +55,7 @@
         public void TryResetStreak(List<string> exemptPersons)
         {
             var settings = new SettingsRepository().Get();
-            if (DateHelper.DateNow.Date > GetDateToShow(settings))
+            if (DateHelper.AdjustedDateNow.Date > GetDateToShow(settings))
             {
                 var nextPerson = GetNextPerson(settings);
                 if (!exemptPersons.Contains(nextPerson))
@@ -80,7 +80,7 @@
         public string ChorePerson()
         {
             var settings = new SettingsRepository().Get();
-            if (DateHelper.DateNow >= GetDateToShow(settings))
+            if (DateHelper.AdjustedDateNow >= GetDateToShow(settings))
             {
                 return GetNextPerson(settings);
             }
@@ -121,7 +121,7 @@
                 streak = IncreaseStreak(settings, Person.Jens.Name);
             }
 
-            SetLastUpdated(settings, DateHelper.ToKey(DateHelper.DateNow));
+            SetLastUpdated(settings, DateHelper.ToKey(DateHelper.AdjustedDateNow));
             repo.Save(settings);
             return streak;
         }

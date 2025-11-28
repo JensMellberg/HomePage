@@ -27,6 +27,8 @@
             <a href="/Pictures">Bilder</a>
             <div class="divider"></div>
             <a href="/WordMixStats">Ordmix</a>
+            <div class="divider"></div>
+            <a href="/FoodStorage">Skafferi</a>
         </div>
     </div>
 </div>
@@ -54,14 +56,14 @@
 
     @if (Model.TodayFood != null) {
         <div class="input-wrapper">
-            <span style="font-size: 18px">Mat: @Model.TodayFood.Name</span>
-            @if (!string.IsNullOrEmpty(Model.TodayFood.RecipeUrl))
+            <span style="font-size: 18px">Mat: @Model.TodayFood.CombinedName</span>
+            @if (!string.IsNullOrEmpty(Model.TodayFood.Food.RecipeUrl))
             {
-                <div class="recipelinkplaceholder" linkurl="@Model.TodayFood.RecipeUrl"></div>
+                <div class="recipelinkplaceholder" linkurl="@Model.TodayFood.Food.RecipeUrl"></div>
             }
-            @if (!string.IsNullOrEmpty(Model.TodayFood.Notes))
+            @if (!string.IsNullOrEmpty(Model.TodayFood.Food.Notes))
             {
-                <div class="notesplaceholder" notes="@Model.TodayFood.Notes"></div>
+                <div class="notesplaceholder" notes="@Model.TodayFood.Food.Notes"></div>
             }
         </div>
     }
@@ -114,6 +116,7 @@
 <script src="~/js/Streak.js" asp-append-version="true"></script>
 <script>
     var currentDayNbr = new Date().getDate()
+    var crntHourNbr = new Date().getHours() % 24
     document.body.style.backgroundColor = 'rgb(20 12 69)'
     setTimeout(() => updateImage(), @Model.MilliSecondsUntilNextPicture)
     updateClock()
@@ -149,6 +152,11 @@
                 },
                 url: "/Endpoint",
                 success: (data) => {
+                    if (data.needLogin) {
+                        window.location.href = 'Login'
+                        return
+                    }
+
                     updateStreakIcon(streakIcon, data.streak)
                     choreIcon.classList.add('done-today')
                     let clientX = e.clientX
@@ -195,7 +203,7 @@
     }
 
     function updateImage() {
-        if (new Date().getDate() !== currentDayNbr) {
+        if (new Date().getDate() !== currentDayNbr || crntHourNbr < 4 && new Date().getHours() > 3) {
             window.location.reload()
             return;
         }

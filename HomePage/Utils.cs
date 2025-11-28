@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.Extensions;
+﻿using System.Globalization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage
@@ -31,6 +32,10 @@ namespace HomePage
             totalAverage = Math.Round(totalAverage, 1);
             int LengthButNotZero(int length) => length == 0 ? 1 : length;
         }
+
+        public static double ToDouble(this string s) => double.Parse(s.Replace(',', '.'), CultureInfo.InvariantCulture);
+
+        public static string GetTextOrNothing(double text) => text == 0 ? "-" : text.ToString();
 
         public static bool ShouldRedirectToLogin(this PageModel model)
         {

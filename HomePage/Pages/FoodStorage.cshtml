@@ -1,0 +1,40 @@
+﻿@page
+@model HomePage.Pages.FoodStorageModel
+@{
+    ViewData["Title"] = "Skafferi";
+}
+
+<div class="page-wrapper" style="gap: 12px">
+    <a href="Ingredients">Ingredienser</a>
+    <a href="CreateFoodStorage">Lägg till produkt</a>
+        @foreach (var group in Model.CurrentIngredients.GroupBy(x => x.Ingredient.CategoryId).OrderBy(x => x.First().SortOrder))
+        {
+            <div class="spending-group" style="background-color:#8bf5eb">
+                <div class="spending-group-header">
+                    <span class="spending-group-title">@group.First().Ingredient.Category.Name </span>
+                </div>
+
+                @foreach (var item in group.OrderBy(x => x.Ingredient.Name))
+                {
+                    <div class="spending-entry-wrapper" style="border: none; gap: 8px;">
+                        <a href="CreateFoodStorage?id=@item.IngredientId" class="spending-group-entry">@item.Ingredient.Name @item.GetStaticDisplayString()</a>
+                        <button type="button" onclick="deleteIngredient('@item.IngredientId', this)">X</button>
+                    </div>
+                }
+            </div>
+        }
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>
+<script>
+    function deleteIngredient(id, button) {
+         $.ajax({
+            type: "POST",
+            url: "/FoodStorage",
+            data: {
+                deleteId: id
+            },
+            success: (e) => $(button).closest('.spending-entry-wrapper').remove()
+        });
+    }
+</script>

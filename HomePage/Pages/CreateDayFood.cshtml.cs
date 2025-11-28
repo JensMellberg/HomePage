@@ -56,10 +56,11 @@ namespace HomePage.Pages
             return Page();
         }
 
-        public IActionResult OnPost(string day, string foodId, string delete, string sideDishIds, string isVego)
+        public IActionResult OnPost(string day, string foodId, string delete, string sideDishIds, string isVego, string portions)
         {
             var date = DateHelper.FromKey(day);
-            var dayFood = new DayFood { Day = date, FoodId = foodId, SideDishIds = (sideDishIds ?? "").Split(',').ToList(), IsVego = isVego == "on" };
+            var portionsDouble = double.Parse(portions.Replace('.', ','));
+            var dayFood = new DayFood { Day = date, FoodId = foodId, SideDishIds = (sideDishIds ?? "").Split(',').ToList(), IsVego = isVego == "on", Portions = portionsDouble };
 
             if (!string.IsNullOrEmpty(delete) && this.CanBeDeleted(day))
             {

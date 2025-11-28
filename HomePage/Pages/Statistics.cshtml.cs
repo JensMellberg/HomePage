@@ -10,7 +10,8 @@ namespace HomePage.Pages
         Category,
         AverageRanking,
         SpendingPerGroup,
-        EatenPerDay
+        EatenPerDay,
+        RankingPerCategory
     }
 
     public class GridDataCell
@@ -27,7 +28,8 @@ namespace HomePage.Pages
             (StatisticType.Category, "Kategorier ätna"),
             (StatisticType.AverageRanking, "Snittbetyg"),
             (StatisticType.SpendingPerGroup, "Spenderande"),
-            (StatisticType.EatenPerDay, "Maträtt per dag")
+            (StatisticType.EatenPerDay, "Maträtt per dag"),
+            (StatisticType.RankingPerCategory, "Betyg per kategori")
         ];
 
         public List<GridDataCell[]> GridData { get; set; }
@@ -125,6 +127,45 @@ namespace HomePage.Pages
                     [new() { Text = "Anna"}, new() { Text = annaAverage.ToString()}],
                     [new() { Text = "Totalt"}, new() { Text = totalAverage.ToString()}],
                 ];
+            }
+            else if (CurrentType == StatisticType.RankingPerCategory)
+            {
+                var allCategories = new CategoryRepository().GetValues();
+                var categoryRankings = allCategories.ToDictionary(x => x.Key, x => new List<FoodRanking>());
+                var rankings = new FoodRankingRepository().GetValues()
+                    .Where(x => DateHelper.FromKey(x.Value.Day) >= from)
+                    .Where(x => DateHelper.FromKey(x.Value.Day) <= to);
+
+                foreach (var v in relevantFoods)
+                {
+                    var dayRankings = rankings.Where(x => DateHelper.FromKey(x.Value.Day) == v.Day);
+                    v.Food = allFoods[v.FoodId];
+                    v.LoadSideDishes(allFoods);
+                    var categories = v.GetCategories(allCategories);
+                    foreach (var c in categories)
+                    {
+                        categoryRankings[c.Key].AddRange(dayRankings.Select(x => x.Value));
+                    }
+                }
+
+                GridData = [];
+                foreach (var c in categoryRankings)
+                {
+                    Utils.CalculateAverages(c.Value, out var jensAverage, out var annaAverage, out var totalAverage);
+                    GridData.Add([
+                        new() { Text = allCategories[c.Key].Name },
+                        new() { Text = "jens: " + Utils.GetTextOrNothing(jensAverage) },
+                        new() { Text = "anna: " + Utils.GetTextOrNothing(annaAverage) },
+                        new() { Text = "totalt: " + Utils.GetTextOrNothing(totalAverage) }]);
+                }
+
+                GridData = GridData.OrderByDescending(x => GetValueFromCell(x[3])).ToList();
+
+                double GetValueFromCell(GridDataCell cell)
+                {
+                    var val = cell.Text.Substring("totalt: ".Length);
+                    return val == "-" ? 0 : double.Parse(val);
+                }
             }
             else if (CurrentType == StatisticType.SpendingPerGroup)
             {

@@ -4,6 +4,20 @@
     {
         public static DateTime DateNow => DateTime.Now;
 
+        public static DateTime AdjustedDateNow
+        {
+            get
+            {
+                var datenow = DateNow;
+                if (datenow.Hour < 4)
+                {
+                    return datenow.AddDays(-1);
+                }
+
+                return datenow;
+            }
+        }
+
         public static string FormatDateForQueryString(DateTime date) => $"year={date.Year}&month={date.Month}&day={date.Day}";
 
         public static string ToKey(DateTime date) => $"{date.Year}-{date.Month}-{date.Day}";

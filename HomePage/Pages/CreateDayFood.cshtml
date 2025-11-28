@@ -53,6 +53,10 @@
             <span>Vegetarisk</span>
             <input type="checkbox" name="isVego" checked="@Model.DayFood.IsVego" />
         </div>
+        <div class="input-wrapper">
+            <span>Portioner</span>
+            <input type="number" step="any" name="portions" value="@Model.DayFood.PortionMultiplier.ToString().Replace(',', '.')" />
+        </div>
 
         <div class="button-wrapper">
             <input type="submit" value="Spara mat" />
@@ -96,7 +100,7 @@
 
         const deleteButton = document.createElement('button')
         deleteButton.innerText = 'X'
-        deleteButton.click = e => deleteSideDish(e.target)
+        deleteButton.onclick = e => deleteSideDish(e.target)
         deleteButton.classList = 'recipe-button'
         deleteButton.type = 'button'
         wrapper.appendChild(deleteButton)
@@ -106,6 +110,7 @@
     }
 
     function deleteSideDish(e) {
+        debugger
         e.parentElement.remove()
         updateSideDishHidden()
     }

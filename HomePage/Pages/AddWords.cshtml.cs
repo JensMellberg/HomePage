@@ -56,7 +56,8 @@ namespace HomePage.Pages
                 if (existing?.AnnaApproved == false && loggedInPerson == Person.Anna.Name)
                 {
                     existing.AnnaApproved = true;
-                } else if (existing?.JensApproved == false && loggedInPerson == Person.Jens.Name)
+                }
+                else if (existing?.JensApproved == false && loggedInPerson == Person.Jens.Name)
                 {
                     existing.JensApproved = true;
                 }

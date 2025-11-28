@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 
 namespace HomePage
 {
@@ -38,30 +39,22 @@ namespace HomePage
             HasHistory = dayFoods.Any(x => x.FoodId == Key || x.SideDishIds.Contains(Key));
         }
 
-        public string ParsedIngredients
+        public string ClientEncodedIngredients => string.Join('¤', Ingredients);
+
+        public List<IngredientInstance> GetParsedIngredients(Dictionary<string, Ingredient> allIngredients)
         {
-            get
+            var result = new List<IngredientInstance>();
+            foreach (var line in Ingredients)
             {
-                if (Ingredients?.Any() == true)
-                {
-                    var sb = new StringBuilder();
-                    for (var i = 0; i < Ingredients.Count; i+=2)
-                    {
-                        if (i > 0)
-                        {
-                            sb.Append(",");
-                        }
-                        sb.Append(Ingredients[i]);
-                        sb.Append(":");
-                        sb.Append(Ingredients[i + 1]);
-                    }
-
-                    return sb.ToString();
-                }
-
-                return string.Empty;
+                var tokens = line.Split('|');
+                var instance = IngredientInstance.Create(allIngredients, tokens[0], tokens[1].ToDouble(), tokens[2]);
+                result.Add(instance);
             }
+
+            return result;
         }
+
+        public IEnumerable<string> GetParsedIngredientIds() => Ingredients.Select(x => x.Split('|')[0]);
 
         public static void LoadCategories(IEnumerable<Food> food)
         {

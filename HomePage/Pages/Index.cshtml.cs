@@ -40,7 +40,7 @@ namespace HomePage.Pages
 
         public string AnniverseryString { get; set; }
 
-        public Food? TodayFood { get; set; }
+        public DayFood? TodayFood { get; set; }
 
         public List<PersonIcon> JensIcons { get; set; } = [];
 
@@ -120,9 +120,12 @@ namespace HomePage.Pages
             new SettingsRepository().PerformBackupAsync(false);
             var dayFoods = new DayFoodRepository().GetValues();
             dayFoods.TryGetValue(DateHelper.ToKey(today), out var todaysFood);
+            var allFoods = new FoodRepository().GetValues();
             if (!string.IsNullOrEmpty(todaysFood?.FoodId))
             {
-                TodayFood = new FoodRepository().TryGetValue(todaysFood.FoodId);
+                todaysFood.Food = allFoods[todaysFood.FoodId];
+                todaysFood?.LoadSideDishes(allFoods);
+                TodayFood = todaysFood;
             }
 
             var nextWeekDays = new List<string>();

@@ -4,9 +4,9 @@
     {
         public required string Name { get; set; }
 
-        public static Person Jens = new Person { Name = "Jens"};
+        public static Person Jens = new() { Name = "Jens" };
 
-        public static Person Anna = new Person { Name = "Anna" };
+        public static Person Anna = new() { Name = "Anna" };
 
         public static string HtmlColorFromPerson(string person) => person switch
         {

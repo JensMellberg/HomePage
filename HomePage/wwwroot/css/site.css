@@ -794,3 +794,17 @@ textarea {
     overflow: auto;
     height: calc(100vh - 124px);
 }
+
+.ingredient-picker-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ingredient-picker-inner-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    max-height: 40vh;
+}

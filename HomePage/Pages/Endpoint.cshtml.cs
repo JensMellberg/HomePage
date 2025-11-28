@@ -16,7 +16,7 @@ namespace HomePage.Pages
 
         public ActionResult OnPost(string action, string transactions, string itemKey, string groupId, string movieSearch)
         {
-            if (action == "shoppingList")
+            /*if (action == "shoppingList")
             {
                 var today = DateTime.Now.Date;
                 var foodRepo = new FoodRepository();
@@ -78,7 +78,7 @@ namespace HomePage.Pages
                 }
 
                 return new JsonResult(new { list = string.Join('\n', allIngredients.Select(x => x.Key + ": " + x.Value)) });
-            }
+            }*/
 
             if (action == "MovieSearch")
             {
@@ -159,7 +159,7 @@ namespace HomePage.Pages
 
             if (this.ShouldRedirectToLogin())
             {
-                return new RedirectResult("/Login");
+                return new JsonResult(new { needLogin = true });
             }
 
             if (action == "Flower")

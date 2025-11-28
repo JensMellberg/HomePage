@@ -1,0 +1,37 @@
+﻿@page
+@model HomePage.Pages.CreateFoodStorageModel
+@{
+    ViewData["Title"] = "Skapa skafferiprodukt";
+}
+
+<div class="page-wrapper mainscreen">
+    <form class="dayfood-form" method="post">
+        <div id="wrapper" class="input-wrapper">
+        </div>
+        
+        <div class="button-wrapper">
+            <input type="submit" value="Spara" />
+            <button type="button" onclick="window.location.href = '/FoodStorage';">Avbryt</button>
+        </div>
+    </form>
+</div>
+
+<script src="~/js/IngredientInstance.js" asp-append-version="true"></script>
+<script>
+    var possibleIngredients = IngredientInstance.decodePossibleIngredients('@Html.Raw(Model.PossibleIngredients)')
+    var unitTypes = JSON.parse('@Html.Raw(Model.AllUnitValues)')
+    var ingredientId = '@Html.Raw(Model.Ingredient.IngredientId)'
+    var amount = @Model.DisplayValues.amount.ToString().Replace(',', '.')
+    var unit = '@Html.Raw(Model.DisplayValues.unit)'
+    var category = '@Html.Raw(Model.Ingredient.Ingredient?.CategoryId)'
+    var categories = '@Html.Raw(string.Join(',', IngredientCategory.Categories.OrderBy(x => x)))'.split(',')
+    var instance = IngredientInstance.create(categories, possibleIngredients, unitTypes, ingredientId, amount, unit, category)
+    var elements = instance.createElements(true)
+    var wrapper = document.getElementById('wrapper')
+    wrapper.appendChild(elements.searchBox)
+    wrapper.appendChild(elements.categoryDropdown)
+    wrapper.appendChild(elements.dropdown)
+    wrapper.appendChild(elements.amountBox)
+    wrapper.appendChild(elements.unitDropdown)
+ 
+</script>

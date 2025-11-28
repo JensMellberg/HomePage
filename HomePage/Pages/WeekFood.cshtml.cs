@@ -25,6 +25,10 @@ namespace HomePage.Pages
 
         public List<WeekGoals> WeekGoals { get; set; } = [];
 
+        public string ShopListFrom { get; set; }
+
+        public string ShopListTo { get; set; }
+
         public IActionResult OnGet(int year, int month, int day)
         {
             this.TryLogIn();
@@ -79,6 +83,13 @@ namespace HomePage.Pages
             }
 
             WeekGoals = weekGoalsPerCategoryId.Values.ToList();
+
+            var today = DateHelper.DateNow;
+
+            var shopListFrom = today > date && (today - date).Days < 7 ? today : date;
+            ShopListFrom = DateHelper.KeyWithZerosFromKey(DateHelper.ToKey(shopListFrom));
+            ShopListTo = DateHelper.KeyWithZerosFromKey(DateHelper.ToKey(shopListFrom.AddDays(7)));
+
             return Page();
         }
 
@@ -89,9 +100,43 @@ namespace HomePage.Pages
                 return new OkResult();
             }
 
-            var foodId = new DayFoodRepository().TryGetValue(date).FoodId;
-            var foodRanking = new FoodRanking { Day = date, Person = person, Ranking = ranking, FoodId = foodId, Note = note };
-            new FoodRankingRepository().SaveValue(foodRanking);
+            var dayFood = new DayFoodRepository().TryGetValue(date);
+            var foodRanking = new FoodRanking { Day = date, Person = person, Ranking = ranking, FoodId = dayFood.FoodId, Note = note };
+            var foodRankingRepo = new FoodRankingRepository();
+            var existsOnDay = foodRankingRepo.GetValues().Values.Any(x => x.Day == date);
+            if (!existsOnDay)
+            {
+                var allFoods = new FoodRepository().GetValues();
+                var allIngredients = new IngredientRepository().GetValues();
+                dayFood.LoadSideDishes(allFoods);
+                dayFood.Food = allFoods[dayFood.FoodId];
+                var ingredientsLost = dayFood.Food.GetParsedIngredients(allIngredients);
+                foreach (var ingrs in dayFood.SideDishes.SelectMany(x => x.GetParsedIngredients(allIngredients)))
+                {
+                    ingredientsLost.Add(ingrs);
+                }
+
+                var storageRepo = new FoodStorageRepository();
+                var storageItems = storageRepo.GetValues().Values.Select(x => x.ToIngredientInstance(allIngredients)).ToDictionary(x => x.IngredientId, x => x);
+                foreach (var ingr in ingredientsLost)
+                {
+                    if (storageItems.TryGetValue(ingr.IngredientId, out var storageItem))
+                    {
+                        ingr.MultiplyAmount(dayFood.PortionMultiplier);
+                        storageItem.Subtract(ingr);
+                    }
+                }
+
+                var itemsToStore = storageItems.Values.Where(x => x.IsNonZero).Select(x => new FoodStorageItem
+                {
+                    IngredientId = x.IngredientId,
+                    Amount = x.Amount.Amount
+                });
+
+                storageRepo.SaveValues(itemsToStore.ToDictionary(x => x.IngredientId, x => x));
+            }
+
+            foodRankingRepo.SaveValue(foodRanking);
             return new OkResult();
         }
     }
