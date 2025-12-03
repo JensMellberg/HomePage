@@ -1,0 +1,14 @@
+{
+  "DetailedErrors": true,
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=HomePage;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True;"
+  },
+  "BackupFolderPath": "<FOLDER_PATH>",
+  "BackupSqlFolderPath": "<ALTERNATIVE_PATH_FROM_SQL_SCRIPT>"
+}
