@@ -1,17 +1,20 @@
 using System.Text;
+using HomePage.Data;
+using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class CurrentWordMixModel : PageModel
+    [RequireAdmin]
+    public class CurrentWordMixModel(CurrentWordMixRepository currentWordMixRepository, 
+        WordMixResultRepository wordMixResultRepository,
+        AppDbContext dbContext, 
+        SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public string BoardString { get; set; }
 
         public string AvailableLetters { get; set; }
-
-        public string LoggedInPerson { get; set; }
 
         public int CurrentBest { get; set; }
 
@@ -21,12 +24,6 @@ namespace HomePage.Pages
 
         public IActionResult OnGet(string board)
         {
-            this.TryLogIn();
-            if (this.ShouldRedirectToLogin())
-            {
-                return new RedirectResult("/Login");
-            }
-
             if (!string.IsNullOrEmpty(board))
             {
                 TempData["Board"] = board;
@@ -34,10 +31,9 @@ namespace HomePage.Pages
             }
 
             BoardString = TempData["Board"] as string ?? "";
-            LoggedInPerson = SignInRepository.LoggedInPerson(HttpContext.Session)?.Name!;
-            AvailableLetters = new CurrentWordMixRepository().GetCurrent().Letters.EncodeForClient();
-            CurrentBest = new WordMixResultRepository().TryGetValue(WordMixResult.MakeId(DateHelper.DateNow, LoggedInPerson))?.Score ?? 0;
-            ExtraWords = string.Join(",", new ExtraWordRepository().GetValues().Values.Select(x => x.Word.ToUpper().EncodeForClient()));
+            AvailableLetters = currentWordMixRepository.GetCurrent().Letters.EncodeForClient();
+            CurrentBest = wordMixResultRepository.GetForDateAndPerson(DateHelper.DateNow, LoggedInPerson!.Name)?.Score ?? 0;
+            ExtraWords = string.Join(",", dbContext.ExtraWord.Select(x => x.Word.ToUpper().EncodeForClient()));
             return Page();
         }
 
@@ -48,7 +44,7 @@ namespace HomePage.Pages
                 return new JsonResult(new { success = true });
             }
 
-            var loggedInPerson = SignInRepository.LoggedInPerson(HttpContext.Session)?.Name;
+            var loggedInPerson = LoggedInPerson?.Name;
             if (string.IsNullOrEmpty(loggedInPerson))
             {
                 return new BadRequestResult();
@@ -56,7 +52,7 @@ namespace HomePage.Pages
 
             if (!string.IsNullOrEmpty(letters))
             {
-                new WordMixResultRepository().UpdateResultWithValidation(loggedInPerson, letters, score);
+                wordMixResultRepository.UpdateResultWithValidation(loggedInPerson, letters, score);
             }
 
             return new JsonResult(new { success = true });

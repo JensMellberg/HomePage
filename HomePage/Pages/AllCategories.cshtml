@@ -7,12 +7,12 @@
 <div class="page-wrapper">
     <a href="Category">Ny kategori</a>
     <div class="food-grid">
-        @foreach (var food in Model.AllCategories)
+        @foreach (var category in Model.AllCategories)
         {
             <div class="food-row">
                 <div class="food-grid-cell">
-                    <a href="Category?categoryId=@food.Key">
-                        @food.Name
+                    <a href="Category?categoryId=@category.Key">
+                        @category.Name
                     </a>
                 </div>
             </div>

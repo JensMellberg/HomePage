@@ -1,11 +1,16 @@
 using System.Text.Json;
+using HomePage.Data;
+using HomePage.Model;
+using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class CreateFoodStorageModel : PageModel
+    [RequireAdmin]
+    public class CreateFoodStorageModel(AppDbContext dbContext, IngredientRepository ingredientRepository, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public IngredientInstance Ingredient { get; set; }
 
@@ -15,51 +20,43 @@ namespace HomePage.Pages
 
         public (string amount, string unit) DisplayValues;
 
-        public IActionResult OnGet(string id)
+        public IActionResult OnGet(Guid id)
         {
-            this.TryLogIn();
-            if (this.ShouldRedirectToLogin())
-            {
-                return new RedirectResult("/Login");
-            }
-
-            var repo = new FoodStorageRepository();
-            var usedIngredients = repo.GetValues().Values.Select(x => x.IngredientId).ToHashSet();
-            if (string.IsNullOrEmpty(id))
+            var usedIngredients = dbContext.FoodStorage.Select(x => x.IngredientId).ToHashSet();
+            if (id == Guid.Empty)
             {
                 Ingredient = new IngredientInstance();
             }
             else
             {
-                var existing = repo.TryGetValue(id) ?? throw new Exception();
-                Ingredient = existing.ToIngredientInstance(new IngredientRepository());
+                var existing = dbContext.FoodStorage.Include(x => x.Ingredient).Single(x => x.IngredientId == id);
+                Ingredient = existing.ToIngredientInstance();
                 usedIngredients.Remove(existing.IngredientId);
             }
             
-            PossibleIngredients = new IngredientRepository().ClientEncodedList(usedIngredients);
+            PossibleIngredients = ingredientRepository.ClientEncodedList(usedIngredients);
             DisplayValues = Ingredient.GetDisplayValues();
 
             return Page();
         }
 
-        public IActionResult OnPost(string ingredientId, string unit, string amount)
+        public IActionResult OnPost(Guid ingredientId, string unit, string amount)
         {
-            this.TryLogIn();
-            if (this.ShouldRedirectToLogin())
-            {
-                return new RedirectResult("/Login");
-            }
-
-            var ingredient = new IngredientRepository().TryGetValue(ingredientId);
+            var ingredient = dbContext.Ingredient.FirstOrDefault(x => x.Id == ingredientId);
             if (ingredient == null)
             {
                 return NotFound();
             }
 
-
             var foodStorageItem = FoodStorageItem.CreateFromIngredient(ingredient, amount, unit);
-            new FoodStorageRepository().SaveValue(foodStorageItem);
+            var existing = dbContext.FoodStorage.FirstOrDefault(x => x.IngredientId == ingredientId);
+            if (existing != null)
+            {
+                dbContext.FoodStorage.Remove(existing);
+            }
 
+            dbContext.FoodStorage.Add(foodStorageItem);
+            dbContext.SaveChanges();
             return Redirect($"/FoodStorage");
         }
     }

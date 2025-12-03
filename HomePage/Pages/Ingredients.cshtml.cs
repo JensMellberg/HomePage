@@ -1,15 +1,15 @@
-using Microsoft.AspNetCore.Mvc;
+using HomePage.Data;
+using HomePage.Model;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
-    public class IngredientsModel : PageModel
+    public class IngredientsModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public List<Ingredient> Ingredients { get; set; }
         public void OnGet()
         {
-            this.TryLogIn();
-            Ingredients = new IngredientRepository().GetValues().Values.OrderBy(x => x.CategoryId).ThenBy(x => x.Name).ToList();
+            Ingredients = dbContext.Ingredient.OrderBy(x => x.CategoryId).ThenBy(x => x.Name).ToList();
         }
     }
 }

@@ -1,30 +1,34 @@
-using Microsoft.AspNetCore.Mvc;
+using HomePage.Data;
+using HomePage.Model;
+using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomePage.Pages
 {
-    public class FoodHistoryModel : PageModel
+    public class FoodHistoryModel(AppDbContext dbContext, DayFoodRepository dayFoodRepository, SignInRepository signInRepository) : BasePage(signInRepository)
     {
+        public Food Food;
         public List<(DayFood dayFood, string jensRanking, string annaRanking, string jensNote, string annaNote)> HistoryList { get; set; } = [];
-        public void OnGet(string foodId)
+        public void OnGet(Guid foodId)
         {
-            var allFoods = new FoodRepository().GetValues();
-            var relevantDayFoods = new DayFoodRepository().GetValues().Values
-                .Where(x => x.FoodId == foodId || x.SideDishIds.Contains(foodId))
-                .OrderByDescending(x => x.Day);
+            var relevantDayFoods = dayFoodRepository.GetPopulatedDayFood()
+                .Where(x => x.FoodConnections.Any(x => x.FoodId == foodId))
+                .OrderByDescending(x => x.Date)
+                .ToList();
 
+            Food = relevantDayFoods.Count > 0 ? relevantDayFoods[0].MainFood : 
+                dbContext.Food.Include(x => x.FoodIngredients).ThenInclude(x => x.Ingredient).Include(x => x.Categories).AsSplitQuery().Single(x => x.Id == foodId);
 
-            var foodRankings = new FoodRankingRepository().GetValues();
+            var foodRankings = dbContext.FoodRanking.ToList();
             foreach (var history in relevantDayFoods)
             {
-                history.Food = allFoods[history.FoodId];
-                history.LoadSideDishes(allFoods);
                 HistoryList.Add((
                     history, 
-                    GetRanking(Person.Jens.Name, history.Day), 
-                    GetRanking(Person.Anna.Name, history.Day),
-                    GetRankingNote(Person.Jens.Name, history.Day),
-                    GetRankingNote(Person.Anna.Name, history.Day)
+                    GetRanking(Person.Jens.Name, history.Date), 
+                    GetRanking(Person.Anna.Name, history.Date),
+                    GetRankingNote(Person.Jens.Name, history.Date),
+                    GetRankingNote(Person.Anna.Name, history.Date)
                     ));
             }
 
@@ -32,22 +36,14 @@ namespace HomePage.Pages
 
             string GetRanking(string person, DateTime date)
             {
-                if (foodRankings.TryGetValue(FoodRanking.MakeId(date, person), out var ranking))
-                {
-                    return GetRankingString(person, ranking.RankingText);
-                }
-
-                return GetRankingString(person, "-");
+                var ranking = foodRankings.FirstOrDefault(x => x.Date == date && x.Person == person);
+                return GetRankingString(person, ranking?.RankingText ?? "-");
             }
 
             string GetRankingNote(string person, DateTime date)
             {
-                if (foodRankings.TryGetValue(FoodRanking.MakeId(date, person), out var ranking))
-                {
-                    return ranking.Note;
-                }
-
-                return "";
+                var ranking = foodRankings.FirstOrDefault(x => x.Date == date && x.Person == person);
+                return ranking?.Note ?? "";
             }
         }
     }

@@ -1,30 +1,29 @@
+using HomePage.Data;
+using HomePage.Model;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class ToDoModel : PageModel
+    public class ToDoModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public List<ToDoItem> ToDos { get; set; }
         public void OnGet()
         {
-            this.TryLogIn();
-            ToDos = new ToDoRepository().GetValues().Values.OrderBy(x => x.IsCompleted).ThenBy(x => x.Name).ToList();
+            //BigMigrator.Migrate6(dbContext);
+            ToDos = dbContext.ToDo.OrderBy(x => x.IsCompleted).ThenBy(x => x.Name).ToList();
         }
 
-        public IActionResult OnPost(string itemId)
+        public IActionResult OnPost(Guid itemId)
         {
-            if (this.ShouldRedirectToLogin())
+            if (!IsAdmin)
             {
                 return Redirect("/Login");
             }
 
-            var repo = new ToDoRepository();
-            var item = repo.TryGetValue(itemId);
+            var item = dbContext.ToDo.Single(x => x.Key == itemId);
             item.IsCompleted = true;
-            repo.SaveValue(item);
-
+            dbContext.SaveChanges();
             return Redirect("ToDo");
         }
     }

@@ -1,37 +1,44 @@
+using HomePage.Data;
+using HomePage.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class CreateMovieModel : PageModel
+    [RequireAdmin]
+    public class CreateMovieModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public Movie Movie { get; set; }
-        public IActionResult OnGet(string id)
+        public IActionResult OnGet(Guid id)
         {
-            this.TryLogIn();
-            if (this.ShouldRedirectToLogin())
-            {
-                return new RedirectResult("/Login");
-            }
-
-            if (string.IsNullOrEmpty(id))
+            if (id == Guid.Empty)
             {
                 Movie = new Movie();
             }
             else
             {
-                Movie = new MovieRepository().TryGetValue(id) ?? new Movie();
+                Movie = dbContext.Movie.Find(id) ?? new Movie();
             }
 
             return Page();
         }
 
-        public IActionResult OnPost(string id, string name, int year, string imageUrl)
+        public IActionResult OnPost(Guid id, string name, int year, string imageUrl)
         {
-            var movie = new Movie { Key = id, Name = name, Year = year, ImageUrl = imageUrl };
-            new MovieRepository().SaveValue(movie);
+            var existing = dbContext.Movie.Find(id);
+            if (existing != null)
+            {
+                existing.Name = name;
+                existing.Year = year;
+                existing.ImageUrl = imageUrl;
+            } else
+            {
+                var movie = new Movie { Id = id, Name = name, Year = year, ImageUrl = imageUrl };
+                dbContext.Movie.Add(movie);
+            }
 
+            dbContext.SaveChanges();
             return Redirect($"/Movies");
         }
     }

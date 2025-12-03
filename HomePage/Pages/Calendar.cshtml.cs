@@ -1,10 +1,11 @@
+using HomePage.Data;
+using HomePage.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace HomePage.Pages
 {
-    public class CalendarModel : PageModel
+    public class CalendarModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public string PrevWeekQs { get; set; }
 
@@ -14,7 +15,6 @@ namespace HomePage.Pages
 
         public IActionResult OnGet(int year, int month, int day)
         {
-            this.TryLogIn();
             var date = new DateTime(year, month, day);
             PrevWeekQs = DateHelper.FormatDateForQueryString(date.AddDays(-7));
             NextWeekQs = DateHelper.FormatDateForQueryString(date.AddDays(7));
@@ -23,17 +23,16 @@ namespace HomePage.Pages
                 return RedirectToPage("Error");
             }
 
-            var calendarAcitivities = new CalendarActivityRepository().GetValues().Values;
+            var calendarAcitivities = dbContext.CalendarActivity.ToList();
             for (int i = 0; i < 7; i++)
             {
                 var crntDate = date.AddDays(i);
-                var dateAsKey = DateHelper.ToKey(crntDate);
-                var activities = calendarAcitivities.Where(x => x.Date == dateAsKey || IsDifferentYear(x.Date, dateAsKey) && x.IsReoccuring).ToList();
+                var activities = calendarAcitivities.Where(x => x.CalendarDate == crntDate || IsDifferentYear(x.CalendarDate, crntDate) && x.IsReoccuring).ToList();
                 if (i == 0)
                 {
                     foreach (var possibleOverlap in calendarAcitivities)
                     {
-                        var dateTime = DateHelper.FromKey(possibleOverlap.Date);
+                        var dateTime = possibleOverlap.CalendarDate;
                         if (dateTime < date && dateTime.AddDays(possibleOverlap.DurationInDays) > date)
                         {
                             possibleOverlap.DurationInDays -= (date - dateTime).Days;
@@ -52,7 +51,7 @@ namespace HomePage.Pages
 
             return Page();
 
-            bool IsDifferentYear(string date1, string date2) => date1.Substring(4) == date2.Substring(4);
+            bool IsDifferentYear(DateTime date1, DateTime date2) => date1.Month == date2.Month && date1.Day == date2.Day;
         }
     }
 

@@ -1,21 +1,17 @@
+using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
-    public class NewPictureModel : PageModel
+    [RequireAdmin]
+    public class NewPictureModel(SignInRepository signInRepository) : BasePage(signInRepository)
     {
         [BindProperty]
         public List<IFormFile> Uploads { get; set; }
 
         public IActionResult OnGet()
         {
-            this.TryLogIn();
-            if (this.ShouldRedirectToLogin())
-            {
-                return new RedirectResult("/Login");
-            }
-
             return Page();
         }
 

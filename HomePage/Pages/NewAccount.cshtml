@@ -1,0 +1,63 @@
+﻿@page
+@model HomePage.Pages.NewAccountModel
+@{
+    ViewData["Title"] = "Skapa konto";
+}
+
+<div class="page-wrapper mainscreen">
+    <div class="dayfood-form" method="post">
+        <span>Skapa konto</span>
+        <div class="input-wrapper">
+            <span>Användarnamn</span>
+            <input type="text" id="username" required />
+        </div>
+        <div class="input-wrapper">
+            <span>Namn att visa</span>
+            <input type="text" id="displayname" />
+        </div>
+        <div class="input-wrapper">
+            <span>Lösenord</span>
+            <input type="password" id="password" required />
+        </div>
+        <div class="input-wrapper">
+            <span>Upprepa lösenord</span>
+            <input type="password" id="password2" required />
+        </div>
+
+        <div class="button-wrapper">
+            <button type="button" onclick="signUp();">Skapa konto</button>
+            <button type="button" onclick="window.history.back();">Avbryt</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function signUp() {
+        const name = $('#displayname').val()
+        const password = $('#password').val()
+        const password2 = $('#password2').val()
+        const username = $('#username').val()
+        if (password !== password2) {
+            Alert.openAlert('De två Lösenordsfälten matchar inte.');
+            return
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/NewAccount",
+            data: {
+                username: username,
+                password: password,
+                name: name
+            },
+            success: (e) => {
+                if (!e.success) {
+                    Alert.openAlert('Användarnamnet finns redan.');
+                } else {
+                     window.location.href = '/Login'
+                }
+            }
+        });
+    }
+</script>

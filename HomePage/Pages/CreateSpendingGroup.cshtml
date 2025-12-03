@@ -6,7 +6,7 @@
 
 <div class="page-wrapper mainscreen" id="pagewrapper">
     <form class="dayfood-form" id="theForm" method="post">
-        <input type="hidden" name="groupId" value="@Model.Group.Key" />
+        <input type="hidden" name="groupId" value="@Model.Group.Id" />
         <input type="hidden" name="returnDate" value="@Model.ReturnDate" />
         <input type="hidden" name="delete" id="deleteHidden" value="" />
         <input type="hidden" name="patterns" id="patterns" value="" />
@@ -42,11 +42,11 @@
         </div>
         <div class="input-wrapper date-based">
             <span>Startdatum</span>
-            <input name="startDate" type="date" required value="@DateHelper.KeyWithZerosFromKey(Model.Group.StartDate)" id="startDate" />
+            <input name="startDate" type="date" required value="@DateHelper.KeyWithZerosFromKey(DateHelper.ToKey(Model.Group.StartDate ?? DateHelper.DateNow))" id="startDate" />
         </div>
         <div class="input-wrapper date-based">
             <span>Slutdatum</span>
-            <input name="endDate" type="date" required value="@DateHelper.KeyWithZerosFromKey(Model.Group.EndDate)" id="endDate" />
+            <input name="endDate" type="date" required value="@DateHelper.KeyWithZerosFromKey(DateHelper.ToKey(Model.Group.EndDate ?? DateHelper.DateNow))" id="endDate" />
         </div>
 
         <div class="button-wrapper">

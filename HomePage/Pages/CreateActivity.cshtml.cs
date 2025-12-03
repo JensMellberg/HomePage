@@ -1,11 +1,11 @@
-using System.Text.RegularExpressions;
-using System.Xml.Linq;
+using HomePage.Data;
+using HomePage.Model;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
-    public class CreateActivityModel : PageModel
+    [RequireAdmin]
+    public class CreateActivityModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public CalendarActivity Activity { get; set; }
 
@@ -13,33 +13,35 @@ namespace HomePage.Pages
 
         public IActionResult OnGet(string activityId, string date)
         {
-            this.TryLogIn();
-            if (this.ShouldRedirectToLogin())
-            {
-                return new RedirectResult("/Login");
-            }
-
-            var existingActivity = new CalendarActivityRepository().TryGetValue(activityId ?? string.Empty);
+            var existingActivity = dbContext.CalendarActivity.Find(activityId);
             IsNew = string.IsNullOrEmpty(activityId);
-            Activity = existingActivity ?? new CalendarActivity { Date = date };
-            Activity.Date = DateHelper.KeyWithZerosFromKey(Activity.Date);
+            Activity = existingActivity ?? new CalendarActivity { CalendarDate = DateHelper.FromKey(date) };
             return Page();
         }
 
         public IActionResult OnPost(string activityId, string date, string text, string person, int duration, string isreoccuring, string isvacation, string delete)
         {
-            var keyWithoutZeros = DateHelper.KeyFromKeyWithZeros(date);
+            var convertedDate = DateHelper.FromKey(DateHelper.KeyFromKeyWithZeros(date));
+            var existing = dbContext.CalendarActivity.Find(activityId);
             if (!string.IsNullOrEmpty(delete))
             {
-                new CalendarActivityRepository().Delete(activityId);
+                dbContext.CalendarActivity.Remove(existing);
+            } else if (existing != null)
+            {
+                existing.Text = text;
+                existing.Person = person;
+                existing.CalendarDate = convertedDate;
+                existing.DurationInDays = duration;
+                existing.IsReoccuring = isreoccuring == "on";
+                existing.IsVacation = isvacation == "on";
             } else
             {
-                var activity = new CalendarActivity { Key = activityId, Text = text, Person = person, Date = keyWithoutZeros, DurationInDays = duration, IsReoccuring = isreoccuring == "on", IsVacation = isvacation == "on" };
-
-                new CalendarActivityRepository().SaveValue(activity);
+                var activity = new CalendarActivity { Key = activityId, Text = text, Person = person, CalendarDate = convertedDate, DurationInDays = duration, IsReoccuring = isreoccuring == "on", IsVacation = isvacation == "on" };
+                dbContext.CalendarActivity.Add(activity);
             }
 
-            var firstOfWeekDate = DateHelper.GetFirstOfWeek(DateHelper.FromKey(keyWithoutZeros));
+            dbContext.SaveChanges();
+            var firstOfWeekDate = DateHelper.GetFirstOfWeek(convertedDate);
             return Redirect($"/Calendar?{DateHelper.FormatDateForQueryString(firstOfWeekDate)}");
         }
     }

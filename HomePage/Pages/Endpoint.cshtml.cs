@@ -1,5 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
+using HomePage.Data;
+using HomePage.Repositories;
 using HomePage.Spending;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -8,13 +10,13 @@ using Newtonsoft.Json;
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class EndpointModel : PageModel
+    public class EndpointModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public void OnGet()
         {
         }
 
-        public ActionResult OnPost(string action, string transactions, string itemKey, string groupId, string movieSearch)
+        public ActionResult OnPost(string action, string transactions, Guid itemKey, string groupId, string movieSearch)
         {
             /*if (action == "shoppingList")
             {
@@ -101,19 +103,18 @@ namespace HomePage.Pages
                     return new JsonResult(new { success = false });
                 }
 
-                var repo = new SpendingItemRepository();
+                var existingTransactions = dbContext.SpendingItem.ToList();
                 var valuesToSave = new List<SpendingItem>();
-                var existingTransactions = repo.GetValues();
                 foreach (var tran in parsed)
                 {
                     var spending = new SpendingItem { 
                         Amount = tran.amount,
-                        Date = DateHelper.KeyFromKeyWithZeros(tran.date),
+                        TransactionDate = DateHelper.FromKey(DateHelper.KeyFromKeyWithZeros(tran.date)),
                         Person = person,
                         Place = tran.place
                     };
 
-                    if (!existingTransactions.ContainsKey(spending.Key))
+                    if (!existingTransactions.Any(x => x.CollidesWith(spending)))
                     {
                         valuesToSave.Add(spending);
                     }
@@ -121,34 +122,33 @@ namespace HomePage.Pages
 
                 foreach (var val in valuesToSave)
                 {
-                    while (existingTransactions.ContainsKey(val.Key))
+                    while (existingTransactions.Any(x => x.CollidesWith(val)))
                     {
                         val.Amount += 1;
                     }
-
-                    existingTransactions.Add(val.Key, val);
                 }
 
-                repo.SaveValues(existingTransactions);
-                return new JsonResult(new { success = false, saved = valuesToSave.Count });
+                dbContext.AddRange(valuesToSave);
+                return new JsonResult(new { success = true, saved = valuesToSave.Count });
             }
 
             if (action == "MoveGroup")
             {
-                if (this.ShouldRedirectToLogin())
+                if (!IsAdmin)
                 {
                     return Redirect("/Login");
                 }
 
-                var spendingRepo = new SpendingItemRepository();
-                var item = spendingRepo.TryGetValue(itemKey);
+                var item = dbContext.SpendingItem.Find(itemKey);
                 if (item == null)
                 {
                     return new JsonResult(new { success = false });
                 }
 
                 item.SetGroupId = groupId;
-                spendingRepo.SaveValue(item);
+                dbContext.SaveChanges();
+
+                return new JsonResult(new { success = true });
             }
 
             if (action == "ImageUrl")
@@ -157,41 +157,42 @@ namespace HomePage.Pages
                 return new JsonResult(new { url = pair.Item1, taken = pair.Item2 });
             }
 
-            if (this.ShouldRedirectToLogin())
+            var redirectResult = GetPotentialClientRedirectResult(true, true, "/Index");
+            if (redirectResult != null)
             {
-                return new JsonResult(new { needLogin = true });
+                return redirectResult;
             }
 
             if (action == "Flower")
             {
-                return new JsonResult(new { streak = SettingsRepository.FlowerChore.Update() });
+                return Utils.CreateClientResult(new { streak = SettingsRepositoryTemp.FlowerChore.Update() });
             }
             else if (action == "Floss")
             {
-                return new JsonResult(new { streak = SettingsRepository.FlossChore.Update() });
+                return Utils.CreateClientResult(new { streak = SettingsRepositoryTemp.FlossChore.Update() });
             }
             else if (action == "FlossJens")
             {
-                return new JsonResult(new { streak = SettingsRepository.FlossChoreJens.Update() });
+                return Utils.CreateClientResult(new { streak = SettingsRepositoryTemp.FlossChoreJens.Update() });
             }
             else if (action == "Bed")
             {
-                return new JsonResult(new { streak = SettingsRepository.BedSheetChore.Update() });
+                return Utils.CreateClientResult(new { streak = SettingsRepositoryTemp.BedSheetChore.Update() });
             }
             else if (action == "Eye")
             {
-                return new JsonResult(new { streak = SettingsRepository.EyeChore.Update() });
+                return Utils.CreateClientResult(new { streak = SettingsRepositoryTemp.EyeChore.Update() });
             }
             else if (action == "Sink")
             {
-                return new JsonResult(new { streak = SettingsRepository.SinkChore.Update() });
+                return Utils.CreateClientResult(new { streak = SettingsRepositoryTemp.SinkChore.Update() });
             }
             else if (action == "Workout")
             {
-                return new JsonResult(new { streak = SettingsRepository.WorkoutChore.Update() });
+                return Utils.CreateClientResult(new { streak = SettingsRepositoryTemp.WorkoutChore.Update() });
             }
 
-            return null;
+            return Utils.CreateErrorClientResult(null);
         }
 
         public class Transaction

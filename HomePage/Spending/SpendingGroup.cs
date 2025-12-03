@@ -1,34 +1,33 @@
-﻿namespace HomePage.Spending
-{
-    public class SpendingGroup : SaveableItem
-    {
-        public string Key { get; set; } = Guid.NewGuid().ToString();
+﻿using System.ComponentModel.DataAnnotations;
 
-        [SaveProperty]
+namespace HomePage.Spending
+{
+
+    public class SpendingGroup
+    {
+        public Guid Id { get; set; }
+
+        [MaxLength(200)]
         public string Name { get; set; }
 
-        [SaveProperty]
         public int SortOrder { get; set; }
 
-        [SaveProperty]
-        [SaveAsList]
         public List<string> Patterns { get; set; } = [];
 
-        [SaveProperty]
         public bool IgnoreTowardsTotal { get; set; }
 
-        [SaveProperty]
+        [MaxLength(50)]
         public string Person { get; set; }
 
-        [SaveProperty]
+        [MaxLength(50)]
         public string Color { get; set; }
 
         [SaveProperty]
-        public string StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
 
         [SaveProperty]
-        public string EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
-        public bool IsDateBasedGroup => !string.IsNullOrEmpty(StartDate);
+        public bool IsDateBasedGroup => StartDate.HasValue;
     }
 }

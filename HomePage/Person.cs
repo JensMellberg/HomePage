@@ -1,12 +1,16 @@
-﻿namespace HomePage
+﻿using HomePage.Model;
+
+namespace HomePage
 {
     public class Person
     {
         public required string Name { get; set; }
 
-        public static Person Jens = new() { Name = "Jens" };
+        public required string UserName { get; set; }
 
-        public static Person Anna = new() { Name = "Anna" };
+        public static Person Jens = new() { Name = "Jens", UserName = "Jens" };
+
+        public static Person Anna = new() { Name = "Anna", UserName = "Anna" };
 
         public static string HtmlColorFromPerson(string person) => person switch
         {
@@ -22,11 +26,11 @@
             _ => "#007083",
         };
 
-        public static Person FromString(string s) => s switch
+        public static Person FromUserInfo(UserInfo user) => user.UserName switch
         {
             "Jens" => Jens,
             "Anna" => Anna,
-            _ => throw new Exception(),
+            _ => new Person { Name = user.DisplayName, UserName = user.UserName },
         };
 
         public override string ToString() => Name;

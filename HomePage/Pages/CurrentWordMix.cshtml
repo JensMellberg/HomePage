@@ -7,7 +7,7 @@
 <div class="word-mix-top-bar" style="margin-top: 1px;">
 <div class="word-mix-score-wrapper">
     <button onclick="window.location.href='WordMixStats'" style="height: 32px; margin-top: 8px;">Tillbaka</button>
-    @if (Model.LoggedInPerson == Person.Jens.Name) {
+    @if (Model.LoggedInPerson.Name == Person.Jens.Name) {
         <div class="profile-photo jens"></div>
     } else {
         <div class="profile-photo anna"></div>

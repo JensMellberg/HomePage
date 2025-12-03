@@ -1,11 +1,16 @@
 ﻿using System.Globalization;
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using HomePage.Model;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HomePage
 {
     public static class Utils
     {
+        public static JsonResult CreateRedirectClientResult(string redirectUrl) => new(new { redirectUrl });
+
+        public static JsonResult CreateErrorClientResult(string? message) => new(new { success = false, message });
+
+        public static JsonResult CreateClientResult(object? data) => new(new { data = data ?? new { success = true }, success = true });
         public static string EncodeForClient(this string _this) => _this.Replace('Ä', '.').Replace('Ö', '*');
         public static void CalculateAverages(IEnumerable<FoodRanking> rankings, out double jensAverage, out double annaAverage, out double totalAverage)
         {
@@ -36,21 +41,5 @@ namespace HomePage
         public static double ToDouble(this string s) => double.Parse(s.Replace(',', '.'), CultureInfo.InvariantCulture);
 
         public static string GetTextOrNothing(double text) => text == 0 ? "-" : text.ToString();
-
-        public static bool ShouldRedirectToLogin(this PageModel model)
-        {
-            if (!SignInRepository.IsLoggedIn(model.HttpContext.Session))
-            {
-                model.HttpContext.Session.SetString("ReturnUrl", model.Request.GetDisplayUrl());
-                return true;
-            }
-
-            return false;
-        }
-
-        public static void TryLogIn(this PageModel model)
-        {
-            SignInRepository.TryLogIn(model.HttpContext.Session, model.Request, model.Response);
-        }
     }
 }

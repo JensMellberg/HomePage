@@ -13,7 +13,6 @@
                 <span class="approval-icon">@Model.WaitingForApproval</span>
             }
         </div>
-        
     </div>
     
 
@@ -46,7 +45,7 @@
             <div class="word-mix-history-wrapper">
                 <div class="word-mix-score-wrapper">
                     @if (history.jensScore > 0) {
-                        <a class="profile-photo jens" href="WordMixStat?key=@WordMixResult.MakeId(DateHelper.ToKey(history.date), Person.Jens.Name)"></a>
+                        <a class="profile-photo jens" href="WordMixStat?key=@history.jensKey"></a>
                     }
                     else {
                         <div class="profile-photo jens"></div>
@@ -58,7 +57,7 @@
                     <span>@Model.ConvertScore(history.annaScore)</span>
                     @if (history.annaScore > 0)
                     {
-                        <a class="profile-photo anna" href="WordMixStat?key=@WordMixResult.MakeId(DateHelper.ToKey(history.date), Person.Anna.Name)"></a>
+                        <a class="profile-photo anna" href="WordMixStat?key=@history.annaKey"></a>
                     }
                     else
                     {

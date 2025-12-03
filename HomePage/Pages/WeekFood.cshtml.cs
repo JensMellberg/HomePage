@@ -1,11 +1,15 @@
 using System.Globalization;
+using HomePage.Data;
+using HomePage.Model;
+using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class WeekFoodModel : PageModel
+    public class WeekFoodModel(FoodStorageRepository foodStorageRepository, DayFoodRepository dayFoodRepository, AppDbContext dbContext, DatabaseLogger logger, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public List<DayFood> DayFoods { get; set; } = new List<DayFood>();
 
@@ -17,11 +21,7 @@ namespace HomePage.Pages
 
         public int Week { get; set; }
 
-        public bool IsLoggedIn { get; set; }
-
-        public string LoggedInPerson { get; set; }
-
-        public bool IsInFuture(string date) => DateHelper.FromKey(date) > DateTime.Now;
+        public bool IsInFuture(DateTime date) => date > DateTime.Now;
 
         public List<WeekGoals> WeekGoals { get; set; } = [];
 
@@ -31,14 +31,9 @@ namespace HomePage.Pages
 
         public IActionResult OnGet(int year, int month, int day)
         {
-            this.TryLogIn();
-            IsLoggedIn = SignInRepository.IsLoggedIn(HttpContext.Session);
-            LoggedInPerson = SignInRepository.LoggedInPerson(HttpContext.Session)?.Name;
-            var dayFoods = new DayFoodRepository().GetValues();
-            var allFoods = new FoodRepository().GetValues();
-            var allRankings = new FoodRankingRepository().GetValues();
-            var allCategories = new CategoryRepository().GetValues();
-            var categoriesWithGoal = allCategories.Values.Where(x => x.HasGoal);
+            var dayFoods = dayFoodRepository.GetPopulatedDayFood();
+            var allRankings = dbContext.FoodRanking.ToList();
+            var categoriesWithGoal = dbContext.Category.ToList().Where(x => x.HasGoal).ToList();
             var weekGoalsPerCategoryId = categoriesWithGoal.ToDictionary(x => x.Key, x => new WeekGoals
             {
                 Category = x.Name,
@@ -63,22 +58,20 @@ namespace HomePage.Pages
             for (var i = 0; i < 7; i++)
             {
                 var crntDate = date.AddDays(i);
-                dayFoods.TryGetValue(DateHelper.ToKey(crntDate), out var dayFood);
+                var dayFood = dayFoods.FirstOrDefault(x => x.Date == crntDate);
                 if (dayFood != null)
                 {
-                    dayFood.Food = allFoods[dayFood.FoodId];
-                    dayFood.LoadSideDishes(allFoods);
-                    foreach (var category in dayFood.GetCategories(allCategories).Select(x => x.Key).Where(weekGoalsPerCategoryId.ContainsKey))
+                    foreach (var category in dayFood!.GetCategories(dbContext).Select(x => x.Key).Where(weekGoalsPerCategoryId.ContainsKey))
                     {
                         weekGoalsPerCategoryId[category].Completed++;
                     }
                 }
-                
-                DayFoods.Add(dayFood ?? new DayFood { FoodId = null, Day = crntDate });
-                allRankings.TryGetValue(FoodRanking.MakeId(crntDate, Person.Anna.Name), out var ranking1);
-                allRankings.TryGetValue(FoodRanking.MakeId(crntDate, Person.Jens.Name), out var ranking2);
-                ranking1 = ranking1 ?? new FoodRanking { Day = DateHelper.ToKey(crntDate), Person = Person.Anna.Name };
-                ranking2 = ranking2 ?? new FoodRanking { Day = DateHelper.ToKey(crntDate), Person = Person.Jens.Name };
+
+                DayFoods.Add(dayFood ?? new EmptyDayFood { Date = crntDate });
+                var ranking1 = allRankings.FirstOrDefault(x => x.Date == crntDate && x.Person == Person.Anna.Name);
+                var ranking2 = allRankings.FirstOrDefault(x => x.Date == crntDate && x.Person == Person.Jens.Name);
+                ranking1 = ranking1 ?? new FoodRanking { Date = crntDate, Person = Person.Anna.Name };
+                ranking2 = ranking2 ?? new FoodRanking { Date = crntDate, Person = Person.Jens.Name };
                 FoodRankings.Add(DateHelper.ToKey(crntDate), [ranking1, ranking2]);
             }
 
@@ -95,48 +88,65 @@ namespace HomePage.Pages
 
         public IActionResult OnPost(string date, string person, int ranking, string note)
         {
-            if (!SignInRepository.IsLoggedIn(HttpContext.Session) || person != SignInRepository.LoggedInPerson(HttpContext.Session).Name)
+            if (!IsAdmin || person != LoggedInPerson?.Name)
             {
                 return new OkResult();
             }
 
-            var dayFood = new DayFoodRepository().TryGetValue(date);
-            var foodRanking = new FoodRanking { Day = date, Person = person, Ranking = ranking, FoodId = dayFood.FoodId, Note = note };
-            var foodRankingRepo = new FoodRankingRepository();
-            var existsOnDay = foodRankingRepo.GetValues().Values.Any(x => x.Day == date);
+            var convertedDate = DateHelper.FromKey(date);
+            var dayFood = dayFoodRepository.GetPopulatedDayFood()
+                .FirstOrDefault(x => x.Date == convertedDate);
+
+            if (dayFood == null)
+            {
+                return BadRequest();
+            }
+
+            var existsOnDay = dbContext.FoodRanking.Any(x => x.Date == convertedDate);
             if (!existsOnDay)
             {
-                var allFoods = new FoodRepository().GetValues();
-                var allIngredients = new IngredientRepository().GetValues();
-                dayFood.LoadSideDishes(allFoods);
-                dayFood.Food = allFoods[dayFood.FoodId];
-                var ingredientsLost = dayFood.Food.GetParsedIngredients(allIngredients);
-                foreach (var ingrs in dayFood.SideDishes.SelectMany(x => x.GetParsedIngredients(allIngredients)))
+                var ingredientsLost = dayFood.MainFood.FoodIngredients.Select(x => x.ToIngredientInstance()).ToList();
+                foreach (var ingrs in dayFood.SideDishes.SelectMany(x => x.FoodIngredients.Select(x => x.ToIngredientInstance())))
                 {
                     ingredientsLost.Add(ingrs);
                 }
 
-                var storageRepo = new FoodStorageRepository();
-                var storageItems = storageRepo.GetValues().Values.Select(x => x.ToIngredientInstance(allIngredients)).ToDictionary(x => x.IngredientId, x => x);
+                var storageItems = foodStorageRepository.GetIngredients().ToDictionary(x => x.IngredientId, x => x);
                 foreach (var ingr in ingredientsLost)
                 {
                     if (storageItems.TryGetValue(ingr.IngredientId, out var storageItem))
                     {
-                        ingr.MultiplyAmount(dayFood.PortionMultiplier);
+                        ingr.MultiplyAmount(dayFood.Portions);
                         storageItem.Subtract(ingr);
+                        logger.Information($"Ingredient {ingr.Ingredient.Name} was automatically reduced by {ingr.GetStaticDisplayString()} after eating food {dayFood.CombinedName}", person);
                     }
                 }
 
                 var itemsToStore = storageItems.Values.Where(x => x.IsNonZero).Select(x => new FoodStorageItem
                 {
-                    IngredientId = x.IngredientId,
+                    IngredientId = x.IngredientId ?? Guid.Empty,
                     Amount = x.Amount.Amount
                 });
 
-                storageRepo.SaveValues(itemsToStore.ToDictionary(x => x.IngredientId, x => x));
+                dbContext.FoodStorage.RemoveRange(dbContext.FoodStorage);
+                dbContext.FoodStorage.AddRange(itemsToStore);
+                dbContext.SaveChanges();
             }
 
-            foodRankingRepo.SaveValue(foodRanking);
+            var existing = dbContext.FoodRanking.FirstOrDefault(x => x.Date == convertedDate && x.Person == person);
+            if (existing != null)
+            {
+                existing.Ranking = ranking;
+                existing.Note = note;
+                existing.FoodId = dayFood!.MainFoodId.ToString();
+            } else
+            {
+                var foodRanking = new FoodRanking { Date = convertedDate, Person = person, Ranking = ranking, FoodId = dayFood!.MainFoodId.ToString(), Note = note };
+                dbContext.FoodRanking.Add(foodRanking);
+            }
+
+            logger.Information($"{person} gave food {dayFood.CombinedName} a score of {ranking}", person);
+            dbContext.SaveChanges();
             return new OkResult();
         }
     }

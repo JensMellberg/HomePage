@@ -10,7 +10,7 @@
 
         bool IgnoreTowardsTotal { get; }
 
-        string Id { get; }
+        Guid Id { get; }
 
         string Color { get; }
     }

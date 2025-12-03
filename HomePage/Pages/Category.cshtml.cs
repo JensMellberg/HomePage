@@ -1,57 +1,69 @@
+using HomePage.Data;
+using HomePage.Model;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class CategoryModel : PageModel
+    [RequireAdmin]
+    public class CategoryModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public Category Category { get; set; }
         public IActionResult OnGet(string categoryId)
         {
-            this.TryLogIn();
-            if (this.ShouldRedirectToLogin())
-            {
-                return new RedirectResult("/Login");
-            }
-
             if (string.IsNullOrEmpty(categoryId))
             {
                 Category = new Category();
             }
             else
             {
-                Category = new CategoryRepository().TryGetValue(categoryId) ?? new Category();
+                Category = dbContext.Category.Find(categoryId) ?? new Category();
             }
 
             return Page();
         }
 
-        public IActionResult OnPost(string foodId, string categoryId, string name, string weekgoal, string weekgoalmax, string needsOnAllSides)
+        public IActionResult OnPost(Guid? foodId, string categoryId, string name, string weekgoal, string weekgoalmax, string needsOnAllSides)
         {
             if (foodId != null)
             {
-                var food = new FoodRepository().TryGetValue(foodId);
-                var allCategories = new CategoryRepository().GetValues().Values.ToList();
+                var food = dbContext.Food.Include(x => x.Categories).FirstOrDefault(x => x.Id == foodId);
+                var allCategories = dbContext.Category.ToList();
                 var foodCategories = allCategories.Select(x => new FoodCategory
                 {
                     id = x.Key,
                     name = x.Name,
-                    isSelected = food?.CategoriyIds.Contains(x.Key) == true
+                    isSelected = food?.Categories.Any(c => x.Key == c.Key) == true
                 });
 
                 return new JsonResult(foodCategories);
             }
+
+            var existing = dbContext.Category.Find(categoryId);
+            var goalPerWeek = string.IsNullOrEmpty(weekgoal) ? (string.IsNullOrEmpty(weekgoalmax) ? 0 : int.Parse(weekgoalmax)) : int.Parse(weekgoal);
+            var IsBad = !string.IsNullOrEmpty(weekgoalmax);
+            if (existing != null)
+            {
+                existing.Name = name;
+                existing.GoalPerWeek = goalPerWeek;
+                existing.IsBad = IsBad;
+                existing.NeedsOnAllSides = needsOnAllSides == "on";
+            }
             else
             {
-                var category = new Category { 
-                    Key = categoryId, Name = name,
-                    GoalPerWeek = string.IsNullOrEmpty(weekgoal) ? (string.IsNullOrEmpty(weekgoalmax) ? 0 : int.Parse(weekgoalmax)) : int.Parse(weekgoal),
-                    IsBad = !string.IsNullOrEmpty(weekgoalmax),
+                var category = new Category
+                {
+                    Key = categoryId,
+                    Name = name,
+                    GoalPerWeek = goalPerWeek,
+                    IsBad = IsBad,
                     NeedsOnAllSides = needsOnAllSides == "on"
                 };
-                new CategoryRepository().SaveValue(category);
+                dbContext.Category.Add(category);
             }
+
+            dbContext.SaveChanges();
 
             return Redirect($"/AllCategories");
         }

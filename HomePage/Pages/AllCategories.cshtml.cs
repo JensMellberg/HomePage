@@ -1,18 +1,15 @@
-using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using HomePage.Data;
+using HomePage.Model;
 
 namespace HomePage.Pages
 {
-    public class AllCategoriesModel : PageModel
+    public class AllCategoriesModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public List<Category> AllCategories { get; set; }
 
         public void OnGet()
         {
-            this.TryLogIn();
-            AllCategories = new CategoryRepository().GetValues()
-                .Select(x => x.Value)
+            AllCategories = dbContext.Category
                 .OrderBy(x => x.Name)
                 .ToList();
         }

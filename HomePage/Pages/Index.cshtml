@@ -29,6 +29,12 @@
             <a href="/WordMixStats">Ordmix</a>
             <div class="divider"></div>
             <a href="/FoodStorage">Skafferi</a>
+            <div class="divider"></div>
+            @if (Model.IsLoggedIn) {
+                <a href="/Logout">Logga ut (@Model.LoggedInPerson!.Name)</a>
+            } else {
+                <a href="/Login">Logga in</a>
+            }
         </div>
     </div>
 </div>
@@ -57,13 +63,13 @@
     @if (Model.TodayFood != null) {
         <div class="input-wrapper">
             <span style="font-size: 18px">Mat: @Model.TodayFood.CombinedName</span>
-            @if (!string.IsNullOrEmpty(Model.TodayFood.Food.RecipeUrl))
+            @if (!string.IsNullOrEmpty(Model.TodayFood.MainFood.RecipeUrl))
             {
-                <div class="recipelinkplaceholder" linkurl="@Model.TodayFood.Food.RecipeUrl"></div>
+                <div class="recipelinkplaceholder" linkurl="@Model.TodayFood.MainFood.RecipeUrl"></div>
             }
-            @if (!string.IsNullOrEmpty(Model.TodayFood.Food.Notes))
+            @if (!string.IsNullOrEmpty(Model.TodayFood.MainFood.Notes))
             {
-                <div class="notesplaceholder" notes="@Model.TodayFood.Food.Notes"></div>
+                <div class="notesplaceholder" notes="@Model.TodayFood.MainFood.Notes"></div>
             }
         </div>
     }
@@ -113,6 +119,7 @@
 </div>
 
 <script src="~/js/Firework.js" asp-append-version="true"></script>
+<script src="~/js/JsonResultUnpacker.js" asp-append-version="true"></script>
 <script src="~/js/Streak.js" asp-append-version="true"></script>
 <script>
     var currentDayNbr = new Date().getDate()
@@ -152,18 +159,18 @@
                 },
                 url: "/Endpoint",
                 success: (data) => {
-                    if (data.needLogin) {
-                        window.location.href = 'Login'
-                        return
+                    const result = JsonResultUnpacker.unpackResult(data, window)
+                    if (!result) {
+                        return;
                     }
 
-                    updateStreakIcon(streakIcon, data.streak)
+                    updateStreakIcon(streakIcon, result.streak)
                     choreIcon.classList.add('done-today')
                     let clientX = e.clientX
                     let clientY = e.clientY
                     let counter = 3
                     makeFirework(clientX, clientY, counter)
-                    //window.showStreak(data.streak, clientX, clientY)
+                    //window.showStreak(result.streak, clientX, clientY)
                     choreIcon.onclick = () => true
                 }
             });
@@ -271,7 +278,10 @@
                 date: date,
                 foodId: id
             },
-            success: (e) => window.location = e.redirectUrl
+            success: (e) => {
+                Popup.closePopup()
+                JsonResultUnpacker.unpackResult(e, window)
+            }
         });
     }
 </script>

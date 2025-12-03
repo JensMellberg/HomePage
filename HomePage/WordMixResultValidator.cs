@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using Newtonsoft.Json.Linq;
+using HomePage.Data;
 
 namespace HomePage
 {
@@ -11,7 +11,7 @@ namespace HomePage
 
     public static class WordMixResultValidator
     {
-        public static HashSet<string> GetAllWords()
+        public static HashSet<string> GetAllWords(AppDbContext dbContext)
         {
             var result = new HashSet<string>();
             var lines = File.ReadAllLines("wwwroot/js/WordList.js");
@@ -32,7 +32,7 @@ namespace HomePage
                 }
             }
 
-            var extraWords = new ExtraWordRepository().GetValues().Values;
+            var extraWords = dbContext.ExtraWord.ToList();
             foreach (var word in extraWords.Where(x => x.JensApproved && x.AnnaApproved))
             {
                 result.Add(word.Word.ToUpper());
@@ -41,7 +41,7 @@ namespace HomePage
             return result;
         }
 
-        public static WordMixValidationResult ValidateResult(string boardString, string availableLettersString)
+        public static WordMixValidationResult ValidateResult(string boardString, string availableLettersString, AppDbContext dbContext)
         {
             var availableLetters = ParseAvailableLetters(availableLettersString);
             var board = Board.ParseFromString(boardString);
@@ -55,12 +55,12 @@ namespace HomePage
                 return new WordMixValidationError("Not all board letters are connected.");
             }
 
-            return ValidateWords(board);
+            return ValidateWords(board, dbContext);
         }
 
-        private static WordMixValidationResult ValidateWords(Board board)
+        private static WordMixValidationResult ValidateWords(Board board, AppDbContext dbContext)
         {
-            var allWords = GetAllWords();
+            var allWords = GetAllWords(dbContext);
             var totalScore = 0;
             string? error = null;
             Iterate(board.BoardMatrix.GetLength(0), board.BoardMatrix.GetLength(1), (o, i) => board.BoardMatrix[o, i]);

@@ -1,4 +1,8 @@
-﻿namespace HomePage
+﻿using HomePage.Data;
+using HomePage.Model;
+using Microsoft.EntityFrameworkCore;
+
+namespace HomePage
 {
     public class IngredientInstance
     {
@@ -10,16 +14,8 @@
 
         public void MultiplyAmount(double multipler) => Amount.Multiply(multipler);
 
-        public static IngredientInstance Create(IngredientRepository repository, string ingredientId, double amount, string unit) =>
-            Create(repository.GetValues(), ingredientId, amount, unit);
-
-        public static IngredientInstance Create(Dictionary<string, Ingredient> allIngredients, string ingredientId, double amount, string unit)
+        public static IngredientInstance Create(Ingredient ingredient, double amount, string? unit)
         {
-            if (!allIngredients.TryGetValue(ingredientId, out var ingredient))
-            {
-                throw new Exception();
-            }
-
             var unitInstance = UnitTypes.CreateInstance(ingredient.UnitType, amount);
             if (unit != null)
             {
@@ -45,7 +41,7 @@
 
         public bool IsNonZero => Amount.Amount > 0;
 
-        public string? IngredientId => Ingredient?.Key;
+        public Guid? IngredientId => Ingredient?.Id;
 
         public (string amount, string unit) GetDisplayValues() => Amount?.GetDisplayValues() ?? ("1", "st");
 

@@ -1,11 +1,14 @@
 using System.Text.Json;
+using HomePage.Data;
+using HomePage.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class CreateIngredientModel : PageModel
+    [RequireAdmin]
+    public class CreateIngredientModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public Ingredient Ingredient { get; set; }
 
@@ -13,31 +16,26 @@ namespace HomePage.Pages
 
         public string AllUnitValues = JsonSerializer.Serialize(UnitTypes.GetAllUnitValues());
 
-        public IActionResult OnGet(string id)
+        public IActionResult OnGet(Guid id)
         {
-            this.TryLogIn();
-            if (this.ShouldRedirectToLogin())
-            {
-                return new RedirectResult("/Login");
-            }
-
-            if (string.IsNullOrEmpty(id))
+            if (id == Guid.Empty)
             {
                 Ingredient = new Ingredient();
             }
             else
             {
-                Ingredient = new IngredientRepository().TryGetValue(id) ?? new Ingredient();
+                Ingredient = dbContext.Ingredient.Single(x => x.Id == id);
             }
 
             Categories = string.Join(',', IngredientCategory.Categories.OrderBy(x => x));
             return Page();
         }
 
-        public IActionResult OnPost(string id, string name, string unitType, string category, string isstandard, string standardamount, string standardunit)
+        public IActionResult OnPost(Guid id, string name, string unitType, string category, string isstandard, string standardamount, string standardunit)
         {
-            var ingredient = new Ingredient {
-                Key = id,
+            var ingredient = new Ingredient
+            {
+                Id = id,
                 Name = name,
                 UnitType = unitType,
                 CategoryId = category,
@@ -45,8 +43,18 @@ namespace HomePage.Pages
                 StandardAmount = standardamount.ToDouble(),
                 StandardUnit = standardunit
             };
+            var existing = dbContext.Ingredient.Find(id);
 
-            new IngredientRepository().SaveValue(ingredient);
+            if (existing == null)
+            {
+                dbContext.Ingredient.Add(ingredient);
+            }
+            else
+            {
+                dbContext.Entry(existing).CurrentValues.SetValues(ingredient);
+            }
+
+            dbContext.SaveChanges();
 
             return Redirect($"/Ingredients");
         }

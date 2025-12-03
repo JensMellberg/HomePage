@@ -2,13 +2,15 @@
 {
     public static class DateHelper
     {
-        public static DateTime DateNow => DateTime.Now;
+        public static DateTime DateTimeNow => DateTime.Now;
+
+        public static DateTime DateNow => DateTimeNow.Date;
 
         public static DateTime AdjustedDateNow
         {
             get
             {
-                var datenow = DateNow;
+                var datenow = DateTimeNow;
                 if (datenow.Hour < 4)
                 {
                     return datenow.AddDays(-1);

@@ -1,6 +1,9 @@
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Mvc;
+using HomePage.Data;
+using HomePage.Model;
+using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomePage.Pages
 {
@@ -12,13 +15,13 @@ namespace HomePage.Pages
         TotalRating
     }
 
-    public class AllFoodsModel : PageModel
+    public class AllFoodsModel(IngredientRepository ingredientRepository, FoodRepository foodRepository, AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public List<Food> AllFoods { get; set; }
 
         public List<Food> SideDishes { get; set; }
 
-        public Dictionary<string, string[]> FoodRankings { get; set; } = new();
+        public Dictionary<Guid, string[]> FoodRankings { get; set; } = new();
 
         public (Sorting, string)[] SortingOptions = [
             (Sorting.Name, "Maträtt"),
@@ -39,7 +42,6 @@ namespace HomePage.Pages
 
         public void OnGet(string filter, string categoryFilter, string sorting, string ingredientFilter)
         {
-            this.TryLogIn();
             CurrentFilter = filter;
             Enum.TryParse(typeof(Sorting), sorting, out var parsedSorting);
             if (parsedSorting is Sorting correctlyParsed) {
@@ -48,16 +50,15 @@ namespace HomePage.Pages
 
             var Regex = string.IsNullOrEmpty(filter) ? null : new Regex("^.*" + filter + ".*$", RegexOptions.IgnoreCase);
             var categoriesList = categoryFilter?.Split(',').ToHashSet();
-            var ingredientsList = ingredientFilter?.Split(',').ToHashSet();
-            var foodValues = new FoodRepository().GetValues().Select(x => x.Value);
-            var ingredientsRepository = new IngredientRepository();
-            PossibleIngredients = ingredientsRepository.ClientEncodedList();
-            var allIngredients = ingredientsRepository.GetValues();
+            var ingredientsList = ingredientFilter?.Split(',').Select(Guid.Parse).ToHashSet();
+            var foodValues = foodRepository.GetPopulatedFood;
+
+            PossibleIngredients = ingredientRepository.ClientEncodedList();
 
             var allFoods = foodValues
                 .Where(x => !x.IsSideDish)
                 .Where(x => Regex?.IsMatch(x.Name) ?? true)
-                .Where(x => categoriesList == null || categoriesList.All(c => x.CategoriyIds.Contains(c)))
+                .Where(x => categoriesList == null || categoriesList.All(c => x.Categories.Select(x => x.Key).Contains(c)))
                 .Where(x => ingredientsList == null || FoodContainsAllIngredients(x, ingredientsList));
 
             SideDishes = foodValues
@@ -67,12 +68,12 @@ namespace HomePage.Pages
 
             CurrentCategories = categoryFilter ?? "";
             CurrentIngredients = ingredientFilter ?? "";
-            var allRankings = new FoodRankingRepository().GetValues().Values;
+            var allRankings = dbContext.FoodRanking.ToList();
             var foodKeys = new Dictionary<Food, string>();
             var rankingsKeys = new Dictionary<Food, double>();
             foreach (var food in allFoods)
             {
-                var relevantRankings = allRankings.Where(x => x.FoodId == food.Key);
+                var relevantRankings = allRankings.Where(x => Guid.Parse(x.FoodId) == food.Id);
                 Utils.CalculateAverages(relevantRankings, out var jensAverage, out var annaAverage, out var totalAverage);
 
                 string[] strings = [
@@ -81,7 +82,7 @@ namespace HomePage.Pages
                     GetRankingString("Totalt", totalAverage)
                 ];
 
-                FoodRankings.Add(food.Key, strings);
+                FoodRankings.Add(food.Id, strings);
                 switch (CurrentSorting)
                 {
                     case Sorting.Name: foodKeys[food] = food.Name; break;
@@ -100,18 +101,12 @@ namespace HomePage.Pages
                 AllFoods = [.. allFoods.OrderByDescending(x => rankingsKeys[x])];
             }
 
-            var dayFoods = new DayFoodRepository().GetValues().Values;
-            foreach (var food in AllFoods.Concat(SideDishes))
-            {
-                food.UpdateHistory(dayFoods);
-            }
-
             string GetRankingString(string person, double average) => person + ": " + (average == 0 ? "-" : average.ToString());
 
-            bool FoodContainsAllIngredients(Food food, HashSet<string> ingredients)
+            bool FoodContainsAllIngredients(Food food, HashSet<Guid> ingredients)
             {
-                var parsedIngredients = food.GetParsedIngredientIds().ToHashSet();
-                return ingredients.All(parsedIngredients.Contains);
+                var foodIngredientIds = food.FoodIngredients.Select(x => x.IngredientId).ToHashSet();
+                return ingredients.All(foodIngredientIds.Contains);
             }
         }
     }

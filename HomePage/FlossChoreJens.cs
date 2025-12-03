@@ -8,9 +8,9 @@
 
         protected override string PersonName => Person.Jens.Name;
 
-        protected override string GetLastUpdated(Settings settings) => settings.LastFlossTimeJens;
+        protected override string GetLastUpdated(SettingsTemp settings) => settings.LastFlossTimeJens;
 
-        protected override void SetLastUpdated(Settings settings, string date)
+        protected override void SetLastUpdated(SettingsTemp settings, string date)
         {
             settings.LastFlossTimeJens = date;
         }

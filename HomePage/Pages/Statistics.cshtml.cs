@@ -1,6 +1,8 @@
-using System.Linq;
+using HomePage.Data;
+using HomePage.Model;
 using HomePage.Spending;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomePage.Pages
 {
@@ -21,7 +23,7 @@ namespace HomePage.Pages
         public List<GridDataCell[]> DrillDown { get; set; }
     }
 
-    public class StatisticsModel : PageModel
+    public class StatisticsModel(AppDbContext dbContext, SpendingGroupRepository spendingGroupRepository, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public (StatisticType, string)[] StatisticOptions = [
             (StatisticType.Amount, "Antal ätna"),
@@ -56,15 +58,19 @@ namespace HomePage.Pages
             var to = string.IsNullOrEmpty(toDate) ? DateTime.MaxValue : DateHelper.FromKey(toDate);
             FromDate = fromDate;
             ToDate = toDate;
-            var relevantFoods = new DayFoodRepository().GetValues()
-                .Where(x => DateHelper.FromKey(x.Key) >= from)
-                .Where(x => DateHelper.FromKey(x.Key) <= to)
-                .Select(x => x.Value);
-            var allFoods = new FoodRepository().GetValues();
+            var relevantFoods = dbContext.DayFood
+                .Include(x => x.FoodConnections)
+                .Where(x => x.Date >= from)
+                .Where(x => x.Date <= to)
+                .ToList();
+            var allFoods = dbContext.Food
+                .Include(x => x.Categories)
+                .Include(x => x.FoodIngredients)
+                .ToDictionary(x => x.Id, x => x);
 
             if (CurrentType == StatisticType.Amount)
             {
-                var groupPairs = relevantFoods.GroupBy(x => x.FoodId).Select(x => (x.Key, x.Count())).OrderByDescending(x => x.Item2);
+                var groupPairs = relevantFoods.GroupBy(x => x.MainFoodId).Select(x => (x.Key, x.Count())).OrderByDescending(x => x.Item2);
                 GridData = groupPairs.Select(x => (GridDataCell[])[
                     new GridDataCell { Text = allFoods[x.Key].Name },
                     new GridDataCell { Text = x.Item2.ToString() }
@@ -72,44 +78,32 @@ namespace HomePage.Pages
             }
             else if (CurrentType == StatisticType.EatenPerDay)
             {
-                var foodRankings = new FoodRankingRepository().GetValues();
-                foreach (var relevantFood in relevantFoods)
-                {
-                    relevantFood.Food = allFoods[relevantFood.FoodId];
-                    relevantFood.LoadSideDishes(allFoods);
-                }
-
-                GridData = relevantFoods.OrderBy(x => x.Day).Select(x => (GridDataCell[])[
-                    new GridDataCell { Text = DateHelper.ToNumberedDateString(x.Day) },
+                var foodRankings = dbContext.FoodRanking.ToList();
+                GridData = relevantFoods.OrderByDescending(x => x.Date).Select(x => (GridDataCell[])[
+                    new GridDataCell { Text = DateHelper.ToNumberedDateString(x.Date) },
                     new GridDataCell { Text = x.CombinedName },
-                    new GridDataCell { Text = $"{Person.Jens.Name}: {GetRanking(Person.Jens.Name, x.Day)}" },
-                    new GridDataCell { Text = $"{Person.Anna.Name}: {GetRanking(Person.Anna.Name, x.Day)}" },
+                    new GridDataCell { Text = $"{Person.Jens.Name}: {GetRanking(Person.Jens.Name, x.Date)}" },
+                    new GridDataCell { Text = $"{Person.Anna.Name}: {GetRanking(Person.Anna.Name, x.Date)}" },
                 ]).ToList();
 
                 string GetRanking(string person, DateTime date) {
-                    if (foodRankings.TryGetValue(FoodRanking.MakeId(date, person), out var ranking))
-                    {
-                        return ranking.RankingText;
-                    }
-
-                    return "-";
+                    var ranking = foodRankings.FirstOrDefault(x => x.Date == date && x.Person == person);
+                    return ranking?.RankingText ?? "-";
                 }
             }
             else if (CurrentType == StatisticType.Category)
             {
-                var allCategories = new CategoryRepository().GetValues();
-                var categoriesForDayFood = new Dictionary<string, List<Category>>();
+                var allCategories = dbContext.Category.ToList();
+                var categoriesForDayFood = new Dictionary<Guid, List<Category>>();
                 foreach (var dayFood in relevantFoods)
                 {
-                    dayFood.Food = allFoods[dayFood.FoodId];
-                    dayFood.LoadSideDishes(allFoods);
-                    categoriesForDayFood.Add(dayFood.Key, dayFood.GetCategories(allCategories));
+                    categoriesForDayFood.Add(dayFood.Id, dayFood.GetCategories(dbContext));
                 }
 
                 GridData = [];
-                foreach (var cat in allCategories.Values)
+                foreach (var cat in allCategories)
                 {
-                    var foods = relevantFoods.Where(x => categoriesForDayFood[x.Key].Contains(cat));
+                    var foods = relevantFoods.Where(x => categoriesForDayFood[x.Id].Contains(cat));
                     var drilldownGrid = foods.Select(x => (GridDataCell[])[new() { Text = x.CombinedName }]).ToList();
                     GridData.Add([new() { Text = cat.Name }, new() { Text = drilldownGrid.Count.ToString() }, new() { DrillDown = drilldownGrid }]);
                 }
@@ -118,9 +112,7 @@ namespace HomePage.Pages
             }
             else if (CurrentType == StatisticType.AverageRanking)
             {
-                var rankings = new FoodRankingRepository().GetValues().Values
-                    .Where(x => DateHelper.FromKey(x.Day) >= from)
-                    .Where(x => DateHelper.FromKey(x.Day) <= to);
+                var rankings = dbContext.FoodRanking.Where(x => x.Date >= from && x.Date <= to).ToList();
                 Utils.CalculateAverages(rankings, out var jensAverage, out var annaAverage, out var totalAverage);
                 GridData = [
                     [new() { Text = "Jens"}, new() { Text = jensAverage.ToString()}],
@@ -130,21 +122,18 @@ namespace HomePage.Pages
             }
             else if (CurrentType == StatisticType.RankingPerCategory)
             {
-                var allCategories = new CategoryRepository().GetValues();
+                var allCategories = dbContext.Category.ToDictionary(x => x.Key, x => x);
                 var categoryRankings = allCategories.ToDictionary(x => x.Key, x => new List<FoodRanking>());
-                var rankings = new FoodRankingRepository().GetValues()
-                    .Where(x => DateHelper.FromKey(x.Value.Day) >= from)
-                    .Where(x => DateHelper.FromKey(x.Value.Day) <= to);
+                var rankings = dbContext.FoodRanking.Where(x => x.Date >= from && x.Date <= to).ToList();
 
                 foreach (var v in relevantFoods)
                 {
-                    var dayRankings = rankings.Where(x => DateHelper.FromKey(x.Value.Day) == v.Day);
-                    v.Food = allFoods[v.FoodId];
-                    v.LoadSideDishes(allFoods);
-                    var categories = v.GetCategories(allCategories);
+                    var dayRankings = rankings.Where(x => x.Date == v.Date);
+                    v.MainFood = allFoods[v.MainFoodId];
+                    var categories = v.GetCategories(dbContext);
                     foreach (var c in categories)
                     {
-                        categoryRankings[c.Key].AddRange(dayRankings.Select(x => x.Value));
+                        categoryRankings[c.Key].AddRange(dayRankings);
                     }
                 }
 
@@ -169,14 +158,8 @@ namespace HomePage.Pages
             }
             else if (CurrentType == StatisticType.SpendingPerGroup)
             {
-                var allItems = new SpendingItemRepository().GetValues().Values;
-                foreach (var item in allItems)
-                {
-                    item.ConvertedDate = DateHelper.FromKey(item.Date);
-                }
-
-                var itemsInRange = allItems.Where(x => x.ConvertedDate >= from && x.ConvertedDate <= to);
-                var allGroups = new SpendingGroupRepository().GetAllSpendingGroups("Both", from, to);
+                var itemsInRange = dbContext.SpendingItem.Where(x => x.TransactionDate >= from && x.TransactionDate <= to).ToList();
+                var allGroups = spendingGroupRepository.GetAllSpendingGroups("Both", from, to);
                 var sortedItems = SpendingModel.SortIntoGroups(itemsInRange, allGroups);
                 GridData = [];
                 foreach (var monthGroup in sortedItems.Values.Where(x => x.Total < 0 ))

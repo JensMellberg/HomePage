@@ -1,4 +1,7 @@
-using Microsoft.AspNetCore.Identity;
+using HomePage.Data;
+using HomePage.Repositories;
+using HomePage.Spending;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
 namespace HomePage
@@ -10,12 +13,26 @@ namespace HomePage
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddTransient<CurrentWordMixRepository>();
+            builder.Services.AddTransient<WordMixResultRepository>();
+            builder.Services.AddTransient<FoodStorageRepository>();
+            builder.Services.AddTransient<IngredientRepository>();
+            builder.Services.AddTransient<FoodRepository>();
+            builder.Services.AddTransient<DayFoodRepository>();
+            builder.Services.AddTransient<RedDayRepository>();
+            builder.Services.AddTransient<SpendingGroupRepository>();
+            builder.Services.AddTransient<ThemeDayRepository>();
+            builder.Services.AddTransient<SignInRepository>();
+            builder.Services.AddTransient<SettingsRepository>();
+            builder.Services.AddTransient<DatabaseLogger>();
             builder.Services.AddRazorPages();
 
             builder.Services.AddSession(options => {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
             });
             builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             /*builder.WebHost.ConfigureKestrel(options =>
             {
@@ -26,7 +43,14 @@ namespace HomePage
                 });
             });*/
 
+            
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                db.Database.Migrate();
+            }
 
             // Configure the HTTP request pipeline.
             app.UseExceptionHandler("/Error");

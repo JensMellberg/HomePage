@@ -1,12 +1,12 @@
-﻿namespace HomePage.Spending
-{
-    public class SpendingGroupRepository : Repository<SpendingGroup>
-    {
-        public override string FileName => "SpendingGroup.txt";
+﻿using HomePage.Data;
 
+namespace HomePage.Spending
+{
+    public class SpendingGroupRepository(AppDbContext dbContext)
+    {
         public IEnumerable<ISpendingGroup> GetAllSpendingGroups(string person, DateTime start, DateTime end)
         {
-            var allGroups = this.GetValues().Values.Where(x => x.Person == person).ToList();
+            var allGroups = dbContext.SpendingGroup.Where(x => x.Person == person).ToList();
 
             return allGroups
                 .Where(x => x.IsDateBasedGroup)

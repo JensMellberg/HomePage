@@ -1,40 +1,36 @@
 using System;
+using HomePage.Data;
 using HomePage.Spending;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
-    public class CreateSpendingGroupModel : PageModel
+    [RequireAdmin]
+    public class CreateSpendingGroupModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public SpendingGroup Group { get; set; }
 
         public string ReturnDate { get; set; }
 
         public bool IsNew { get; set; }
-        public IActionResult OnGet(string groupId, string returnDate)
+        public IActionResult OnGet(Guid groupId, string returnDate)
         {
-            this.TryLogIn();
-            if (this.ShouldRedirectToLogin())
-            {
-                return new RedirectResult("/Login");
-            }
-
-            IsNew = string.IsNullOrEmpty(groupId);
-            if (string.IsNullOrEmpty(groupId))
+            IsNew = groupId == Guid.Empty;
+            if (IsNew)
             {
                 Group = new SpendingGroup();
             }
             else
             {
-                Group = new SpendingGroupRepository().TryGetValue(groupId) ?? new SpendingGroup();
+                Group = dbContext.SpendingGroup.Find(groupId) ?? new SpendingGroup();
             }
 
             ReturnDate = returnDate;
             return Page();
         }
 
-        public IActionResult OnPost(string groupId,
+        public IActionResult OnPost(Guid groupId,
             string delete, 
             string place,
             string ignoreTowardsTotal,
@@ -46,16 +42,20 @@ namespace HomePage.Pages
             string endDate,
             string returnDate)
         {
-            if (!string.IsNullOrEmpty(delete))
+            var existing = dbContext.SpendingGroup.Find(groupId);
+            if (!string.IsNullOrEmpty(delete) && existing != null)
             {
-                new SpendingGroupRepository().Delete(groupId);
+                dbContext.SpendingGroup.Remove(existing);
             }
-            else if (new SpendingGroupRepository().GetValues().Values.Any(x => x.Key != groupId && x.Name == place))
+            else if (dbContext.SpendingGroup.Any(x => x.Id != groupId && x.Name == place))
             {
 
             }
             else
             {
+                List<string> patternList = new();
+                var convertedStartDate = isDateBased == "on" ? DateHelper.FromKey(DateHelper.KeyFromKeyWithZeros(startDate)) : (DateTime?)null;
+                var convertedEndDate = isDateBased == "on" ? DateHelper.FromKey(DateHelper.KeyFromKeyWithZeros(endDate)) : (DateTime?)null;
                 if (isDateBased == "on")
                 {
                     patterns = null;
@@ -66,23 +66,37 @@ namespace HomePage.Pages
                 {
                     startDate = null;
                     endDate = null;
+                    patternList = patterns.Split('¤').ToList();
                 }
 
-                var group = new SpendingGroup { 
-                    Key = groupId,
-                    IgnoreTowardsTotal = ignoreTowardsTotal == "on",
-                    Person = "Both",
-                    Name = place, 
-                    SortOrder = sortOrder,
-                    Color = color,
-                    Patterns = string.IsNullOrEmpty(patterns) ? null : patterns.Split('¤').ToList(),
-                    StartDate = startDate,
-                    EndDate = endDate
-                };
+                if (existing != null)
+                {
+                    existing.IgnoreTowardsTotal = ignoreTowardsTotal == "on";
+                    existing.Name = place;
+                    existing.SortOrder = sortOrder;
+                    existing.StartDate = convertedStartDate;
+                    existing.EndDate = convertedEndDate;
+                    existing.Patterns = patternList;
+                } else
+                {
+                    var group = new SpendingGroup
+                    {
+                        Id = groupId,
+                        IgnoreTowardsTotal = ignoreTowardsTotal == "on",
+                        Person = "Both",
+                        Name = place,
+                        SortOrder = sortOrder,
+                        Color = color,
+                        Patterns = patternList,
+                        StartDate = convertedStartDate,
+                        EndDate = convertedEndDate
+                    };
 
-                new SpendingGroupRepository().SaveValue(group);
+                    dbContext.SpendingGroup.Add(group);
+                }
             }
 
+            dbContext.SaveChanges();
             return Redirect($"/Spending?dateMonth="+returnDate);
         }
     }

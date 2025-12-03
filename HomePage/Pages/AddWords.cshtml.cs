@@ -1,63 +1,56 @@
+using HomePage.Data;
+using HomePage.Model;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using static HomePage.WordMixResultValidator;
 
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class AddWordsModel : PageModel
+    [RequireAdmin]
+    public class AddWordsModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public List<(ExtraWord model, bool canDelete, bool canApprove)> AllWords { get; set; }
 
         public string VisibilityText(bool canDelete) => canDelete ? "visible" : "hidden";
 
-        public string LoggedInPerson { get; set; }
-
         public IActionResult OnGet()
         {
-            this.TryLogIn();
-            if (this.ShouldRedirectToLogin())
-            {
-                return new RedirectResult("/Login");
-            }
-
-            LoggedInPerson = SignInRepository.LoggedInPerson(HttpContext.Session)?.Name!;
-            AllWords = new ExtraWordRepository().GetValues().Values
+            AllWords = dbContext.ExtraWord
                 .OrderBy(x => x.AnnaApproved && x.JensApproved ? 1 : 0)
                 .ThenBy(x => x.Word)
-                .Select(x => (x, x.Creator == LoggedInPerson, CanApprove(x))).ToList();
+                .ToList()
+                .Select(x => (x, x.Creator == LoggedInPerson?.Name, CanApprove(x))).ToList();
            
             return Page();
-            bool CanApprove(ExtraWord word) => !word.AnnaApproved && LoggedInPerson == Person.Anna.Name || !word.JensApproved && LoggedInPerson == Person.Jens.Name;
+            bool CanApprove(ExtraWord word) => !word.AnnaApproved && LoggedInPerson?.Name == Person.Anna.Name || !word.JensApproved && LoggedInPerson?.Name == Person.Jens.Name;
         }
 
         public IActionResult OnPost(string action, string word)
         {
-            var repo = new ExtraWordRepository();
-            var loggedInPerson = SignInRepository.LoggedInPerson(HttpContext.Session)?.Name;
-            if (string.IsNullOrEmpty(loggedInPerson))
+            if (string.IsNullOrEmpty(LoggedInPerson?.Name))
             {
                 return new BadRequestResult();
             }
 
             if (action == "delete")
             {
-                var existing = repo.TryGetValue(word);
-                if (existing?.Creator == loggedInPerson)
+                var existing = dbContext.ExtraWord.FirstOrDefault(x => x.Word == word);
+                if (existing?.Creator == LoggedInPerson.Name)
                 {
-                    repo.Delete(word);
+                    dbContext.ExtraWord.Remove(existing);
+                    dbContext.SaveChanges();
                 }
 
                 return new JsonResult(new { success = true });
             }
             else if (action == "approve")
             {
-                var existing = repo.TryGetValue(word);
-                if (existing?.AnnaApproved == false && loggedInPerson == Person.Anna.Name)
+                var existing = dbContext.ExtraWord.FirstOrDefault(x => x.Word == word);
+                if (existing?.AnnaApproved == false && LoggedInPerson.Name == Person.Anna.Name)
                 {
                     existing.AnnaApproved = true;
                 }
-                else if (existing?.JensApproved == false && loggedInPerson == Person.Jens.Name)
+                else if (existing?.JensApproved == false && LoggedInPerson.Name == Person.Jens.Name)
                 {
                     existing.JensApproved = true;
                 }
@@ -66,27 +59,28 @@ namespace HomePage.Pages
                     return new JsonResult(new { success = false });
                 }
 
-                repo.SaveValue(existing);
+                dbContext.SaveChanges();
                 return new JsonResult(new { success = true });
             }
             else if (action == "new")
             {
-                if (GetAllWords().Contains(word.ToUpper()) || repo.TryGetValue(word.ToLower()) != null)
+                if (GetAllWords(dbContext).Contains(word.ToUpper()) || dbContext.ExtraWord.Any(x => x.Word == word.ToLower()))
                 {
                     return new JsonResult(new { success = false });
                 }
 
-                var newWord = new ExtraWord { Key = word.ToLower(), Creator = loggedInPerson };
-                if (loggedInPerson == Person.Jens.Name)
+                var newWord = new ExtraWord { Word = word.ToLower(), Creator = LoggedInPerson.Name };
+                if (LoggedInPerson.Name == Person.Jens.Name)
                 {
                     newWord.JensApproved = true;
                 }
-                else if (loggedInPerson == Person.Anna.Name)
+                else if (LoggedInPerson.Name == Person.Anna.Name)
                 {
                     newWord.AnnaApproved = true;
                 }
 
-                repo.SaveValue(newWord);
+                dbContext.ExtraWord.Add(newWord);
+                dbContext.SaveChanges();
                 return new JsonResult(new { success = true });
             }
 

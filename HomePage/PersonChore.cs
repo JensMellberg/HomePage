@@ -2,19 +2,19 @@
 {
     public abstract class PersonChore
     {
-        protected abstract string GetLastUpdated(Settings settings);
+        protected abstract string GetLastUpdated(SettingsTemp settings);
 
-        protected abstract void SetLastUpdated(Settings settings, string date);
+        protected abstract void SetLastUpdated(SettingsTemp settings, string date);
 
-        protected abstract string GetLastUpdatedPerson(Settings settings);
+        protected abstract string GetLastUpdatedPerson(SettingsTemp settings);
 
-        protected abstract void SetLastUpdatedPerson(Settings settings, string person);
+        protected abstract void SetLastUpdatedPerson(SettingsTemp settings, string person);
 
         protected virtual string ConvertStreakPerson(string person) => person;
 
-        public int GetStreak(string person) => GetStreak(new SettingsRepository().Get(), person);
+        public int GetStreak(string person) => GetStreak(new SettingsRepositoryTemp().Get(), person);
 
-        protected int GetStreak(Settings settings, string person)
+        protected int GetStreak(SettingsTemp settings, string person)
         {
             person = ConvertStreakPerson(person);
             var allStreaks = settings.Streaks;
@@ -23,7 +23,7 @@
             return int.TryParse(streak, out var intStreak) ? intStreak : 0;
         }
 
-        protected void UpdateStreak(Settings settings, string person, int count)
+        protected void UpdateStreak(SettingsTemp settings, string person, int count)
         {
             person = ConvertStreakPerson(person);
             var allStreaks = settings.Streaks;
@@ -45,7 +45,7 @@
             }
 
             settings.Streaks = allStreaks;
-            new SettingsRepository().Save(settings);
+            new SettingsRepositoryTemp().Save(settings);
         }
 
         protected abstract int DaysBetween { get; }
@@ -54,7 +54,7 @@
 
         public void TryResetStreak(List<string> exemptPersons)
         {
-            var settings = new SettingsRepository().Get();
+            var settings = new SettingsRepositoryTemp().Get();
             if (DateHelper.AdjustedDateNow.Date > GetDateToShow(settings))
             {
                 var nextPerson = GetNextPerson(settings);
@@ -67,9 +67,9 @@
 
         public string WasDoneToday()
         {
-            var settings = new SettingsRepository().Get();
+            var settings = new SettingsRepositoryTemp().Get();
             var lastUpdated = GetLastUpdated(settings);
-            if (lastUpdated == DateHelper.ToKey(DateHelper.DateNow))
+            if (lastUpdated == DateHelper.ToKey(DateHelper.DateTimeNow))
             {
                 return GetLastUpdatedPerson(settings);
             }
@@ -79,7 +79,7 @@
 
         public string ChorePerson()
         {
-            var settings = new SettingsRepository().Get();
+            var settings = new SettingsRepositoryTemp().Get();
             if (DateHelper.AdjustedDateNow >= GetDateToShow(settings))
             {
                 return GetNextPerson(settings);
@@ -88,16 +88,16 @@
             return null;
         }
 
-        private int IncreaseStreak(Settings settings, string person)
+        private int IncreaseStreak(SettingsTemp settings, string person)
         {
             var current = GetStreak(settings, person);
             UpdateStreak(settings, person, current + 1);
             return current + 1;
         }
 
-        protected virtual string GetNextPerson(Settings settings) => (GetLastUpdatedPerson(settings) ?? Person.Anna.Name) == Person.Jens.Name ? Person.Anna.Name : Person.Jens.Name;
+        protected virtual string GetNextPerson(SettingsTemp settings) => (GetLastUpdatedPerson(settings) ?? Person.Anna.Name) == Person.Jens.Name ? Person.Anna.Name : Person.Jens.Name;
 
-        private DateTime GetDateToShow(Settings settings)
+        private DateTime GetDateToShow(SettingsTemp settings)
         {
             var lastUpdated = GetLastUpdated(settings);
             var lastUpdatedDate = string.IsNullOrEmpty(lastUpdated) ? DateTime.MinValue : DateHelper.FromKey(lastUpdated);
@@ -106,7 +106,7 @@
 
         public int Update()
         {
-            var repo = new SettingsRepository();
+            var repo = new SettingsRepositoryTemp();
             var settings = repo.Get();
             var lastUpdatedPerson = GetLastUpdatedPerson(settings);
             var streak = 0;

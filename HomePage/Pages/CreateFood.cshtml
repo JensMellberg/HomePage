@@ -6,9 +6,9 @@
 
 <div class="page-wrapper mainscreen">
     <form class="dayfood-form" method="post" id="theForm">
-        <input type="hidden" name="foodId" value="@Model.Food.Key" />
+        <input type="hidden" name="foodId" value="@Model.Food.Id" />
         <input type="hidden" name="date" value="@Model.DateKey" />
-        <input type="hidden" name="ingredients" value="@Model.Food.ClientEncodedIngredients" id="ingredients" />
+        <input type="hidden" name="ingredients" value="@Html.Raw(Model.Food.ClientEncodedIngredients)" id="ingredients" />
         <input type="hidden" name="delete" id="deleteHidden" value="" />
         <div class="input-wrapper">
             <span>Maträtt</span>
@@ -29,8 +29,8 @@
 
         <div class="input-wrapper">
             <span>Kategorier</span>
-            <input id="categoryids" type="hidden" name="categories" value="@string.Join(',', Model.Food.CategoriyIds ?? [])" />
-            <div onclick="showCategoryPicker('@Model.Food.Key')" class="category-shower">@string.Join(", ", Model.Food.Categories.Select(xa => xa.Name))</div>
+            <input id="categoryids" type="hidden" name="categories" value="@string.Join(',', Model.Food.Categories.Select(x => x.Key))" />
+            <div onclick="showCategoryPicker('@Model.Food.Id')" class="category-shower">@string.Join(", ", Model.Food.Categories.Select(xa => xa.Name))</div>
         </div>
 
         <div class="input-wrapper">

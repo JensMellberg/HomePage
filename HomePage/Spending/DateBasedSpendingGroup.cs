@@ -6,8 +6,8 @@
         public DateBasedSpendingGroup(SpendingGroup source)
         {
             this.source = source;
-            this.startDate = DateHelper.FromKey(source.StartDate);
-            this.endDate = DateHelper.FromKey(source.EndDate);
+            startDate = source.StartDate ?? throw new Exception();
+            endDate = source.EndDate ?? throw new Exception();
         }
 
         public string Name => source.Name;
@@ -18,9 +18,9 @@
 
         public string Color => source.Color;
 
-        public bool IsMatch(SpendingItem item) => item.ConvertedDate >= this.startDate && item.ConvertedDate <= this.endDate;
+        public bool IsMatch(SpendingItem item) => item.TransactionDate >= startDate && item.TransactionDate <= endDate;
 
-        public string Id => source.Key;
+        public Guid Id => source.Id;
 
         public DateTime startDate;
 

@@ -10,7 +10,7 @@
         <input type="hidden" name="delete" id="deleteHidden" value="" />
         <div class="input-wrapper">
             <span>Datum</span>
-            <input type="date" name="date" required value="@Model.Activity.Date" />
+            <input type="date" name="date" required value="@DateHelper.KeyWithZerosFromKey(DateHelper.ToKey(Model.Activity.CalendarDate))" />
         </div>
         <div class="input-wrapper">
             <span>Text</span>

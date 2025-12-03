@@ -19,36 +19,36 @@
         <a href="WeekFood?@Model.NextWeekQs">Nästa vecka</a>
     </div>
 
-    <input type="hidden" id="loggedInPerson" value="@Model.LoggedInPerson" />
+    <input type="hidden" id="loggedInPerson" value="@Model.LoggedInPerson?.Name" />
     <div class="food-grid">
         @foreach (var dayFood in Model.DayFoods) {
             <div class="food-row">
-                <span class="weekday-cell food-grid-cell"> @DateHelper.WeekNumberToString[(int)dayFood.Day.DayOfWeek] @dayFood.Day.Day/@dayFood.Day.Month</span>
+                <span class="weekday-cell food-grid-cell"> @DateHelper.WeekNumberToString[(int)dayFood.Date.DayOfWeek] @dayFood.Date.Day/@dayFood.Date.Month</span>
                 <div class="food-cell food-grid-cell">
-                    @if (!string.IsNullOrEmpty(dayFood.Food?.RecipeUrl))
+                    @if (!string.IsNullOrEmpty(dayFood.MainFood?.RecipeUrl))
                     {
-                        <div class="recipelinkplaceholder" linkurl="@dayFood.Food?.RecipeUrl"></div>
+                        <div class="recipelinkplaceholder" linkurl="@dayFood.MainFood?.RecipeUrl"></div>
                     }
-                    @if (dayFood.Food?.InFolder == true)
+                    @if (dayFood.MainFood?.InFolder == true)
                     {
                         <span class="recipe-button">📗</span>
                     }
-                    @if(string.IsNullOrEmpty(dayFood.FoodId)) {
-                        <a href="CreateDayFood?@DateHelper.FormatDateForQueryString(dayFood.Day)">Lägg till mat</a>
+                    @if(dayFood.MainFoodId == Guid.Empty) {
+                        <a href="CreateDayFood?@DateHelper.FormatDateForQueryString(dayFood.Date)">Lägg till mat</a>
                     }
-                    else if (!Model.IsLoggedIn || Model.FoodRankings[DateHelper.ToKey(dayFood.Day)].Any(x => !string.IsNullOrEmpty(x.FoodId))) {
+                    else if (!Model.IsLoggedIn || Model.FoodRankings[DateHelper.ToKey(dayFood.Date)].Any(x => !string.IsNullOrEmpty(x.FoodId))) {
                         <span>@dayFood.CombinedName</span>
                     }
                     else {
-                        <a href="CreateDayFood?@DateHelper.FormatDateForQueryString(dayFood.Day)">@dayFood.CombinedName</a>
+                        <a href="CreateDayFood?@DateHelper.FormatDateForQueryString(dayFood.Date)">@dayFood.CombinedName</a>
                     }
                 </div>
-                @foreach (var ranking in Model.FoodRankings[DateHelper.ToKey(dayFood.Day)]) {
-                    if (Model.IsInFuture(ranking.Day)) {
+                @foreach (var ranking in Model.FoodRankings[DateHelper.ToKey(dayFood.Date)]) {
+                    if (Model.IsInFuture(ranking.Date)) {
                         <span class="food-grid-cell" > </span>
                     }
                     else {
-                        <span class="food-grid-cell" onclick="makeRanking('@ranking.Day', '@ranking.Person')"> @ranking.Person: @ranking.RankingText</span>
+                        <span class="food-grid-cell" onclick="makeRanking('@DateHelper.ToKey(ranking.Date)', '@ranking.Person')"> @ranking.Person: @ranking.RankingText</span>
                     }
                 }
             </div>

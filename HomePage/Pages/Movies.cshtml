@@ -26,7 +26,7 @@
     </div>
     <span>Senaste filmen: @Model.LastSeen.Name</span>
     <input type="hidden" value="@Model.AllMoviesJson" id="moviesJson" />
-    <input type="hidden" id="loggedInPerson" value="@Model.LoggedInPerson" />
+    <input type="hidden" id="loggedInPerson" value="@Model.LoggedInPerson?.Name" />
     <div class="food-grid">
         @foreach (var movie in Model.Movies)
         {
@@ -37,15 +37,15 @@
                 <div class="food-grid-cell">
                     @if (movie.IsCompleted) {
                         <div class="food-grid-cell-inner">
-                            <a href="CreateMovie?Id=@movie.Key">
+                            <a href="CreateMovie?Id=@movie.Id">
                                 @movie.Name
                             </a>
-                            <span onclick="makeRanking('@movie.Key', '@Person.Jens.Name')"> @movie.RankingText(Person.Jens)</span>
-                            <span onclick="makeRanking('@movie.Key', '@Person.Anna.Name')"> @movie.RankingText(Person.Anna)</span>
+                            <span onclick="makeRanking('@movie.Id', '@Person.Jens.Name')"> @movie.RankingText(Person.Jens)</span>
+                            <span onclick="makeRanking('@movie.Id', '@Person.Anna.Name')"> @movie.RankingText(Person.Anna)</span>
                         </div>
                     }
                     else {
-                        <a href="CreateMovie?Id=@movie.Key">
+                        <a href="CreateMovie?Id=@movie.Id">
                             @movie.Name
                         </a>
                     }
@@ -60,7 +60,7 @@
                     }
                     else
                     {
-                        <input type="checkbox" class="todo-checkbox" onchange="markCompleted('@movie.Key')" />
+                        <input type="checkbox" class="todo-checkbox" onchange="markCompleted('@movie.Id')" />
                     }
                 </div>
             </div>

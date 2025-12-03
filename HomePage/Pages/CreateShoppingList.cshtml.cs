@@ -1,13 +1,20 @@
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Text.Json;
+using HomePage.Data;
+using HomePage.Model;
+using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class CreateShoppingListModel : PageModel
+    public class CreateShoppingListModel(AppDbContext dbContext, 
+        FoodStorageRepository foodStorageRepository,
+        IngredientRepository ingredientRepository,
+        DayFoodRepository dayFoodRepository, 
+        SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public string ShoppingList { get; set; }
 
@@ -20,39 +27,30 @@ namespace HomePage.Pages
 
         public IActionResult OnGet(string from, string to)
         {
-            this.TryLogIn();
-            if (this.ShouldRedirectToLogin())
-            {
-                return new RedirectResult("Login");
-            }
-
-            PossibleIngredients = new IngredientRepository().ClientEncodedList();
+            PossibleIngredients = ingredientRepository.ClientEncodedList();
 
             var fromDate = DateHelper.FromKey(DateHelper.KeyFromKeyWithZeros(from));
             var toDate = DateHelper.FromKey(DateHelper.KeyFromKeyWithZeros(to));
-            var includedDayFoods = new DayFoodRepository().GetValues().Values.Where(x => x.Day >= fromDate && x.Day <= toDate);
-            var allFoods = new FoodRepository().GetValues();
-            var allIngredients = new IngredientRepository().GetValues();
-            var ingredients = new Dictionary<string, IngredientInstance>();
+            var includedDayFoods = dayFoodRepository.GetPopulatedDayFood().Where(x => x.Date >= fromDate && x.Date <= toDate);
+            var allIngredients = ingredientRepository.IngredientsById;
+            var ingredients = new Dictionary<Guid, IngredientInstance>();
             foreach (var dayFood in includedDayFoods)
             {
-                dayFood.LoadSideDishes(allFoods);
-                dayFood.Food = allFoods[dayFood.FoodId];
                 foreach (var sideDish in dayFood.SideDishes)
                 {
-                    AddIngredientsFromFood(sideDish, dayFood.PortionMultiplier);
+                    AddIngredientsFromFood(sideDish, dayFood.Portions);
                 }
 
-                AddIngredientsFromFood(dayFood.Food, dayFood.PortionMultiplier);
+                AddIngredientsFromFood(dayFood.MainFood, dayFood.Portions);
             }
 
             // Remove existing items from food storage.
-            var foodStorageItems = new FoodStorageRepository().GetIngredients(allIngredients)
+            var foodStorageItems = foodStorageRepository.GetIngredients()
                 .ToDictionary(x => x.IngredientId, x => x);
-            foreach (var standardItem in allIngredients.Values.Where(x => x.IsStandard && !ingredients.ContainsKey(x.Key) && !foodStorageItems.ContainsKey(x.Key)))
+            foreach (var standardItem in allIngredients.Values.Where(x => x.IsStandard && !ingredients.ContainsKey(x.Id) && !foodStorageItems.ContainsKey(x.Id)))
             {
-                var instance = IngredientInstance.Create(allIngredients, standardItem.Key, standardItem.StandardAmount, standardItem.StandardUnit);
-                ingredients.Add(standardItem.Key, instance);
+                var instance = IngredientInstance.Create(allIngredients[standardItem.Id], standardItem.StandardAmount, standardItem.StandardUnit);
+                ingredients.Add(standardItem.Id, instance);
             }
 
             var sb = new StringBuilder();
@@ -92,7 +90,8 @@ namespace HomePage.Pages
 
             void AddIngredientsFromFood(Food food, double multipler)
             {
-                foreach (var ingredient in food.GetParsedIngredients(allIngredients))
+                var parsed = food.FoodIngredients.Select(x => x.ToIngredientInstance());
+                foreach (var ingredient in parsed)
                 {
                     ingredient.MultiplyAmount(multipler);
                     AddIngredient(ingredient);
@@ -101,28 +100,26 @@ namespace HomePage.Pages
 
             void AddIngredient(IngredientInstance instance)
             {
-                if (!ingredients.TryAdd(instance.IngredientId, instance))
+                if (!ingredients.TryAdd(instance.IngredientId ?? Guid.Empty, instance))
                 {
-                    ingredients[instance.IngredientId].Combine(instance);
+                    ingredients[instance.IngredientId ?? Guid.Empty].Combine(instance);
                 }
             }
         }
 
         public IActionResult OnPost(List<IngredientModel> ingredients, string action)
         {
-            this.TryLogIn();
-            if (this.ShouldRedirectToLogin())
+            if (!IsAdmin)
             {
                 return BadRequest();
             }
 
-            var repo = new FoodStorageRepository();
-            var allIngredients = new IngredientRepository().GetValues();
-            var storageItems = repo.GetValues().Values.Select(x => x.ToIngredientInstance(allIngredients)).ToDictionary(x => x.IngredientId, x => x);
+            var storageItems = foodStorageRepository.GetIngredients().ToDictionary(x => x.IngredientId, x => x);
+            var allIngredients = ingredientRepository.IngredientsById;
             foreach (var ingr in ingredients)
             {
                 var doubleAmount = ingr.Amount.ToDouble();
-                var instance = IngredientInstance.Create(allIngredients, ingr.Id, doubleAmount, ingr.Unit);
+                var instance = IngredientInstance.Create(allIngredients[ingr.Id], doubleAmount, ingr.Unit);
                 if (storageItems.TryGetValue(instance.IngredientId, out var storageItem))
                 {
                     storageItem.Combine(instance);
@@ -135,11 +132,13 @@ namespace HomePage.Pages
 
             var itemsToStore = storageItems.Values.Select(x => new FoodStorageItem
             {
-                IngredientId = x.IngredientId,
+                IngredientId = x.IngredientId ?? Guid.Empty,
                 Amount = x.Amount.Amount
             });
 
-            repo.SaveValues(itemsToStore.ToDictionary(x => x.IngredientId, x => x));
+            dbContext.FoodStorage.RemoveRange(dbContext.FoodStorage);
+            dbContext.FoodStorage.AddRange(itemsToStore);
+            dbContext.SaveChanges();
             return new JsonResult(new { success = true });
         }
 
@@ -147,7 +146,7 @@ namespace HomePage.Pages
 
     public class IngredientModel
     {
-        public string Id { get; set; }
+        public Guid Id { get; set; }
 
         public string Amount { get; set; }
 

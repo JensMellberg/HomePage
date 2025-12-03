@@ -13,16 +13,16 @@
             }
         }
 
-        protected override string GetLastUpdated(Settings settings) => settings.LastFlowerTime;
+        protected override string GetLastUpdated(SettingsTemp settings) => settings.LastFlowerTime;
 
-        protected override string GetLastUpdatedPerson(Settings settings) => settings.LastFlowerPerson;
+        protected override string GetLastUpdatedPerson(SettingsTemp settings) => settings.LastFlowerPerson;
 
-        protected override void SetLastUpdated(Settings settings, string date)
+        protected override void SetLastUpdated(SettingsTemp settings, string date)
         {
             settings.LastFlowerTime = date;
         }
 
-        protected override void SetLastUpdatedPerson(Settings settings, string person)
+        protected override void SetLastUpdatedPerson(SettingsTemp settings, string person)
         {
             settings.LastFlowerPerson = person;
         }

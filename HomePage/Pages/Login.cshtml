@@ -5,11 +5,16 @@
 }
 
 <div class="page-wrapper mainscreen">
+    <a href="/NewAccount">Skapa konto</a>
     <div class="dayfood-form" method="post">
         <span>Logga in</span>
         <div class="input-wrapper">
+            <span>Användarnamn</span>
+            <input type="text" id="username" required/>
+        </div>
+        <div class="input-wrapper">
             <span>Lösenord</span>
-            <input type="password" id="password" required/>
+            <input type="password" id="password" required />
         </div>
 
         <div class="button-wrapper">
@@ -22,15 +27,17 @@
 <script>
     function logIn() {
         const password = $('#password').val()
+        const username = $('#username').val()
         $.ajax({
             type: "POST",
             url: "/Login",
             data: {
+                username: username,
                 password: password
             },
             success: (e) => {
                 if (!e.success) {
-                    Alert.openAlert('Fel lösenord');
+                    Alert.openAlert('Fel användarnamn eller lösenord.');
                 } else {
                     if (e.url) {
                         window.location.href = e.url;

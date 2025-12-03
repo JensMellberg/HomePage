@@ -21,6 +21,6 @@
 
         private List<SpendingGroupPattern> patterns;
 
-        public string Id => source.Key;
+        public Guid Id => source.Id;
     }
 }

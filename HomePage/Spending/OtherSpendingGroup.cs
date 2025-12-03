@@ -10,7 +10,7 @@
 
         public bool IsMatch(SpendingItem item) => true;
 
-        public string Id => null;
+        public Guid Id => Guid.Empty;
 
         public string Color => "#d67dd7";
     }

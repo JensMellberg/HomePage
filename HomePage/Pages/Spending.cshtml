@@ -33,8 +33,8 @@
                 <span class="spending-group-title">@group.Name: @group.Total </span>
             </div>
             
-            @foreach (var item in group.Entries.OrderByDescending(x => x.ConvertedDate)) {
-                <div class="spending-entry-wrapper" onclick="setItemGroup(event, '@item.Key')">
+            @foreach (var item in group.Entries.OrderByDescending(x => x.TransactionDate)) {
+                <div class="spending-entry-wrapper" onclick="setItemGroup(event, '@item.Id')">
                     <span class="spending-group-entry place-entry">@item.Place</span>
                     <span class="spending-group-entry date-entry">@DateHelper.KeyWithZerosFromKey(item.Date)</span>
                     <span class="spending-group-entry amount-entry">@item.Amount</span>

@@ -1,36 +1,33 @@
+using HomePage.Data;
+using HomePage.Model;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class CreateToDoModel : PageModel
+    [RequireAdmin]
+    public class CreateToDoModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public ToDoItem ToDo { get; set; }
-        public IActionResult OnGet(string id)
+        public IActionResult OnGet(Guid id)
         {
-            this.TryLogIn();
-            if (this.ShouldRedirectToLogin())
-            {
-                return new RedirectResult("/Login");
-            }
-
-            if (string.IsNullOrEmpty(id))
+            if (id == Guid.Empty)
             {
                 ToDo = new ToDoItem();
             }
             else
             {
-                ToDo = new ToDoRepository().TryGetValue(id) ?? new ToDoItem();
+                ToDo = dbContext.ToDo.Single(x => x.Key == id);
             }
 
             return Page();
         }
 
-        public IActionResult OnPost(string id, string name)
+        public IActionResult OnPost(Guid id, string name)
         {
             var toDo = new ToDoItem { Key = id, Name = name };
-            new ToDoRepository().SaveValue(toDo);
+            dbContext.ToDo.Add(toDo);
+            dbContext.SaveChanges();
 
             return Redirect($"/ToDo");
         }

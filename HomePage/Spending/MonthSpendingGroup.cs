@@ -18,6 +18,6 @@ namespace HomePage
 
         public string Color { get; private set; } = source.Color;
 
-        public string Id { get; private set; } = source.Id;
+        public Guid Id { get; private set; } = source.Id;
     }
 }

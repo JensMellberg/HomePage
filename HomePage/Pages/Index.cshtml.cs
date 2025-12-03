@@ -1,6 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Identity;
+using HomePage.Data;
+using HomePage.Model;
+using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -26,9 +26,13 @@ namespace HomePage.Pages
     }
 
     [IgnoreAntiforgeryToken]
-    public class IndexModel : PageModel
+    public class IndexModel(AppDbContext dbContext, 
+        RedDayRepository redDayRepository, 
+        ThemeDayRepository themeDayRepository, 
+        DayFoodRepository dayFoodRepository, 
+        SignInRepository signInRepository, 
+        SettingsRepository settingsRepository) : BasePage(signInRepository)
     {
-        private readonly ILogger<IndexModel> _logger;
 
         public int Day { get; set; }
 
@@ -62,22 +66,16 @@ namespace HomePage.Pages
 
         public int MilliSecondsUntilNextPicture { get; set; }
 
-        public IndexModel(ILogger<IndexModel> logger)
-        {
-            _logger = logger;
-        }
-
         public void OnGet()
         {
-            this.TryLogIn();
-            var today = DateHelper.DateNow;
+            var today = DateHelper.DateTimeNow;
             Day = today.Day;
             DayOfWeek = DateHelper.WeekNumberToString[(int)today.DayOfWeek];
             Month = DateHelper.MonthNumberToString[today.Month];
 
-            Activities = new CalendarActivityRepository().GetValues().Values.Where(x =>
+            Activities = dbContext.CalendarActivity.ToList().Where(x =>
             {
-                var startDay = DateHelper.FromKey(x.Date);
+                var startDay = x.CalendarDate;
                 if (x.IsReoccuring)
                 {
                     startDay = startDay.AddYears(today.Year - startDay.Year);
@@ -99,13 +97,13 @@ namespace HomePage.Pages
             }
 
             (Day % 2 == 0 ? AnnaIcons : JensIcons).Add(new PersonIcon { Id = "Litter" });
-            AddChore(SettingsRepository.FlossChore);
-            AddChore(SettingsRepository.FlossChoreJens);
-            AddChore(SettingsRepository.FlowerChore);
-            AddChore(SettingsRepository.BedSheetChore);
-            AddChore(SettingsRepository.WorkoutChore);
-            AddChore(SettingsRepository.EyeChore);
-            AddChore(SettingsRepository.SinkChore);
+            AddChore(SettingsRepositoryTemp.FlossChore);
+            AddChore(SettingsRepositoryTemp.FlossChoreJens);
+            AddChore(SettingsRepositoryTemp.FlowerChore);
+            AddChore(SettingsRepositoryTemp.BedSheetChore);
+            AddChore(SettingsRepositoryTemp.WorkoutChore);
+            AddChore(SettingsRepositoryTemp.EyeChore);
+            AddChore(SettingsRepositoryTemp.SinkChore);
 
             FixWeekQs = GetFirstOfWeekQueryString(today);
             if (Day == 16)
@@ -117,24 +115,18 @@ namespace HomePage.Pages
                 AnniverseryString = $"{yearsPassed} år{monthString}";
             }
 
-            new SettingsRepository().PerformBackupAsync(false);
-            var dayFoods = new DayFoodRepository().GetValues();
-            dayFoods.TryGetValue(DateHelper.ToKey(today), out var todaysFood);
-            var allFoods = new FoodRepository().GetValues();
-            if (!string.IsNullOrEmpty(todaysFood?.FoodId))
-            {
-                todaysFood.Food = allFoods[todaysFood.FoodId];
-                todaysFood?.LoadSideDishes(allFoods);
-                TodayFood = todaysFood;
-            }
+            settingsRepository.PerformBackupAsync(false);
+            var dayFoods = dayFoodRepository.GetPopulatedDayFood();
+            var todaysFood = dayFoods.FirstOrDefault(x => x.Date == today.Date);
+            TodayFood = todaysFood;
 
             var nextWeekDays = new List<string>();
             for (var i = 0; i < 7; i++)
             {
-                var dayKey = DateHelper.ToKey(today.AddDays(i));
-                if (!dayFoods.ContainsKey(dayKey))
+                var day = today.Date.AddDays(i);
+                if (!dayFoods.Any(x => x.Date == day))
                 {
-                    nextWeekDays.Add(dayKey);
+                    nextWeekDays.Add(DateHelper.ToKey(day));
                 }
             }
 
@@ -143,9 +135,9 @@ namespace HomePage.Pages
             MilliSecondsUntilNextPicture = ImageRepository.Instance.SecondsUntilNextUpdate * 1000;
             ImageUrl = imagePair.Item1;
             ImageTaken = imagePair.Item2;
-            RedDay = new RedDayRepository().InfoForDate(today);
+            RedDay = redDayRepository.InfoForDate(today.Date);
             //new ThemeDayRepository().UpdateFromJsonFile();
-            ThemeDays = new ThemeDayRepository().InfoForDate(today);
+            ThemeDays = themeDayRepository.InfoForDate(today.Date);
 
             void AddChore(PersonChore chore)
             {
@@ -174,26 +166,36 @@ namespace HomePage.Pages
             return DateHelper.FormatDateForQueryString(firstDayOfWeek);
         }
 
-        public IActionResult OnPost(string date, string foodId)
+        public IActionResult OnPost(string date, Guid foodId)
         {
-            if (string.IsNullOrEmpty(foodId))
+            if (foodId == Guid.Empty)
             {
-                var allFoods = new FoodRepository().GetValues().Values.Where(x => !x.IsSideDish).ToArray();
+                var allFoods = dbContext.Food.Where(x => !x.IsSideDish).ToArray();
                 var randomizedFoodIndex = new Random().Next(allFoods.Length);
                 var randomizedFood = allFoods[randomizedFoodIndex];
-                return new JsonResult(new { id = randomizedFood.Key, food = randomizedFood.Name });
+                return new JsonResult(new { id = randomizedFood.Id, food = randomizedFood.Name });
             }
             else
             {
-                if (this.ShouldRedirectToLogin())
+                var redirectResult = GetPotentialClientRedirectResult(true, true);
+                if (redirectResult != null)
                 {
-                    return new JsonResult(new { redirectUrl = "Login" });
+                    return redirectResult;
                 }
 
+                var idToUse = Guid.NewGuid();
+                var foodConnection = new DayFoodDishConnection
+                {
+                    DayFoodId = idToUse,
+                    FoodId = foodId,
+                    IsMainDish = true
+                };
+
                 var dateTime = DateHelper.FromKey(date);
-                var dayFood = new DayFood() { Day = dateTime, FoodId = foodId };
-                new DayFoodRepository().SaveValue(dayFood);
-                return new JsonResult(new { redirectUrl = "WeekFood?" + GetFirstOfWeekQueryString(dateTime) });
+                var dayFood = new DayFood { Id = idToUse, Date = dateTime, Portions = 1, FoodConnections = [foodConnection] };
+                dbContext.DayFood.Add(dayFood);
+                dbContext.SaveChanges();
+                return Utils.CreateRedirectClientResult("WeekFood?" + GetFirstOfWeekQueryString(dateTime));
             }
         }
     }

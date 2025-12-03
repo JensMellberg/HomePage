@@ -45,13 +45,13 @@
                         <span class="recipe-button">📗</span>
                     }
                     @if (food.HasHistory) {
-                        <div class="foodhistoryplaceholder" foodId="@food.Key"></div>
+                        <div class="foodhistoryplaceholder" foodId="@food.Id"></div>
                     }
-                    <a href="CreateFood?foodId=@food.Key">
-                        @food.Name (@food.CategoriyIds.Count)
+                    <a href="CreateFood?foodId=@food.Id">
+                        @food.Name (@food.Categories.Count)
                     </a>
                 </div>
-                @foreach (var ranking in Model.FoodRankings[food.Key]) {
+                @foreach (var ranking in Model.FoodRankings[food.Id]) {
                     <span class="food-grid-cell">
                         @ranking
                     </span>
@@ -72,8 +72,8 @@
                     {
                         <span class="recipe-button">📗</span>
                     }
-                    <a href="CreateFood?foodId=@food.Key">
-                        @food.Name (@food.CategoriyIds.Count)
+                    <a href="CreateFood?foodId=@food.Id">
+                        @food.Name (@food.Categories.Count)
                     </a>
                 </div>
             </div>

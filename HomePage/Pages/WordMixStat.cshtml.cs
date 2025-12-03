@@ -1,9 +1,10 @@
+using HomePage.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
-    public class WordMixStatModel : PageModel
+    public class WordMixStatModel(AppDbContext dbContext, SignInRepository signInRepository, DatabaseLogger logger) : BasePage(signInRepository)
     {
         public string PersonClass { get; set; }
 
@@ -11,14 +12,14 @@ namespace HomePage.Pages
 
         public string BoardString { get; set; }
 
-        public void OnGet(string key)
+        public void OnGet(Guid key)
         {
-            var result = new WordMixResultRepository()
-                .TryGetValue(key);
+            var result = dbContext.WordMixResult.FirstOrDefault(x => x.Id == key);
 
-            if (result == null || DateHelper.FromKey(result.Day).Date >= DateHelper.DateNow.Date)
+            if (result == null || result.Date >= DateHelper.DateNow)
             {
-                throw new Exception("Tried to access word mix result that was not allowed. " + key);
+                logger.Error("Tried to access word mix result that was not allowed. " + key, LoggedInPerson?.Name);
+                return;
             }
 
             PersonClass = result.Person.ToLower();

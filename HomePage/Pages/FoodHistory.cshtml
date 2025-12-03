@@ -5,26 +5,42 @@
 }
 
 <div class="page-wrapper">
-    <div class="food-grid">
-        @foreach (var row in Model.HistoryList)
-        {
-            <div class="food-row">
-                <span class="food-grid-cell">@DateHelper.ToNumberedDateString(row.dayFood.Day)</span>
-                <span class="food-grid-cell">@row.dayFood.CombinedName</span>
-                <span class="food-grid-cell">@row.jensRanking</span>
-                @if (!string.IsNullOrEmpty(row.jensNote)) {
-                    <span class="food-grid-cell">
-                        <span style="background: white">@row.jensNote</span>
-                    </span>
-                }
-                <span class="food-grid-cell">@row.annaRanking</span>
-                @if (!string.IsNullOrEmpty(row.annaNote))
-                {
-                    <span class="food-grid-cell">
-                        <span style="background: white">@row.annaNote</span>
-                    </span>
-                }
-            </div>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+        <span style="font-size: 24px">@Model.Food.Name</span>
+        @if (Model.Food.RecipeUrl != null) {
+            <a href="@Model.Food.RecipeUrl">Länk till recept</a>
         }
+        @if (Model.Food.Notes != null)
+        {
+            <span>@Model.Food.Notes</span>
+        }
+        <div class="input-wrapper">
+            <span>Kategorier</span>
+            <div class="category-shower">@string.Join(", ", Model.Food.Categories.Select(xa => xa.Name))</div>
+        </div>
+    </div>
+    <div style="width: 103%; overflow-x: auto;">
+        <div class="food-grid">
+            @foreach (var row in Model.HistoryList)
+            {
+                <div class="food-row">
+                    <span class="food-grid-cell">@DateHelper.ToNumberedDateString(row.dayFood.Date)</span>
+                    <span class="food-grid-cell">@row.dayFood.CombinedName</span>
+                    <span class="food-grid-cell">@row.jensRanking</span>
+                    @if (!string.IsNullOrEmpty(row.jensNote)) {
+                        <span class="food-grid-cell">
+                            <span style="background: white">@row.jensNote</span>
+                        </span>
+                    }
+                    <span class="food-grid-cell">@row.annaRanking</span>
+                    @if (!string.IsNullOrEmpty(row.annaNote))
+                    {
+                        <span class="food-grid-cell">
+                            <span style="background: white">@row.annaNote</span>
+                        </span>
+                    }
+                </div>
+            }
+        </div>
     </div>
 </div>

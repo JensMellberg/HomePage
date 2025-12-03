@@ -1,21 +1,22 @@
+using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
-    public class DownloadBackupModel : PageModel
+    [RequireAdmin]
+    public class DownloadBackupModel(SignInRepository signInRepository, SettingsRepository settingsRepository) : BasePage(signInRepository)
     {
         public ActionResult OnGet()
         {
-            var fileName = new SettingsRepository().PerformBackup(true);
-            var fullPath = "";
-            while (!System.IO.File.Exists(fileName))
+            settingsRepository.PerformBackup(true);
+
+            var backupStream = settingsRepository.GetLatestBackup(out var fileName);
+            if (backupStream == null)
             {
-                Thread.Sleep(100);
+                return NotFound();
             }
 
-            fullPath = Path.GetFullPath(fileName);
-            return PhysicalFile(fullPath, "application/zip", fileName.Replace("Backups/", ""));
+            return File(backupStream, "application/octet-stream", fileName);
         }
     }
 }
