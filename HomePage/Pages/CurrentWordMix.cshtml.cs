@@ -32,8 +32,8 @@ namespace HomePage.Pages
 
             BoardString = TempData["Board"] as string ?? "";
             AvailableLetters = currentWordMixRepository.GetCurrent().Letters.EncodeForClient();
-            CurrentBest = wordMixResultRepository.GetForDateAndPerson(DateHelper.DateNow, LoggedInPerson!.Name)?.Score ?? 0;
-            ExtraWords = string.Join(",", dbContext.ExtraWord.Select(x => x.Word.ToUpper().EncodeForClient()));
+            CurrentBest = wordMixResultRepository.GetForDateAndPerson(DateHelper.DateNow, LoggedInPerson!.UserName)?.Score ?? 0;
+            ExtraWords = string.Join(",", dbContext.ExtraWord.Where(x => x.JensApproved && x.AnnaApproved).Select(x => x.Word.ToUpper().EncodeForClient()));
             return Page();
         }
 
@@ -44,7 +44,7 @@ namespace HomePage.Pages
                 return new JsonResult(new { success = true });
             }
 
-            var loggedInPerson = LoggedInPerson?.Name;
+            var loggedInPerson = LoggedInPerson?.UserName;
             if (string.IsNullOrEmpty(loggedInPerson))
             {
                 return new BadRequestResult();

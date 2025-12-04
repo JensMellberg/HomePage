@@ -22,10 +22,8 @@ namespace HomePage.Spending
         [MaxLength(50)]
         public string Color { get; set; }
 
-        [SaveProperty]
         public DateTime? StartDate { get; set; }
 
-        [SaveProperty]
         public DateTime? EndDate { get; set; }
 
         public bool IsDateBasedGroup => StartDate.HasValue;

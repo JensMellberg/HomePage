@@ -36,7 +36,7 @@
             @foreach (var item in group.Entries.OrderByDescending(x => x.TransactionDate)) {
                 <div class="spending-entry-wrapper" onclick="setItemGroup(event, '@item.Id')">
                     <span class="spending-group-entry place-entry">@item.Place</span>
-                    <span class="spending-group-entry date-entry">@DateHelper.KeyWithZerosFromKey(item.Date)</span>
+                    <span class="spending-group-entry date-entry">@item.TransactionDate.ToString("dd-MM-yyyy")</span>
                     <span class="spending-group-entry amount-entry">@item.Amount</span>
                 </div>
             }

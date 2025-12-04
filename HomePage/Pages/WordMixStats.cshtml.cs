@@ -34,7 +34,7 @@ namespace HomePage.Pages
                 return Page();
             }
 
-            var loggedInPersonName = LoggedInPerson?.Name;
+            var loggedInPersonName = LoggedInPerson?.UserName;
             if (allDateGroupings.First().Key == DateHelper.DateTimeNow.Date)
             {
                 foreach (var entry in allDateGroupings.First())

@@ -26,7 +26,7 @@
     </div>
     <span>Senaste filmen: @Model.LastSeen.Name</span>
     <input type="hidden" value="@Model.AllMoviesJson" id="moviesJson" />
-    <input type="hidden" id="loggedInPerson" value="@Model.LoggedInPerson?.Name" />
+    <input type="hidden" id="loggedInPerson" value="@Model.LoggedInPerson?.UserName" />
     <div class="food-grid">
         @foreach (var movie in Model.Movies)
         {

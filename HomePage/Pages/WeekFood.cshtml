@@ -19,7 +19,7 @@
         <a href="WeekFood?@Model.NextWeekQs">Nästa vecka</a>
     </div>
 
-    <input type="hidden" id="loggedInPerson" value="@Model.LoggedInPerson?.Name" />
+    <input type="hidden" id="loggedInPerson" value="@Model.LoggedInPerson?.UserName" />
     <div class="food-grid">
         @foreach (var dayFood in Model.DayFoods) {
             <div class="food-row">

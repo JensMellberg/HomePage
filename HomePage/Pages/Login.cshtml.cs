@@ -12,7 +12,7 @@ namespace HomePage.Pages
 
         public IActionResult OnPost(string username, string password)
         {
-            var success = signInRepository.LogInWithPassword(HttpContext.Session, Response, username, password);
+            var success = signInRepository.LogInWithPassword(HttpContext.Session, Request, Response, username, password);
             if (success)
             {
                 return new JsonResult(new { success = true, url = HttpContext.Session.GetString("ReturnUrl") });

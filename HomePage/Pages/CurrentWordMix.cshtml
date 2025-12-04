@@ -7,8 +7,12 @@
 <div class="word-mix-top-bar" style="margin-top: 1px;">
 <div class="word-mix-score-wrapper">
     <button onclick="window.location.href='WordMixStats'" style="height: 32px; margin-top: 8px;">Tillbaka</button>
-    @if (Model.LoggedInPerson.Name == Person.Jens.Name) {
+    @if (Model.LoggedInPerson?.UserName == Person.Jens.Name) {
         <div class="profile-photo jens"></div>
+        }
+        else if (Model.LoggedInPerson?.UserName == Person.Anna.Name)
+        {
+        <div class="profile-photo anna"></div>
     } else {
         <div class="profile-photo anna"></div>
     }
@@ -38,7 +42,6 @@
         initializeWordMixFromStorage('@Model.AvailableLetters')
     }
 
-    debugger
     addWords('@Model.ExtraWords')
     
     bindEvents()

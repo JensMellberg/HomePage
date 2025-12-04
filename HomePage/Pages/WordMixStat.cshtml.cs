@@ -18,7 +18,7 @@ namespace HomePage.Pages
 
             if (result == null || result.Date >= DateHelper.DateNow)
             {
-                logger.Error("Tried to access word mix result that was not allowed. " + key, LoggedInPerson?.Name);
+                logger.Error("Tried to access word mix result that was not allowed. " + key, LoggedInPerson?.UserName);
                 return;
             }
 

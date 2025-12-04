@@ -10,7 +10,7 @@ namespace HomePage.Pages
         public List<ToDoItem> ToDos { get; set; }
         public void OnGet()
         {
-            //BigMigrator.Migrate6(dbContext);
+            //BigMigrator.Migrate7(dbContext);
             ToDos = dbContext.ToDo.OrderBy(x => x.IsCompleted).ThenBy(x => x.Name).ToList();
         }
 

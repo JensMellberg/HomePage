@@ -8,6 +8,8 @@ namespace HomePage
     {
         public static JsonResult CreateRedirectClientResult(string redirectUrl) => new(new { redirectUrl });
 
+        public static JsonResult CreateAccessDeniedClientResult() => CreateErrorClientResult("Du har inte tillräckliga rättigheter.");
+
         public static JsonResult CreateErrorClientResult(string? message) => new(new { success = false, message });
 
         public static JsonResult CreateClientResult(object? data) => new(new { data = data ?? new { success = true }, success = true });

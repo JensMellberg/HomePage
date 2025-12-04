@@ -1,6 +1,4 @@
-﻿using HomePage.Data;
-using HomePage.Model;
-using Microsoft.EntityFrameworkCore;
+﻿using HomePage.Model;
 
 namespace HomePage
 {

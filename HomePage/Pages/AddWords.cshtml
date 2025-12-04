@@ -29,6 +29,7 @@
 </div>
 
 <script src="~/js/homeButton.js" asp-append-version="true"></script>
+<script src="~/js/JsonResultUnpacker.js" asp-append-version="true"></script>
 <script>
     function addWord() {
         const word = $('#new-word').val()
@@ -40,10 +41,9 @@
                 },
                 url: "/AddWords",
                 success: (data) => {
-                    if (data.success) {
+                    const result = JsonResultUnpacker.unpackResult(data, window)
+                    if (result?.success) {
                         window.location.reload()
-                    } else {
-                        alert('Ordet finns redan.')
                     }
                 }
             });
@@ -59,7 +59,8 @@
                 },
                 url: "/AddWords",
                 success: (data) => {
-                    if (data.success) {
+                    const result = JsonResultUnpacker.unpackResult(data, window)
+                    if (result?.success) {
                         window.location.reload()
                     }
                 }
@@ -76,7 +77,8 @@
                 },
                 url: "/AddWords",
                 success: (data) => {
-                    if (data.success) {
+                    const result = JsonResultUnpacker.unpackResult(data, window)
+                    if (result?.success) {
                         window.location.reload()
                     }
                 }

@@ -6,8 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HomePage
 {
-    public class SignInRepository(AppDbContext dbContext, DatabaseLogger logger)
+    public class SignInRepository(AppDbContext dbContext, DatabaseLogger logger, BruteForceProtector bruteForceProtector)
     {
+        private static List<(string ip, DateTime date)> FailedLogins = [];
+
         public static bool IsLoggedIn(ISession session)
         {
             var bytes = session.Get("IsLoggedIn");
@@ -37,20 +39,39 @@ namespace HomePage
             return true;
         }
 
-        public bool LogInWithPassword(ISession session, HttpResponse response, string username, string password)
+        public UserInfo? VerifyUserCredentials(HttpRequest request, string username, string password)
         {
+            var ip = request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            if (bruteForceProtector.ShouldBlockLogin(ip))
+            {
+                return null;
+            }
+
             var user = dbContext.UserInfo.Include(x => x.Cookies).ToList()
-                .FirstOrDefault(x => x.UserName.Equals(username, StringComparison.CurrentCultureIgnoreCase));
+               .FirstOrDefault(x => x.UserName.Equals(username, StringComparison.CurrentCultureIgnoreCase));
             if (user == null)
             {
                 logger.Warning($"Failed login for invalid username {username}.", null);
-                return false;
+                bruteForceProtector.AddFailedLogin(ip);
+                return null;
             }
 
             var hashedPassword = HashPassword(password);
             if (!hashedPassword.SequenceEqual(user.PasswordHash))
             {
                 logger.Warning($"Failed login for {username} with invalid password.", null);
+                bruteForceProtector.AddFailedLogin(ip);
+                return null;
+            }
+
+            return user;
+        }
+
+        public bool LogInWithPassword(ISession session, HttpRequest request, HttpResponse response, string username, string password)
+        {
+            var user = VerifyUserCredentials(request, username, password);
+            if (user == null)
+            {
                 return false;
             }
 
@@ -61,10 +82,8 @@ namespace HomePage
 
         public static byte[] HashPassword(string password)
         {
-           var dataToHash = Encoding.UTF8.GetBytes(password);
-
-            using SHA256 sha256 = SHA256.Create();
-            var hashBytes = sha256.ComputeHash(dataToHash);
+            var dataToHash = Encoding.UTF8.GetBytes(password);
+            var hashBytes = SHA256.HashData(dataToHash);
             return hashBytes;
         }
 

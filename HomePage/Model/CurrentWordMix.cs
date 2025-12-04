@@ -10,7 +10,6 @@ namespace HomePage.Model
 
         public DateTime CreatedAt { get; set; }
 
-        [SaveProperty]
         [MaxLength(200)]
         public string Letters { get; set; }
 

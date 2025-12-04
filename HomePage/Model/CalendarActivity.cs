@@ -10,23 +10,18 @@ namespace HomePage.Model
         [MaxLength(50)]
         public string Key { get; set; } = Guid.NewGuid().ToString();
 
-        [SaveProperty]
         [MaxLength(50)]
         public string Text { get; set; }
 
-        [SaveProperty]
         [MaxLength(50)]
         public string Person { get; set; }
 
         public DateTime CalendarDate { get; set; }
 
-        [SaveProperty]
         public int DurationInDays { get; set; } = 1;
 
-        [SaveProperty]
         public bool IsReoccuring { get; set; }
 
-        [SaveProperty]
         public bool IsVacation { get; set; }
 
         [NotMapped]

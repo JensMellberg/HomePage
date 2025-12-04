@@ -62,7 +62,7 @@ namespace HomePage
 
             if (url == "/AccessDenied")
             {
-                return Utils.CreateErrorClientResult("Du har inte tillräckliga rättigheter.");
+                return Utils.CreateAccessDeniedClientResult();
             }
 
             return Utils.CreateRedirectClientResult(url);

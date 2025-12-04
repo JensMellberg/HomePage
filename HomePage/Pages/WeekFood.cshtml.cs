@@ -88,7 +88,7 @@ namespace HomePage.Pages
 
         public IActionResult OnPost(string date, string person, int ranking, string note)
         {
-            if (!IsAdmin || person != LoggedInPerson?.Name)
+            if (!IsAdmin || person != LoggedInPerson?.UserName)
             {
                 return new OkResult();
             }

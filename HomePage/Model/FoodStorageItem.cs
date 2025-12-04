@@ -20,13 +20,10 @@ namespace HomePage.Model
         }
 
         public Guid Id { get; set; } = Guid.NewGuid();
-
-        [SaveProperty]
         public Guid IngredientId { get; set; }
 
         public Ingredient Ingredient { get; set; }
 
-        [SaveProperty]
         public double Amount { get; set; }
 
         public IngredientInstance ToIngredientInstance() => IngredientInstance.Create(Ingredient, Amount, null);

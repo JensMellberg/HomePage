@@ -9,10 +9,8 @@ namespace HomePage.Model
 
         public DateTime Date { get; set; }
 
-        [SaveProperty]
         public bool IsRed { get; set; }
 
-        [SaveProperty]
         [MaxLength(200)]
         public string? DayName { get; set; }
     }

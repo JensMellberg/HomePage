@@ -1,3 +1,4 @@
+using HomePage.Chores;
 using HomePage.Data;
 using HomePage.Model;
 using HomePage.Repositories;
@@ -31,7 +32,8 @@ namespace HomePage.Pages
         ThemeDayRepository themeDayRepository, 
         DayFoodRepository dayFoodRepository, 
         SignInRepository signInRepository, 
-        SettingsRepository settingsRepository) : BasePage(signInRepository)
+        SettingsRepository settingsRepository,
+        ChoreRepository choreRepository) : BasePage(signInRepository)
     {
 
         public int Day { get; set; }
@@ -97,13 +99,11 @@ namespace HomePage.Pages
             }
 
             (Day % 2 == 0 ? AnnaIcons : JensIcons).Add(new PersonIcon { Id = "Litter" });
-            AddChore(SettingsRepositoryTemp.FlossChore);
-            AddChore(SettingsRepositoryTemp.FlossChoreJens);
-            AddChore(SettingsRepositoryTemp.FlowerChore);
-            AddChore(SettingsRepositoryTemp.BedSheetChore);
-            AddChore(SettingsRepositoryTemp.WorkoutChore);
-            AddChore(SettingsRepositoryTemp.EyeChore);
-            AddChore(SettingsRepositoryTemp.SinkChore);
+            var shouldSaveContext = choreRepository.GetAllChores().Select(AddChore).ToList().Any();
+            if (shouldSaveContext)
+            {
+                dbContext.SaveChanges();
+            }
 
             FixWeekQs = GetFirstOfWeekQueryString(today);
             if (Day == 16)
@@ -139,24 +139,30 @@ namespace HomePage.Pages
             //new ThemeDayRepository().UpdateFromJsonFile();
             ThemeDays = themeDayRepository.InfoForDate(today.Date);
 
-            void AddChore(PersonChore chore)
+            bool AddChore(BaseChore chore)
             {
-                chore.TryResetStreak(exemptFromChores);
+                var shouldSaveContext = chore.TryResetStreak(exemptFromChores);
                 var wasDoneToday = chore.WasDoneToday();
-                
+
                 if (wasDoneToday != null)
                 {
-                    var streak = chore.GetStreak(wasDoneToday);
-                    (wasDoneToday == Person.Anna.Name ? AnnaIcons : JensIcons).Add(new PersonIcon { Id = chore.Id, WasDoneToday = true, Streak = streak });
-                    return;
+                    AddChoreIcon(chore, wasDoneToday, true);
+                    return shouldSaveContext;
                 }
 
                 var chorePerson = chore.ChorePerson();
                 if (chorePerson != null)
                 {
-                    var streak = chore.GetStreak(chorePerson);
-                    (chorePerson == Person.Anna.Name ? AnnaIcons : JensIcons).Add(new PersonIcon { Id = chore.Id, Streak = streak });
+                    AddChoreIcon(chore, chorePerson, false);
                 }
+
+                return shouldSaveContext;
+            }
+
+            void AddChoreIcon(BaseChore chore, string person, bool wasDoneToday)
+            {
+                var streak = chore.GetStreak(person).Streak;
+                (person == Person.Anna.Name ? AnnaIcons : JensIcons).Add(new PersonIcon { Id = chore.Id, Streak = streak, WasDoneToday = wasDoneToday });
             }
         }
 

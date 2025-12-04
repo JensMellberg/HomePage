@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Text;
+using HomePage.Chores;
 using HomePage.Data;
 using HomePage.Repositories;
 using HomePage.Spending;
@@ -10,13 +11,13 @@ using Newtonsoft.Json;
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class EndpointModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
+    public class EndpointModel(AppDbContext dbContext, SignInRepository signInRepository, ChoreRepository choreRepository) : BasePage(signInRepository)
     {
         public void OnGet()
         {
         }
 
-        public ActionResult OnPost(string action, string transactions, Guid itemKey, string groupId, string movieSearch)
+        public ActionResult OnPost(string action, string transactions, Guid itemKey, string groupId, string movieSearch, string username, string password)
         {
             /*if (action == "shoppingList")
             {
@@ -94,7 +95,7 @@ namespace HomePage.Pages
                 return new JsonResult(jsonString);
             }
 
-            if (!string.IsNullOrEmpty(transactions))
+            if (!string.IsNullOrEmpty(transactions) && signInRepository.VerifyUserCredentials(Request, username, password)?.IsAdmin == true)
             {
                 var parsed = JsonConvert.DeserializeObject<List<Transaction>>(transactions);
                 var person = action;
@@ -116,19 +117,17 @@ namespace HomePage.Pages
 
                     if (!existingTransactions.Any(x => x.CollidesWith(spending)))
                     {
+                        while (valuesToSave.Any(x => x.CollidesWith(spending)))
+                        {
+                            spending.Amount += 1;
+                        }
+
                         valuesToSave.Add(spending);
                     }
                 }
 
-                foreach (var val in valuesToSave)
-                {
-                    while (existingTransactions.Any(x => x.CollidesWith(val)))
-                    {
-                        val.Amount += 1;
-                    }
-                }
-
                 dbContext.AddRange(valuesToSave);
+                dbContext.SaveChanges();
                 return new JsonResult(new { success = true, saved = valuesToSave.Count });
             }
 
@@ -163,33 +162,12 @@ namespace HomePage.Pages
                 return redirectResult;
             }
 
-            if (action == "Flower")
+            var chore = choreRepository.GetChore(action);
+            if (chore != null)
             {
-                return Utils.CreateClientResult(new { streak = SettingsRepositoryTemp.FlowerChore.Update() });
-            }
-            else if (action == "Floss")
-            {
-                return Utils.CreateClientResult(new { streak = SettingsRepositoryTemp.FlossChore.Update() });
-            }
-            else if (action == "FlossJens")
-            {
-                return Utils.CreateClientResult(new { streak = SettingsRepositoryTemp.FlossChoreJens.Update() });
-            }
-            else if (action == "Bed")
-            {
-                return Utils.CreateClientResult(new { streak = SettingsRepositoryTemp.BedSheetChore.Update() });
-            }
-            else if (action == "Eye")
-            {
-                return Utils.CreateClientResult(new { streak = SettingsRepositoryTemp.EyeChore.Update() });
-            }
-            else if (action == "Sink")
-            {
-                return Utils.CreateClientResult(new { streak = SettingsRepositoryTemp.SinkChore.Update() });
-            }
-            else if (action == "Workout")
-            {
-                return Utils.CreateClientResult(new { streak = SettingsRepositoryTemp.WorkoutChore.Update() });
+                var streak = chore.Update();
+                dbContext.SaveChanges();
+                return Utils.CreateClientResult(new { streak });
             }
 
             return Utils.CreateErrorClientResult(null);

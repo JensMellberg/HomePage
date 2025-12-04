@@ -11,20 +11,16 @@ namespace HomePage.Model
 
         public string RankingTextWithNote => RankingText + (string.IsNullOrEmpty(Note) ? "" : " " + Note);
 
-        [SaveProperty]
         [MaxLength(2000)]
         public string? Note { get; set; }
 
         public DateTime Date { get; set; }
 
-        [SaveProperty]
         [MaxLength(50)]
         public string Person { get; set; }
 
-        [SaveProperty]
         public string FoodId { get; set; }
 
-        [SaveProperty]
         public int Ranking { get; set; }
     }
 }

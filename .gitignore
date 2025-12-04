@@ -42,3 +42,8 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+HomePage/appsettings.json
+HomePage/appsettings.Development.json
+Deploy.ps1
+HomePage/Pictures/

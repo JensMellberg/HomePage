@@ -55,6 +55,10 @@ namespace HomePage.Data
 
         public DbSet<Settings> Settings { get; set; }
 
+        public DbSet<ChoreModel> ChoreModel { get; set; }
+
+        public DbSet<ChoreStreak> ChoreStreak { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<LogRow>()
@@ -83,6 +87,9 @@ namespace HomePage.Data
 
             modelBuilder.Entity<FoodIngredient>()
                 .HasKey(fi => new { fi.FoodId, fi.IngredientId});
+
+            modelBuilder.Entity<ChoreStreak>()
+            .HasKey(c => new { c.ChoreId, c.Person});
         }
     }
 }

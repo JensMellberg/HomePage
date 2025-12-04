@@ -1,3 +1,4 @@
+using HomePage.Chores;
 using HomePage.Data;
 using HomePage.Repositories;
 using HomePage.Spending;
@@ -13,6 +14,7 @@ namespace HomePage
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddSingleton<BruteForceProtector>();
             builder.Services.AddTransient<CurrentWordMixRepository>();
             builder.Services.AddTransient<WordMixResultRepository>();
             builder.Services.AddTransient<FoodStorageRepository>();
@@ -25,6 +27,7 @@ namespace HomePage
             builder.Services.AddTransient<SignInRepository>();
             builder.Services.AddTransient<SettingsRepository>();
             builder.Services.AddTransient<DatabaseLogger>();
+            builder.Services.AddTransient<ChoreRepository>();
             builder.Services.AddRazorPages();
 
             builder.Services.AddSession(options => {
@@ -67,13 +70,6 @@ namespace HomePage
                 FileProvider = new PhysicalFileProvider(
                     Path.Combine(Directory.GetCurrentDirectory(), "Pictures")),
                     RequestPath = "/Pictures"
-            });
-
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), "Backups")),
-                    RequestPath = "/Backups"
             });
 
             app.UseRouting();
