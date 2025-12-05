@@ -5,24 +5,26 @@ using Microsoft.AspNetCore.Mvc;
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class ToDoModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
+    public class ToDoModel(AppDbContext dbContext, SignInRepository signInRepository, DatabaseLogger logger) : BasePage(signInRepository)
     {
         public List<ToDoItem> ToDos { get; set; }
         public void OnGet()
         {
-            //BigMigrator.Migrate7(dbContext);
             ToDos = dbContext.ToDo.OrderBy(x => x.IsCompleted).ThenBy(x => x.Name).ToList();
         }
 
         public IActionResult OnPost(Guid itemId)
         {
-            if (!IsAdmin)
+            var redirectResult = GetPotentialRedirectResult(true, true);
+            if (redirectResult != null)
             {
-                return Redirect("/Login");
+                return redirectResult;
             }
 
             var item = dbContext.ToDo.Single(x => x.Key == itemId);
             item.IsCompleted = true;
+            logger.Information($"Did ToDo activity {item.Name}!", LoggedInPerson?.UserName);
+
             dbContext.SaveChanges();
             return Redirect("ToDo");
         }

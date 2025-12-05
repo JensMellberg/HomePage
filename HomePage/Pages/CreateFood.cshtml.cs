@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HomePage.Pages
 {
-    [RequireAdmin]
+    [RequireLogin]
     public class CreateFoodModel(IngredientRepository ingredientRepository, AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public Food Food { get; set; }
@@ -25,6 +25,11 @@ namespace HomePage.Pages
 
         public IActionResult OnGet(Guid foodId, string date)
         {
+            if (!IsAdmin)
+            {
+                return Redirect($"/FoodHistory?foodId={foodId}");
+            }
+
             DateKey = date;
             if (foodId == Guid.Empty)
             {
@@ -44,6 +49,12 @@ namespace HomePage.Pages
 
         public IActionResult OnPost(Guid foodId, string foodName, string date, string recipeUrl, string categories, string delete, string notes, string ingredients, string inFolder, string isSideDish)
         {
+            var redirectResult = GetPotentialRedirectResult(true, true);
+            if (redirectResult != null)
+            {
+                return redirectResult;
+            }
+
             var existing = dbContext.Food
                 .Include(x => x.FoodConnections)
                 .Include(x => x.Categories)

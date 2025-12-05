@@ -170,6 +170,15 @@ body {
     min-height: 17px;
 }
 
+.word-mix-other-current {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 16px;
+    border: 1px solid black;
+    padding: 8px;
+}
+
 .profile-photo {
     background-size: 100% 100%;
     width: 48px;
@@ -183,6 +192,10 @@ body {
 
 .profile-photo.anna {
     background-image: url(../Anna.png);
+}
+
+.profile-photo.unknown {
+    background-image: url(../Unknown.jpg);
 }
 
 .profile-photo.Flower {

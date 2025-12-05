@@ -1,5 +1,6 @@
 using HomePage.Data;
 using HomePage.Model;
+using HomePage.Repositories;
 using HomePage.Spending;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,10 @@ namespace HomePage.Pages
         public List<GridDataCell[]> DrillDown { get; set; }
     }
 
-    public class StatisticsModel(AppDbContext dbContext, SpendingGroupRepository spendingGroupRepository, SignInRepository signInRepository) : BasePage(signInRepository)
+    public class StatisticsModel(AppDbContext dbContext, 
+        SpendingGroupRepository spendingGroupRepository, 
+        SignInRepository signInRepository,
+        DayFoodRepository dayFoodRepository) : BasePage(signInRepository)
     {
         public (StatisticType, string)[] StatisticOptions = [
             (StatisticType.Amount, "Antal ätna"),
@@ -58,21 +62,13 @@ namespace HomePage.Pages
             var to = string.IsNullOrEmpty(toDate) ? DateTime.MaxValue : DateHelper.FromKey(toDate);
             FromDate = fromDate;
             ToDate = toDate;
-            var relevantFoods = dbContext.DayFood
-                .Include(x => x.FoodConnections)
-                .Where(x => x.Date >= from)
-                .Where(x => x.Date <= to)
-                .ToList();
-            var allFoods = dbContext.Food
-                .Include(x => x.Categories)
-                .Include(x => x.FoodIngredients)
-                .ToDictionary(x => x.Id, x => x);
+            var relevantFoods = dayFoodRepository.GetPopulatedDayFood();
 
             if (CurrentType == StatisticType.Amount)
             {
-                var groupPairs = relevantFoods.GroupBy(x => x.MainFoodId).Select(x => (x.Key, x.Count())).OrderByDescending(x => x.Item2);
+                var groupPairs = relevantFoods.GroupBy(x => x.MainFood.Name).Select(x => (x.Key, x.Count())).OrderByDescending(x => x.Item2);
                 GridData = groupPairs.Select(x => (GridDataCell[])[
-                    new GridDataCell { Text = allFoods[x.Key].Name },
+                    new GridDataCell { Text = x.Key },
                     new GridDataCell { Text = x.Item2.ToString() }
                 ]).ToList();
             }
@@ -129,7 +125,6 @@ namespace HomePage.Pages
                 foreach (var v in relevantFoods)
                 {
                     var dayRankings = rankings.Where(x => x.Date == v.Date);
-                    v.MainFood = allFoods[v.MainFoodId];
                     var categories = v.GetCategories(dbContext);
                     foreach (var c in categories)
                     {

@@ -31,7 +31,7 @@ namespace HomePage
                               .GetCustomAttributes(typeof(RequireLoginAttribute), true)
                               .Any() == true;
 
-            var redirectResult = GetPotentialRedirectResult();
+            var redirectResult = GetPotentialRedirectResult(IsAdminPage, RequireLogin);
             if (redirectResult != null)
             {
                 context.Result = redirectResult;
@@ -41,7 +41,7 @@ namespace HomePage
             base.OnPageHandlerExecuting(context);
         }
 
-        public IActionResult? GetPotentialRedirectResult()
+        public IActionResult? GetPotentialRedirectResult(bool requireAdmin, bool requireLogin)
         {
             var url = GetPotentialRedirectUrl();
             if (url == null)

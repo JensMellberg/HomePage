@@ -2,6 +2,7 @@ using HomePage.Data;
 using HomePage.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace HomePage.Pages
@@ -31,7 +32,7 @@ namespace HomePage.Pages
     }
 
     [IgnoreAntiforgeryToken]
-    public class MoviesModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
+    public class MoviesModel(AppDbContext dbContext, SignInRepository signInRepository, DatabaseLogger logger) : BasePage(signInRepository)
     {
         public List<Movie> Movies { get; set; }
 
@@ -78,6 +79,7 @@ namespace HomePage.Pages
             {
                 item.IsCompleted = true;
                 item.CompletedAt = DateHelper.DateTimeNow;
+                logger.Information($"Watched movie {item.Name}", LoggedInPerson?.UserName);
             } else
             {
                 if (person == Person.Jens.Name)
@@ -87,6 +89,8 @@ namespace HomePage.Pages
                 {
                     item.AnnaRanking = ranking;
                 }
+
+                logger.Information($"{person} gave the movie {item.Name} a score of {ranking}", LoggedInPerson?.UserName);
             }
 
             dbContext.SaveChanges();

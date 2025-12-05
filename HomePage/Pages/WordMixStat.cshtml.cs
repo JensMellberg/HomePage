@@ -1,6 +1,4 @@
 using HomePage.Data;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
@@ -22,7 +20,7 @@ namespace HomePage.Pages
                 return;
             }
 
-            PersonClass = result.Person.ToLower();
+            PersonClass = result.Person == Person.Jens.Name || result.Person == Person.Anna.Name ? result.Person.ToLower() : "unknown";
             Score = result.Score;
             BoardString = result.Board.EncodeForClient();
         }

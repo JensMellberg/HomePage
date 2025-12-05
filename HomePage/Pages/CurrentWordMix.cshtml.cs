@@ -1,4 +1,3 @@
-using System.Text;
 using HomePage.Data;
 using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    [RequireAdmin]
+    [RequireLogin]
     public class CurrentWordMixModel(CurrentWordMixRepository currentWordMixRepository, 
         WordMixResultRepository wordMixResultRepository,
         AppDbContext dbContext, 

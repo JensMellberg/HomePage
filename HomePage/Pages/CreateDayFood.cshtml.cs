@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace HomePage.Pages
 {
     [RequireAdmin]
-    public class CreateDayFoodModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
+    public class CreateDayFoodModel(AppDbContext dbContext, SignInRepository signInRepository, DatabaseLogger logger) : BasePage(signInRepository)
     {
         public string DateKey { get; set; }
 
@@ -56,10 +56,11 @@ namespace HomePage.Pages
         public IActionResult OnPost(string day, Guid foodId, string delete, string sideDishIds, string isVego, string portions)
         {
             var date = DateHelper.FromKey(day);
-            var existingDayFood = dbContext.DayFood.Include(x => x.FoodConnections).FirstOrDefault(x => x.Date == date);
+            var existingDayFood = dbContext.DayFood.Include(x => x.FoodConnections).ThenInclude(x => x.Food).FirstOrDefault(x => x.Date == date);
             if (!string.IsNullOrEmpty(delete) && existingDayFood != null && this.CanBeDeleted(day))
             {
                 dbContext.DayFood.Remove(existingDayFood);
+                logger.Information($"Deleted food {existingDayFood.CombinedName} on day {date.ToReadable()}.", LoggedInPerson?.UserName);
             }
             else
             {
@@ -70,6 +71,7 @@ namespace HomePage.Pages
                 {
                     DayFoodId = idToUse,
                     FoodId = x.Id,
+                    Food = x,
                     IsMainDish = x.Id == foodId
                 }).ToList();
 
@@ -78,11 +80,13 @@ namespace HomePage.Pages
                     existingDayFood.FoodConnections = foodConnections;
                     existingDayFood.IsVego = isVego == "on";
                     existingDayFood.Portions = portions.ToDouble();
+                    logger.Information($"Updated food {existingDayFood.CombinedName} for day {date.ToReadable()}.", LoggedInPerson?.UserName);
                 }
                 else
                 {
                     var dayFood = new DayFood { Id = idToUse, Date = date, IsVego = isVego == "on", Portions = portions.ToDouble(), FoodConnections = foodConnections };
                     dbContext.DayFood.Add(dayFood);
+                    logger.Information($"Added food {dayFood.CombinedName} for day {date.ToReadable()}.", LoggedInPerson?.UserName);
                 }
             }
 

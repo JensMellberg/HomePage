@@ -13,7 +13,6 @@ namespace HomePage
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             builder.Services.AddSingleton<BruteForceProtector>();
             builder.Services.AddTransient<CurrentWordMixRepository>();
             builder.Services.AddTransient<WordMixResultRepository>();
@@ -36,15 +35,6 @@ namespace HomePage
             builder.Services.AddExceptionHandler<CustomExceptionHandler>();
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-            /*builder.WebHost.ConfigureKestrel(options =>
-            {
-                options.ListenAnyIP(8001);
-                options.ListenAnyIP(8000, listenOptions =>
-                {
-                    listenOptions.UseHttps("Certs/HomePage.pfx", "admin");
-                });
-            });*/
 
             
             var app = builder.Build();

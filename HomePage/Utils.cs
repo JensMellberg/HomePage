@@ -43,5 +43,7 @@ namespace HomePage
         public static double ToDouble(this string s) => double.Parse(s.Replace(',', '.'), CultureInfo.InvariantCulture);
 
         public static string GetTextOrNothing(double text) => text == 0 ? "-" : text.ToString();
+
+        public static string Truncate(this string s, int length) => s.Length > length ? s[..length] : s;
     }
 }

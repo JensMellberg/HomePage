@@ -7,17 +7,15 @@ namespace HomePage.Pages
 {
     public class WordMixStatsModel(AppDbContext dbContext, WordMixResultRepository wordMixResultRepository, SignInRepository signInRepository) : BasePage(signInRepository)
     {
-        public int JensScore { get; set; }
+        public WordMixResultClientModel? JensScore { get; set; }
 
-        public int AnnaScore { get; set; }
+        public WordMixResultClientModel? AnnaScore { get; set; }
 
-        public string JensBoard { get; set; }
+        public List<WordMixResultClientModel> OtherScores { get; set; } = [];
 
-        public string AnnaBoard { get; set; }
+        public List<(WordMixResultClientModel? jensScore, WordMixResultClientModel? annaScore, List<WordMixResultClientModel> others, DateTime date)> History { get; set; } = [];
 
-        public List<(int jensScore, int annaScore, DateTime date, Guid jensKey, Guid annaKey)> History { get; set; } = [];
-
-        public string ConvertScore(int score) => score == 0 ? "-" : score.ToString();
+        public string ConvertScore(int? score) => !score.HasValue || (score.Value == 0) ? "-" : score.ToString();
 
         public int WaitingForApproval { get; set; }
 
@@ -34,26 +32,29 @@ namespace HomePage.Pages
                 return Page();
             }
 
+            var accounts = dbContext.UserInfo.ToDictionary(x => x.UserName, x => x);
             var loggedInPersonName = LoggedInPerson?.UserName;
-            if (allDateGroupings.First().Key == DateHelper.DateTimeNow.Date)
+            if (allDateGroupings.First().Key == DateHelper.DateNow)
             {
                 foreach (var entry in allDateGroupings.First())
                 {
+                    var clientModel = new WordMixResultClientModel
+                    {
+                        Score = entry.Score,
+                        Person = accounts[entry.Person].DisplayName.Truncate(10),
+                        Key = loggedInPersonName == entry.Person ? entry.Board : null
+                    };
                     if (entry.Person == Person.Jens.Name)
                     {
-                        JensScore = entry.Score;
-                        if (loggedInPersonName == Person.Jens.Name)
-                        {
-                            JensBoard = entry.Board;
-                        }
-                    } 
+                        JensScore = clientModel;
+                    }
+                    else if (entry.Person == Person.Anna.Name)
+                    {
+                        AnnaScore = clientModel;
+                    }
                     else
                     {
-                        AnnaScore = entry.Score;
-                        if (loggedInPersonName == Person.Anna.Name)
-                        {
-                            AnnaBoard = entry.Board;
-                        }
+                        OtherScores.Add(clientModel);
                     }
                 }
 
@@ -62,25 +63,32 @@ namespace HomePage.Pages
 
             foreach (var dateGrouping in allDateGroupings)
             {
-                var jensScore = 0;
-                var annaScore = 0;
-                Guid jensKey = Guid.Empty;
-                Guid annaKey = Guid.Empty;
+                WordMixResultClientModel? jensScore = null;
+                WordMixResultClientModel? annaScore = null;
+                var otherScores = new List<WordMixResultClientModel>();
                 foreach (var entry in dateGrouping)
                 {
+                    var clientModel = new WordMixResultClientModel
+                    {
+                        Score = entry.Score,
+                        Person = accounts[entry.Person].DisplayName.Truncate(10),
+                        Key = entry.Id.ToString()
+                    };
                     if (entry.Person == Person.Jens.Name)
                     {
-                        jensScore = entry.Score;
-                        jensKey = entry.Id;
+                        jensScore = clientModel;
+                    }
+                    else if (entry.Person == Person.Anna.Name)
+                    {
+                        annaScore = clientModel;
                     }
                     else
                     {
-                        annaScore = entry.Score;
-                        annaKey = entry.Id;
+                        otherScores.Add(clientModel);
                     }
                 }
 
-                History.Add((jensScore, annaScore, dateGrouping.Key, jensKey, annaKey ));
+                History.Add((jensScore, annaScore, otherScores, dateGrouping.Key ));
             }
 
             WaitingForApproval = loggedInPersonName != null
@@ -89,6 +97,15 @@ namespace HomePage.Pages
                 : 0;
 
             return Page();
+        }
+
+        public class WordMixResultClientModel
+        {
+            public required string Person { get; set; }
+
+            public string? Key { get; set; }
+
+            public int Score { get; set; }
         }
     }
 }

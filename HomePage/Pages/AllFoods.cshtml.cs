@@ -21,7 +21,7 @@ namespace HomePage.Pages
 
         public List<Food> SideDishes { get; set; }
 
-        public Dictionary<Guid, string[]> FoodRankings { get; set; } = new();
+        public Dictionary<Guid, string[]> FoodRankings { get; set; } = [];
 
         public (Sorting, string)[] SortingOptions = [
             (Sorting.Name, "Maträtt"),

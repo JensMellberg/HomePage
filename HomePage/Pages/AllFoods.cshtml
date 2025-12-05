@@ -112,7 +112,6 @@
     }
 
     function showIngredientPicker() {
-        const ingredientElement = document.getElementById('ingredients')
         const existing = document.getElementById('currentIngredients').value.split(',').map(x => ({ id: x }))
         const categories = '@Html.Raw(string.Join(',', IngredientCategory.Categories.OrderBy(x => x)))'.split(',')
         IngredientPicker.createPicker(categories, possibleIngredients, null, existing, x => updateIngredients(x))

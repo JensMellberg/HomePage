@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using HomePage.Data;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +15,7 @@ namespace HomePage.Pages
                 ? dbContext.LogRow
                     .OrderByDescending(x => x.LogDate)
                     .Take(50)
-                    .Select(x => x.LogDate.ToString("yy/MM/dd HH:mm:ss") + " " + x.LogRowSeverity.ToString() + " " + x.TruncatedMessage)
+                    .Select(x => x.LogDate.ToString("dd/MM/yyyy HH:mm:ss") + " " + x.LogRowSeverity.ToString() + " " + x.TruncatedMessage)
                     .ToList()
                 : [];
         }

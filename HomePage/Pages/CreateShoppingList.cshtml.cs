@@ -109,9 +109,10 @@ namespace HomePage.Pages
 
         public IActionResult OnPost(List<IngredientModel> ingredients, string action)
         {
-            if (!IsAdmin)
+            var redirectResult = GetPotentialClientRedirectResult(true, true);
+            if (redirectResult != null)
             {
-                return BadRequest();
+                return redirectResult;
             }
 
             var storageItems = foodStorageRepository.GetIngredients().ToDictionary(x => x.IngredientId, x => x);
@@ -139,7 +140,7 @@ namespace HomePage.Pages
             dbContext.FoodStorage.RemoveRange(dbContext.FoodStorage);
             dbContext.FoodStorage.AddRange(itemsToStore);
             dbContext.SaveChanges();
-            return new JsonResult(new { success = true });
+            return Utils.CreateClientResult(new { success = true });
         }
 
     }

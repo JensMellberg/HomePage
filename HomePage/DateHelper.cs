@@ -85,6 +85,8 @@
             return returnDate;
         }
 
+        public static string ToReadable(this DateTime date) => date.ToString("dd/MM-yyyy");
+
         public static readonly Dictionary<int, string> MonthNumberToString = new Dictionary<int, string>() {
             {1, "Januari" },
             {2, "Februari" },

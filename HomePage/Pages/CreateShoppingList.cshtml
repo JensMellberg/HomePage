@@ -14,6 +14,7 @@
 </div>
 
 <script src="~/js/IngredientInstance.js" asp-append-version="true"></script>
+<script src="~/js/JsonResultUnpacker.js" asp-append-version="true"></script>
 <script>
         var possibleIngredients = IngredientInstance.decodePossibleIngredients('@Html.Raw(Model.PossibleIngredients)')
         var unitTypes = JSON.parse('@Html.Raw(Model.AllUnitValues)')
@@ -72,7 +73,13 @@
                     ingredients: ingreds,
                     action: 'addToStorage'
                 },
-                success: (e) =>  { alert('Tillagt i skafferi!'); $('.input-wrapper').remove() }
+                success: (data) =>  { 
+                    const result = JsonResultUnpacker.unpackResult(data, window)
+                    if (result?.success) {
+                        alert('Tillagt i skafferi!');
+                        $('.input-wrapper').remove()
+                    }
+                }
             });
     }
 </script>
