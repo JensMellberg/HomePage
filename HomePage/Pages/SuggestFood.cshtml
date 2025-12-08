@@ -1,0 +1,94 @@
+﻿@page
+@model HomePage.Pages.SuggestFoodModel
+@{
+    ViewData["Title"] = "Föreslå mat";
+}
+
+<button type="button" onclick="window.location.href = 'FoodStorage'" style="position: absolute; top: 5px; right: 5px;">Till skafferi</button>
+<div class="page-wrapper">
+    <div class="filters-wrapper" style="margin-top: 8px;">
+        <button type="button" onclick="showPicker()">Kategorier</button>
+        <button type="button" onclick="showIngredientPicker()">Ingredienser</button>
+
+        <input type="hidden" value="@Model.CurrentCategories" id="currentCategories" />
+        <input type="hidden" value="@Model.CurrentIngredients" id="currentIngredients" />
+    </div>
+    <div class="food-grid">
+        @foreach (var suggestion in Model.Suggestions.OrderBy(x => x.RankingScore))
+        {
+            <div class="food-row">
+                <div class="food-grid-cell">
+                    <a href="CreateFood?foodId=@suggestion.Food.Id" style="font-size: 18px; font-weight: bold;">
+                        @suggestion.Food.Name
+                    </a>
+                </div>
+            </div>
+            @if (suggestion.MissingIngredients.Count > 0) {
+                <div class="food-row">
+                    <span style="margin-left: 12px;">Saknar:</span>
+                </div>
+                foreach (var ingredient in suggestion.MissingIngredients) {
+                    <div class="food-row">
+                        <span style="margin-left: 12px;">@ingredient.Ingredient.Name @ingredient.GetStaticDisplayString()</span>
+                    </div>
+                }
+            }
+        }
+    </div>
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>
+<script src="~/js/CategoryPicker.js" asp-append-version="true"></script>
+<script src="~/js/IngredientInstance.js" asp-append-version="true"></script>
+<script src="~/js/IngredientPicker.js" asp-append-version="true"></script>
+<script>
+    var possibleIngredients = IngredientInstance.decodePossibleIngredients('@Html.Raw(Model.PossibleIngredients)')
+
+    function showPicker() {
+        $.ajax({
+            type: "POST",
+            url: "/Category",
+            data: {
+                foodId: '00000000-0000-0000-0000-000000000000'
+            },
+            success: (e) => showPickerLocal(e)
+        });
+    }
+
+    function showIngredientPicker() {
+        const existing = document.getElementById('currentIngredients').value.split(',').map(x => ({ id: x }))
+        const categories = '@Html.Raw(string.Join(',', IngredientCategory.Categories.OrderBy(x => x)))'.split(',')
+        IngredientPicker.createPicker(categories, possibleIngredients, null, existing, x => updateIngredients(x))
+    }
+
+    function showPickerLocal(categories) {
+        const currentSelectedString = document.querySelectorAll('#currentCategories')[0].value
+
+        if (currentSelectedString) {
+            const currentSelected = currentSelectedString.split(',')
+            for (const category of currentSelected) {
+                categories.filter(x => x.id == category)[0].isSelected = true
+            }
+        }
+
+        CategoryPicker.createPicker(categories, (x) => updateFoodCategories(x))
+    }
+
+    function updateFoodCategories(categories) {
+        const idList = categories.map(x => x.id).join(',');
+        document.querySelectorAll('#currentCategories')[0].value = idList;
+        updateFilters()
+    }
+
+    function updateIngredients(values) {
+        const stringValue = values.map(x => x.id).join(',');
+        document.querySelectorAll('#currentIngredients')[0].value = stringValue;
+        updateFilters()
+    }
+
+    function updateFilters() {
+        const categories = document.querySelectorAll('#currentCategories')[0].value
+        const ingredients = document.querySelectorAll('#currentIngredients')[0].value
+        window.location = '/SuggestFood?categoryFilter=' + categories + '&ingredientFilter=' + ingredients
+    }
+</script>

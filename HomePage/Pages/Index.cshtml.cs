@@ -20,6 +20,7 @@ namespace HomePage.Pages
                 return Id switch
                 {
                     "Litter" => "<div class=\"profile-photo cat\"></div>",
+                    "LitterSanta" => "<div class=\"profile-photo cat\"><div class=\"santa\"></div></div>",
                     _ => $"<div class=\"profile-photo {Id} chore\" chore-value=\"{Id}\" was-done-today=\"{WasDoneToday}\" streak={Streak}></div>",
                 };
             }
@@ -98,7 +99,8 @@ namespace HomePage.Pages
                 exemptFromChores.Add(Person.Anna.Name);
             }
 
-            (Day % 2 == 0 ? AnnaIcons : JensIcons).Add(new PersonIcon { Id = "Litter" });
+            var catIconId = today.Month == 12 && today.Day < 27 ? "LitterSanta" : "Litter";
+            (Day % 2 == 0 ? AnnaIcons : JensIcons).Add(new PersonIcon { Id = catIconId });
             var shouldSaveContext = choreRepository.GetAllChores().Select(AddChore).ToList().Any();
             if (shouldSaveContext)
             {

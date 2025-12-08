@@ -59,7 +59,7 @@ namespace HomePage.Pages
                 .Where(x => !x.IsSideDish)
                 .Where(x => Regex?.IsMatch(x.Name) ?? true)
                 .Where(x => categoriesList == null || categoriesList.All(c => x.Categories.Select(x => x.Key).Contains(c)))
-                .Where(x => ingredientsList == null || FoodContainsAllIngredients(x, ingredientsList));
+                .Where(x => ingredientsList == null || x.ContainsAllIngredients(ingredientsList));
 
             SideDishes = foodValues
                 .Where(x => x.IsSideDish)
@@ -102,12 +102,6 @@ namespace HomePage.Pages
             }
 
             string GetRankingString(string person, double average) => person + ": " + (average == 0 ? "-" : average.ToString());
-
-            bool FoodContainsAllIngredients(Food food, HashSet<Guid> ingredients)
-            {
-                var foodIngredientIds = food.FoodIngredients.Select(x => x.IngredientId).ToHashSet();
-                return ingredients.All(foodIngredientIds.Contains);
-            }
         }
     }
 }

@@ -33,6 +33,12 @@ namespace HomePage.Model
         public string ClientEncodedIngredients => string.Join('¤', FoodIngredients.OrderBy(x => x.Ingredient.Category.SortOrder).Select(x => x.ClientEncode()));
 
         public bool HasHistory => MainFoodIn.Count != 0 || SideDishIn.Count != 0;
+
+        public bool ContainsAllIngredients(HashSet<Guid> ingredients)
+        {
+            var foodIngredientIds = FoodIngredients.Select(x => x.IngredientId).ToHashSet();
+            return ingredients.All(foodIngredientIds.Contains);
+        }
     }
 
     public class FoodIngredient

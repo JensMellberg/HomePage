@@ -14,7 +14,6 @@
             }
         </div>
     </div>
-    
 
     <div class="word-mix-top-bar">
         <div class="word-mix-score-wrapper">
@@ -40,18 +39,27 @@
             }
         </div>
     </div>
-    <div class="word-mix-other-current">
-        @foreach (var entry in Model.OtherScores.OrderByDescending(x => x.Score)) {
-            @if (entry.Key != null) {
-                <a href="CurrentWordMix?board=@entry.Key.EncodeForClient()">@entry.Person: @entry.Score</a>
-            } else {
-                <span>@entry.Person: @entry.Score</span>
+    @if (Model.OtherScores.Count > 0) {
+        <div class="word-mix-other-current">
+            @foreach (var entry in Model.OtherScores.OrderByDescending(x => x.Score))
+            {
+                @if (entry.Key != null)
+                {
+                    <a href="CurrentWordMix?board=@entry.Key.EncodeForClient()">@entry.Person: @entry.Score</a>
+                }
+                else
+                {
+                    <span>@entry.Person: @entry.Score</span>
+                }
             }
-        }
-    </div>
+        </div>
+    }
     <div class="word-mix-history-outer">
         @foreach (var history in Model.History) {
             <div class="word-mix-history-wrapper">
+                <div class="word-mix-score-date">
+                    <span>@history.date.Day @DateHelper.MonthNumberToString[history.date.Month]</span>
+                </div>
                 <div class="word-mix-score-wrapper">
                     @if (history.jensScore?.Score > 0) {
                         <a class="profile-photo jens" href="WordMixStat?key=@history.jensScore.Key"></a>
@@ -61,8 +69,7 @@
                     }
                     <span>@Model.ConvertScore(history.jensScore?.Score)</span>
                 </div>
-                <div class="word-mix-other-current">
-                    <span>@history.date.Day @DateHelper.MonthNumberToString[history.date.Month]</span>
+                <div class="word-mix-other-current" style="border: none;">
                     @foreach (var entry in history.others.OrderByDescending(x => x.Score))
                     {
                         <a href="WordMixStat?key=@entry.Key!.EncodeForClient()">@entry.Person: @entry.Score</a>

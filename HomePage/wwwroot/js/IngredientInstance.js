@@ -8,7 +8,7 @@
 		instance.amount = amount || 1
 		instance.unit = unit
 		instance.categories = categories
-		instance.category = category || categories[0]
+		instance.category = category || possibleIngredients.filter(x => x.id === instance.ingredientId)[0]?.category || categories[0]
 		return instance
 	}
 
