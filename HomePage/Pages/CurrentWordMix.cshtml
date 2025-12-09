@@ -34,8 +34,10 @@
 <script src="~/js/WordMixGrid.js" asp-append-version="true"></script>
 <script src="~/js/WordList.js" asp-append-version="true"></script>
 <script>
-    drawGrid(5, window.outerWidth - 5, 50, document.getElementById('grid'))
-    document.getElementById('storage').appendChild(makeStorage())
+    var storage = document.getElementById('storage')
+    var squareSize = drawGrid(5, window.outerWidth - 5, 50, document.getElementById('grid'))
+    storage.style.height = (squareSize * 2 + 30) + 'px'
+    storage.appendChild(makeStorage())
     if ('@Model.BoardString') {
         initializeWordMix(decodeForClient('@Model.BoardString'), '@Model.AvailableLetters')
     } else {

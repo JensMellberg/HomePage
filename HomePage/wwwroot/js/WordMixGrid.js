@@ -178,7 +178,7 @@ function drawGrid(startX, endX, startY, wrapper) {
         squares[i] = new Array(gridHeight).fill(undefined);
     }
 
-    squareSize = (endX - startX) / gridWidth
+    squareSize = Math.min((endX - startX) / gridWidth, 50)
     for (let i = 0; i < gridWidth; i++) {
         for (let f = 0; f < gridHeight; f++) {
             const square = document.createElement('div')
@@ -193,6 +193,8 @@ function drawGrid(startX, endX, startY, wrapper) {
             squares[i][f] = squareObject
         }
     }
+
+    return squareSize
 }
 
 function BoardToString(board) {
