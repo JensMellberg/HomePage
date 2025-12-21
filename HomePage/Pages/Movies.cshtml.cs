@@ -1,8 +1,6 @@
 using HomePage.Data;
 using HomePage.Model;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace HomePage.Pages
@@ -69,9 +67,10 @@ namespace HomePage.Pages
 
         public IActionResult OnPost(Guid itemId, string person, int ranking)
         {
-            if (!IsAdmin)
+            var redirectResult = GetPotentialClientRedirectResult(true, true);
+            if (redirectResult != null)
             {
-                return Redirect("/Login");
+                return redirectResult;
             }
 
             var item = dbContext.Movie.Find(itemId) ?? throw new Exception();
@@ -82,10 +81,10 @@ namespace HomePage.Pages
                 logger.Information($"Watched movie {item.Name}", LoggedInPerson?.UserName);
             } else
             {
-                if (person == Person.Jens.Name)
+                if (person == Person.Jens.UserName)
                 {
                     item.JensRanking = ranking;
-                } else
+                } else if (person == Person.Anna.UserName)
                 {
                     item.AnnaRanking = ranking;
                 }
@@ -94,7 +93,9 @@ namespace HomePage.Pages
             }
 
             dbContext.SaveChanges();
-            return Redirect("Movies");
+            return Utils.CreateClientResult(new { success = true });
         }
+
+        public bool HasAccessToMovie(Movie movie) => IsAdmin || movie.Owner == LoggedInPerson?.UserName;
     }
 }

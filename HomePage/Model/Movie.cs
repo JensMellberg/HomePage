@@ -18,6 +18,9 @@ namespace HomePage.Model
 
         public DateTime? CompletedAt { get; set; }
 
+        [MaxLength(50)]
+        public string Owner { get; set; }
+
         public int JensRanking { get; set; }
 
         public int AnnaRanking { get; set; }

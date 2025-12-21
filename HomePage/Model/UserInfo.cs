@@ -15,6 +15,8 @@ namespace HomePage.Model
 
         public List<SignInCookie> Cookies { get; set; } = [];
 
-        public bool IsAdmin { get; set; }
+        public bool IsAdmin => UserGroup?.IsAdmin == true;
+
+        public UserGroup? UserGroup { get; set; }
     }
 }

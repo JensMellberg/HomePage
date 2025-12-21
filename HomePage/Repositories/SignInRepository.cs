@@ -8,8 +8,6 @@ namespace HomePage
 {
     public class SignInRepository(AppDbContext dbContext, DatabaseLogger logger, BruteForceProtector bruteForceProtector)
     {
-        private static List<(string ip, DateTime date)> FailedLogins = [];
-
         public static bool IsLoggedIn(ISession session)
         {
             var bytes = session.Get("IsLoggedIn");
@@ -47,7 +45,7 @@ namespace HomePage
                 return null;
             }
 
-            var user = dbContext.UserInfo.Include(x => x.Cookies).ToList()
+            var user = dbContext.UserInfo.Include(x => x.Cookies).Include(x => x.UserGroup).ToList()
                .FirstOrDefault(x => x.UserName.Equals(username, StringComparison.CurrentCultureIgnoreCase));
             if (user == null)
             {
@@ -110,11 +108,18 @@ namespace HomePage
             dbContext.SaveChanges();
         }
 
-        public static void SetLoggedInSession(ISession session, UserInfo user)
+        public void SetLoggedInSession(ISession session, UserInfo user)
         {
             session.Set("IsLoggedIn", BitConverter.GetBytes(true));
             session.SetString("LoggedInPerson", user.UserName);
             session.Set("IsAdmin", BitConverter.GetBytes(user.IsAdmin));
+
+            if (user.UserGroup != null)
+            {
+                var userGroupId = user.UserGroup.Id.ToString();
+                session.SetString("GroupId", userGroupId);
+                session.SetString("ImpersonateGroupId", userGroupId ?? dbContext.UserGroup.First(x => x.IsAdmin).Id.ToString());
+            }
         }
 
         public Person? LoggedInPerson(ISession session)
@@ -136,7 +141,7 @@ namespace HomePage
                 return null;
             }
 
-            return dbContext.UserInfo.Include(x => x.Cookies).FirstOrDefault(x => x.UserName == person) ?? throw new Exception();
+            return dbContext.UserInfo.Include(x => x.Cookies).Include(x => x.UserGroup).FirstOrDefault(x => x.UserName == person) ?? throw new Exception();
         }
 
         public void TryLogInFromCookie(ISession session, HttpRequest request, HttpResponse response)
@@ -152,7 +157,7 @@ namespace HomePage
                 return;
             }
 
-            var users = dbContext.UserInfo.Include(x => x.Cookies).ToList();
+            var users = dbContext.UserInfo.Include(x => x.Cookies).Include(x => x.UserGroup).ToList();
             foreach (var user in users)
             {
                 var validUserCookies = user.Cookies.Where(x => x.Expires > DateHelper.DateTimeNow).ToList();

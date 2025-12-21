@@ -37,17 +37,27 @@
                 <div class="food-grid-cell">
                     @if (movie.IsCompleted) {
                         <div class="food-grid-cell-inner">
-                            <a href="CreateMovie?Id=@movie.Id">
-                                @movie.Name
-                            </a>
-                            <span onclick="makeRanking('@movie.Id', '@Person.Jens.Name')"> @movie.RankingText(Person.Jens)</span>
-                            <span onclick="makeRanking('@movie.Id', '@Person.Anna.Name')"> @movie.RankingText(Person.Anna)</span>
+                            @if (Model.HasAccessToMovie(movie))
+                            {
+                                <a href="CreateMovie?Id=@movie.Id">
+                                    @movie.Name
+                                </a>
+                            }
+                            else
+                            {
+                                <span>@movie.Name</span>
+                            }
+                            <span onclick="makeRanking('@movie.Id', '@Person.Jens.UserName')"> @movie.RankingText(Person.Jens)</span>
+                            <span onclick="makeRanking('@movie.Id', '@Person.Anna.UserName')"> @movie.RankingText(Person.Anna)</span>
                         </div>
                     }
-                    else {
+                    else if (Model.HasAccessToMovie(movie)) {
                         <a href="CreateMovie?Id=@movie.Id">
                             @movie.Name
                         </a>
+                    }
+                    else {
+                        <span>@movie.Name</span>
                     }
                 </div>
                 <div class="food-grid-cell">
@@ -70,6 +80,7 @@
 
 <script src="~/js/homeButton.js" asp-append-version="true"></script>
 <script src="~/js/StarRanker.js" asp-append-version="true"></script>
+<script src="~/js/JsonResultUnpacker.js" asp-append-version="true"></script>
 <script>
     function markCompleted(id) {
          $.ajax({
@@ -78,7 +89,14 @@
             data: {
                 itemId: id
             },
-            success: (e) => window.location.reload()
+            success: (data) => {
+                const result = JsonResultUnpacker.unpackResult(data, window)
+                if (result?.success) {
+                    window.location.reload()
+                } else {
+                    $('.todo-checkbox').prop('checked', false)
+                }
+            }
         });
     }
 
@@ -117,7 +135,12 @@
                person: person,
                ranking: ranking
             },
-            success: (e) => window.location.reload()
+            success: (data) => {
+                const result = JsonResultUnpacker.unpackResult(data, window)
+                if (result?.success) {
+                    window.location.reload()
+                }
+            }
         });
     }
 

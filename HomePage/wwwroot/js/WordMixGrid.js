@@ -16,6 +16,16 @@ class Letter {
         this.element = element
     }
 
+    removePrevious() {
+        if (this.x !== null) {
+            squares[this.x][this.y].letter = null
+            this.x = null
+            this.y = null
+        } else {
+            storage.removeLetter(this)
+        }
+    }
+
     bindEvents() {
         window.addEventListener("beforeunload", function (e) {
             e.preventDefault();
@@ -29,16 +39,6 @@ class Letter {
             const mouseStartY = e.touches[0].clientY
             const theElement = this.element
             const _this = this
-
-            function removePrevious() {
-                if (_this.x !== null) {
-                    squares[_this.x][_this.y].letter = null
-                    _this.x = null
-                    _this.y = null
-                } else {
-                    storage.removeLetter(_this)
-                }
-            }
 
             function onMove(e) {
                 theElement.style.left = startX + (e.touches[0].clientX - mouseStartX) + "px";
@@ -65,7 +65,7 @@ class Letter {
                             return false
                         }
 
-                        removePrevious()
+                        _this.removePrevious()
                         e.square.letter = _this
                         _this.x = e.square.x
                         _this.y = e.square.y
@@ -78,7 +78,7 @@ class Letter {
                 })
 
                 if (!foundMatch) {
-                    removePrevious()
+                    _this.removePrevious()
                     storage.addLetter(_this)
                     storage.rePosition()
                     updateStorage()
@@ -169,6 +169,20 @@ class Storage {
 var squareSize = 0
 var squares = []
 var recordCallback = (score, board) => true
+
+function reset() {
+    for (let i = 0; i < squares.length; i++) {
+        for (let f = 0; f < squares[0].length; f++) {
+            const letter = squares[i][f].letter
+            if (letter) {
+                letter.removePrevious()
+                storage.addLetter(letter)
+            }
+        }
+    }
+
+    storage.rePosition()
+}
 
 function drawGrid(startX, endX, startY, wrapper) {
     const gridWidth = 10

@@ -59,6 +59,8 @@ namespace HomePage.Data
 
         public DbSet<ChoreStreak> ChoreStreak { get; set; }
 
+        public DbSet<UserGroup> UserGroup { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<LogRow>()

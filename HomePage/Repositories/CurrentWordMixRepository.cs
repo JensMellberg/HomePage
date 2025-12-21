@@ -20,7 +20,7 @@ namespace HomePage.Repositories
 
         public void WordList()
         {
-            var words = File.ReadAllLines("Database/WordList - Original.txt");
+            var words = File.ReadAllLines("Database/NewWords.txt");
             var keptWords = new List<string>();
             HashSet<char> vowels = ['A', 'E', 'I', 'U', 'O', 'Ä', 'Y', 'Ö'];
             MultisidedDie[] dies = [
@@ -41,16 +41,18 @@ namespace HomePage.Repositories
 
             var letters = dies.SelectMany(x => x.sides.Select(t => t.letter)).Distinct().ToHashSet();
             var excluded = File.ReadAllLines("Database/ExcludedWords.txt").Select(x => x.ToUpper()).ToHashSet();
+            var existingWords = WordMixResultValidator.GetAllWords(dbContext);
             foreach (var word in words)
             {
+                var upperWord = word.ToUpper();
                 var invalid = false;
                 var hasVowel = false;
-                if (word == word.ToUpper() || excluded.Contains(word.ToUpper()))
+                if (word == upperWord || excluded.Contains(upperWord) || existingWords.Contains(upperWord))
                 {
                     continue;
                 }
 
-                foreach (var c in word.ToUpper())
+                foreach (var c in upperWord)
                 {
                     if (!letters.Contains(c))
                     {
@@ -64,9 +66,11 @@ namespace HomePage.Repositories
                     }
                 }
 
-                if (!invalid && word.Length < 14 && hasVowel)
+                if (!invalid && word.Length < 14 && word.Length > 1 && hasVowel)
                 {
-                    var canMake = CanMakeWord(word.ToUpper(), dies, 0);
+                    keptWords.Add(word);
+                    continue;
+                    var canMake = CanMakeWord(upperWord, dies, 0);
                     if (canMake)
                     {
                         keptWords.Add(word);
@@ -76,7 +80,7 @@ namespace HomePage.Repositories
 
             var sb = new StringBuilder();
             sb.Append("var dict = {\n");
-            foreach (var w in keptWords)
+            foreach (var w in keptWords.Concat(existingWords).Select(x => x.ToLower()).OrderBy(x => x))
             {
                 sb.Append("\"");
                 sb.Append(w);

@@ -43,7 +43,7 @@ namespace HomePage
 
         public IActionResult? GetPotentialRedirectResult(bool requireAdmin, bool requireLogin)
         {
-            var url = GetPotentialRedirectUrl();
+            var url = GetPotentialRedirectUrl(requireAdmin, requireLogin);
             if (url == null)
             {
                 return null;

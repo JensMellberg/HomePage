@@ -398,6 +398,11 @@ namespace HomePage.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("Owner")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<int>("Year")
                         .HasColumnType("int");
 
@@ -506,6 +511,25 @@ namespace HomePage.Migrations
                     b.ToTable("ToDo");
                 });
 
+            modelBuilder.Entity("HomePage.Model.UserGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserGroup");
+                });
+
             modelBuilder.Entity("HomePage.Model.UserInfo", b =>
                 {
                     b.Property<string>("UserName")
@@ -517,14 +541,16 @@ namespace HomePage.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<bool>("IsAdmin")
-                        .HasColumnType("bit");
-
                     b.Property<byte[]>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
+                    b.Property<Guid?>("UserGroupId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("UserName");
+
+                    b.HasIndex("UserGroupId");
 
                     b.ToTable("UserInfo");
                 });
@@ -713,6 +739,15 @@ namespace HomePage.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HomePage.Model.UserInfo", b =>
+                {
+                    b.HasOne("HomePage.Model.UserGroup", "UserGroup")
+                        .WithMany()
+                        .HasForeignKey("UserGroupId");
+
+                    b.Navigation("UserGroup");
                 });
 
             modelBuilder.Entity("HomePage.Model.ChoreModel", b =>

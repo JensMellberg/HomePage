@@ -62,7 +62,10 @@ namespace HomePage.Pages
             var to = string.IsNullOrEmpty(toDate) ? DateTime.MaxValue : DateHelper.FromKey(toDate);
             FromDate = fromDate;
             ToDate = toDate;
-            var relevantFoods = dayFoodRepository.GetPopulatedDayFood();
+            var relevantFoods = dayFoodRepository
+                .GetPopulatedDayFood()
+                .Where(x => x.Date >= from && x.Date <= to)
+                .ToList();
 
             if (CurrentType == StatisticType.Amount)
             {

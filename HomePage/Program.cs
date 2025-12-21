@@ -13,6 +13,8 @@ namespace HomePage
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<UserContext>();
             builder.Services.AddSingleton<BruteForceProtector>();
             builder.Services.AddTransient<CurrentWordMixRepository>();
             builder.Services.AddTransient<WordMixResultRepository>();
