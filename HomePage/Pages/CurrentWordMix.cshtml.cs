@@ -35,15 +35,6 @@ namespace HomePage.Pages
             CurrentBest = wordMixResultRepository.GetForDateAndPerson(DateHelper.DateNow, LoggedInPerson!.UserName)?.Score ?? 0;
             ExtraWords = string.Join(",", dbContext.ExtraWord.Where(x => x.JensApproved && x.AnnaApproved).Select(x => x.Word.ToUpper().EncodeForClient()));
 
-            var letterString = currentWordMixRepository.GetCurrent().Letters;
-            var letterList = new List<Letter>();
-            for (var i = 0; i < letterString.Length; i+=2)
-            {
-                letterList.Add(new Letter { Character = letterString[i], Score = int.Parse(letterString[i + 1].ToString()) });
-            }
-            
-            var solution = BestBoardFinder.GenerateBestBoard(letterList, GetAllWords(dbContext));
-            Console.WriteLine(solution.PrettyPrint());
             return Page();
         }
 

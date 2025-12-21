@@ -1,21 +1,48 @@
-﻿using static HomePage.WordMixResultValidator;
+﻿using HomePage.Data;
+using Microsoft.IdentityModel.Tokens;
+using static HomePage.WordMixResultValidator;
 namespace HomePage
 {
-    public class WordMixCalculator
+    public class WordMixCalculator(IEnumerable<Letter> letters, AppDbContext dbContext)
     {
-       public WordMixCalculator() { }
+        private (int score, Board board) bestBoard = (0, null);
 
-       private (int score, Board board) bestBoard = (0, null);
+        private Dictionary<string, (bool hasAfter, bool hasBefore)> ValidSubstrings = [];
 
-       public Board CalculateBestBoard(IEnumerable<Letter> letters)
-       {
+        private HashSet<string> ValidWords = []; 
+
+        public Board CalculateBestBoard()
+        {
+            SetupWords();
             var bestLetter = letters.MaxBy(x => x.Score);
             var start = new Letter[10, 10];
             start[4, 4] = bestLetter;
             CalculatePartial(new Board { BoardMatrix = start }, letters.Where(x => x != bestLetter), [(3, 4), (5, 4), (4, 3), (4, 5)]);
 
             return null;
-       }
+        }
+
+        private void SetupWords()
+        {
+            ValidWords = GetAllWords(dbContext);
+            return;
+            var possibleWords = new HashSet<string>();
+            SetupWordsInner(letters.ToList(), "");
+            var a = 5;
+
+            void SetupWordsInner(List<Letter> currentLetters, string word)
+            {
+                for (var i = 0; i < currentLetters.Count; i++)
+                {
+                    var newWord = word + currentLetters[i].Character.ToString();
+
+                    if (possibleWords.Add(newWord))
+                    {
+                        SetupWordsInner(currentLetters.Where(x => x != currentLetters[i]).ToList(), newWord);
+                    }
+                }
+            }
+        }
 
         private void CalculatePartial(Board previous, IEnumerable<Letter> remaining, List<(int x, int y)> possibleSpots)
         {

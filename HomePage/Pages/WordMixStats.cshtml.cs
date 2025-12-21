@@ -2,6 +2,7 @@ using HomePage.Data;
 using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using static HomePage.WordMixResultValidator;
 
 namespace HomePage.Pages
 {
@@ -95,6 +96,18 @@ namespace HomePage.Pages
                 ? dbContext.ExtraWord
                     .Count(x => loggedInPersonName == Person.Jens.Name && !x.JensApproved || loggedInPersonName == Person.Anna.Name && !x.AnnaApproved)
                 : 0;
+
+
+
+            /*var letterString = new CurrentWordMixRepository(dbContext).GetCurrent().Letters;
+            var letterList = new List<Letter>();
+            for (var i = 0; i < letterString.Length; i += 2)
+            {
+                letterList.Add(new Letter { Character = letterString[i], Score = int.Parse(letterString[i + 1].ToString()) });
+            }
+
+            var solver = new WordMixCalculator(letterList, dbContext);
+            var solution = solver.CalculateBestBoard();*/
 
             return Page();
         }
