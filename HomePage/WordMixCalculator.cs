@@ -1,6 +1,4 @@
-﻿using HomePage.Data;
-using System.Collections.Concurrent;
-using System.Threading;
+﻿using System.Collections.Concurrent;
 using static HomePage.DirectionExtensions;
 using static HomePage.WordMixResultValidator;
 namespace HomePage
@@ -41,7 +39,7 @@ namespace HomePage
                     startWords,
                     new ParallelOptions
                     {
-                        MaxDegreeOfParallelism = Environment.ProcessorCount,
+                        MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 1),
                         CancellationToken = cancellationToken
                     },
                     word =>
@@ -67,9 +65,11 @@ namespace HomePage
             if (cancellationToken.IsCancellationRequested)
             {
                 logger.Information($"Timed out when calculating the best word mix result. {completedThreads} of {startWords.Count} start words completed.", null);
+            } else
+            {
+                logger.Information($"Completed best word mix result calculations. A total of {startWords.Count} start words completed.", null);
             }
-
-            logger.Information($"Completed best word mix result calculations. A total of {startWords.Count} start words completed.", null);
+ 
             return bestBoard;
         }
 

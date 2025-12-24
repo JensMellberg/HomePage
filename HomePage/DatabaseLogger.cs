@@ -3,7 +3,7 @@ using HomePage.Model;
 
 namespace HomePage
 {
-    public class DatabaseLogger(AppDbContext dbContext)
+    public class DatabaseLogger(IServiceScopeFactory serviceScopeFactory)
     {
         public void Information(string message, string? person) => Log(LogRowSeverity.Information, message, person);
 
@@ -13,6 +13,8 @@ namespace HomePage
 
         public void Log(LogRowSeverity severity, string message, string? person, string? stackTrace = null)
         {
+            using var scope = serviceScopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             dbContext.LogRow.Add(new LogRow
             {
                 LogRowSeverity = severity,

@@ -1,12 +1,15 @@
-﻿using System.Text;
-using HomePage.Data;
+﻿using HomePage.Data;
 using HomePage.Model;
+using Newtonsoft.Json.Linq;
+using System.Text;
 using static HomePage.WordMixResultValidator;
 
 namespace HomePage.Repositories
 {
     public class CurrentWordMixRepository(AppDbContext dbContext, IServiceScopeFactory scopeFactory)
     {
+        private static TimeSpan MrRobotTimeout => TimeSpan.FromMinutes(30);
+
         public CurrentWordMix GetCurrent()
         {
             var current = dbContext.CurrentWordMix.FirstOrDefault() ?? InitWordMix();
@@ -26,26 +29,29 @@ namespace HomePage.Repositories
             var letters = Letter.ParseAvailableLetters(wordMix.Letters);
             var allWords = GetAllWords(dbContext);
 
-            _ = Task.Run(async () =>
+            new Thread(() =>
             {
+                Thread.CurrentThread.IsBackground = true;
+                Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
+
                 using var scope = scopeFactory.CreateScope();
                 var logger = scope.ServiceProvider.GetRequiredService<DatabaseLogger>();
                 logger.Information($"Calculating best board result for day {day.ToReadable()}", null);
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
                 var calculator = new WordMixCalculator(letters, allWords, logger);
-                var result = calculator.CalculateBestBoardWithTimeout(TimeSpan.FromMinutes(10));
+                var (score, board) = calculator.CalculateBestBoardWithTimeout(MrRobotTimeout);
 
                 dbContext.WordMixResult.Add(new WordMixResult
                 {
                     Date = day,
-                    Score = result.score,
-                    Board = result.board.ToString(),
+                    Score = score,
+                    Board = board.ToString(),
                     Person = Person.MrRobot.UserName
                 });
 
                 dbContext.SaveChanges();
-            });
+            }).Start();
         }
 
         public void WordList()
@@ -71,7 +77,7 @@ namespace HomePage.Repositories
 
             var letters = dies.SelectMany(x => x.sides.Select(t => t.letter)).Distinct().ToHashSet();
             var excluded = File.ReadAllLines("Database/ExcludedWords.txt").Select(x => x.ToUpper()).ToHashSet();
-            var existingWords = WordMixResultValidator.GetAllWords(dbContext);
+            var existingWords = GetAllWords(dbContext);
             foreach (var word in words)
             {
                 var upperWord = word.ToUpper();
