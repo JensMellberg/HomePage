@@ -34,10 +34,17 @@ namespace HomePage.Migrations
                     table.PrimaryKey("PK_UserGroup", x => x.Id);
                 });
 
+            var adminGroupId = Guid.NewGuid();
             migrationBuilder.InsertData(
                 table: "UserGroup",
                 columns: ["Id", "DisplayName", "IsAdmin"],
-                values: [ Guid.NewGuid(), "Admin group", true ]);
+                values: [adminGroupId, "Admin group", true ]);
+
+            var adminHash = SignInRepository.HashPassword("admin");
+            migrationBuilder.InsertData(
+                table: "UserInfo",
+                columns: ["UserName", "DisplayName", "PasswordHash", "UserGroupId"],
+                values: ["admin", "admin", adminHash, adminGroupId]);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserInfo_UserGroupId",
