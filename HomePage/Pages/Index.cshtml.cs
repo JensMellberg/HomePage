@@ -34,7 +34,8 @@ namespace HomePage.Pages
         DayFoodRepository dayFoodRepository, 
         SignInRepository signInRepository, 
         SettingsRepository settingsRepository,
-        ChoreRepository choreRepository) : BasePage(signInRepository)
+        ChoreRepository choreRepository,
+        CurrentWordMixRepository currentWordMixRepository) : BasePage(signInRepository)
     {
 
         public int Day { get; set; }
@@ -118,6 +119,8 @@ namespace HomePage.Pages
             }
 
             settingsRepository.PerformBackupAsync(false);
+            currentWordMixRepository.GetCurrent();
+
             var dayFoods = dayFoodRepository.GetPopulatedDayFood();
             var todaysFood = dayFoods.FirstOrDefault(x => x.Date == today.Date);
             TodayFood = todaysFood;

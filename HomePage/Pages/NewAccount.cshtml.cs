@@ -12,7 +12,7 @@ namespace HomePage.Pages
 
         public IActionResult OnPost(string username, string password, string name)
         {
-            var success = signInRepository.CreateAccount(username, password, name);
+            var success = username != Person.MrRobot.UserName && signInRepository.CreateAccount(username, password, name);
             return new JsonResult(new { success });
         }
     }

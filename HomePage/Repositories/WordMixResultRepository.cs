@@ -5,6 +5,15 @@ namespace HomePage.Repositories
 {
     public class WordMixResultRepository(AppDbContext dbContext, CurrentWordMixRepository currentWordMixRepository, DatabaseLogger logger)
     {
+        public List<IGrouping<DateTime, WordMixResult>> GetResultsByDay()
+        {
+            return dbContext.WordMixResult
+                .ToList()
+                .GroupBy(x => x.Date)
+                .OrderByDescending(x => x.Key)
+                .ToList();
+        }
+
         public void UpdateResultWithValidation(string person, string letters, int score)
         {
             var validationResult = WordMixResultValidator.ValidateResult(letters, currentWordMixRepository.GetCurrent().Letters, dbContext);

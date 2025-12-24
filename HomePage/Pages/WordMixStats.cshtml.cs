@@ -1,4 +1,5 @@
 using HomePage.Data;
+using HomePage.Model;
 using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -22,18 +23,15 @@ namespace HomePage.Pages
 
         public IActionResult OnGet()
         {
-            var allDateGroupings = dbContext.WordMixResult
-                .ToList()
-                .GroupBy(x => x.Date)
-                .OrderByDescending(x => x.Key)
-                .ToList();
+            var allDateGroupings = wordMixResultRepository.GetResultsByDay();
 
             if (allDateGroupings.Count == 0)
             {
                 return Page();
             }
 
-            var accounts = dbContext.UserInfo.ToDictionary(x => x.UserName, x => x);
+            var accountNames = dbContext.UserInfo.ToDictionary(x => x.UserName, x => x.DisplayName);
+            accountNames.Add(Person.MrRobot.UserName, Person.MrRobot.Name);
             var loggedInPersonName = LoggedInPerson?.UserName;
             if (allDateGroupings.First().Key == DateHelper.DateNow)
             {
@@ -42,7 +40,7 @@ namespace HomePage.Pages
                     var clientModel = new WordMixResultClientModel
                     {
                         Score = entry.Score,
-                        Person = accounts[entry.Person].DisplayName.Truncate(10),
+                        Person = accountNames[entry.Person].Truncate(10),
                         Key = loggedInPersonName == entry.Person ? entry.Board : null
                     };
                     if (entry.Person == Person.Jens.Name)
@@ -72,7 +70,7 @@ namespace HomePage.Pages
                     var clientModel = new WordMixResultClientModel
                     {
                         Score = entry.Score,
-                        Person = accounts[entry.Person].DisplayName.Truncate(10),
+                        Person = accountNames[entry.Person].Truncate(10),
                         Key = entry.Id.ToString()
                     };
                     if (entry.Person == Person.Jens.Name)
@@ -96,18 +94,6 @@ namespace HomePage.Pages
                 ? dbContext.ExtraWord
                     .Count(x => loggedInPersonName == Person.Jens.Name && !x.JensApproved || loggedInPersonName == Person.Anna.Name && !x.AnnaApproved)
                 : 0;
-
-
-
-            /*var letterString = new CurrentWordMixRepository(dbContext).GetCurrent().Letters;
-            var letterList = new List<Letter>();
-            for (var i = 0; i < letterString.Length; i += 2)
-            {
-                letterList.Add(new Letter { Character = letterString[i], Score = int.Parse(letterString[i + 1].ToString()) });
-            }
-
-            var solver = new WordMixCalculator(letterList, dbContext);
-            var solution = solver.CalculateBestBoard();*/
 
             return Page();
         }

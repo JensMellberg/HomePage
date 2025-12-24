@@ -1,21 +1,51 @@
 ﻿using System.Text;
 using HomePage.Data;
 using HomePage.Model;
+using static HomePage.WordMixResultValidator;
 
 namespace HomePage.Repositories
 {
-    public class CurrentWordMixRepository(AppDbContext dbContext)
+    public class CurrentWordMixRepository(AppDbContext dbContext, IServiceScopeFactory scopeFactory)
     {
         public CurrentWordMix GetCurrent()
         {
-            var current = dbContext.CurrentWordMix.Single();
+            var current = dbContext.CurrentWordMix.FirstOrDefault() ?? InitWordMix();
             //WordList();
             if (current.ShouldRecreate)
             {
+                var today = DateHelper.DateNow;
                 Recreate(current);
+                AddRobotResult(today, current);
             }
 
             return current;
+        }
+
+        public void AddRobotResult(DateTime day, CurrentWordMix wordMix)
+        {
+            var letters = Letter.ParseAvailableLetters(wordMix.Letters);
+            var allWords = GetAllWords(dbContext);
+
+            _ = Task.Run(async () =>
+            {
+                using var scope = scopeFactory.CreateScope();
+                var logger = scope.ServiceProvider.GetRequiredService<DatabaseLogger>();
+                logger.Information($"Calculating best board result for day {day.ToReadable()}", null);
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                var calculator = new WordMixCalculator(letters, allWords, logger);
+                var result = calculator.CalculateBestBoardWithTimeout(TimeSpan.FromMinutes(10));
+
+                dbContext.WordMixResult.Add(new WordMixResult
+                {
+                    Date = day,
+                    Score = result.score,
+                    Board = result.board.ToString(),
+                    Person = Person.MrRobot.UserName
+                });
+
+                dbContext.SaveChanges();
+            });
         }
 
         public void WordList()
@@ -89,6 +119,14 @@ namespace HomePage.Repositories
 
             sb.Append("}");
             File.WriteAllText("Database/WordList.txt", sb.ToString());
+        }
+
+        private CurrentWordMix InitWordMix()
+        {
+            var currentWordMix = new CurrentWordMix { CreatedAt = DateTime.MinValue, Key = "1", Letters = "" };
+            dbContext.CurrentWordMix.Add(currentWordMix);
+            dbContext.SaveChanges();
+            return currentWordMix;
         }
 
         private bool CanMakeWord(string word, IEnumerable<MultisidedDie> dice, int letterIndex)

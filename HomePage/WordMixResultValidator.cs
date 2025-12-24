@@ -1,13 +1,14 @@
 ﻿using System.Text;
 using HomePage.Data;
+using static HomePage.DirectionExtensions;
 
 namespace HomePage
 {
-    public record WordMixValidationResult();
+    public record WordMixValidationResult(List<string> words);
 
-    public record WordMixValidationError(string message) : WordMixValidationResult;
+    public record WordMixValidationError(string message, List<(int x, int y, Direction direction)> errorWords, List<string> words) : WordMixValidationResult(words);
 
-    public record WordMixValidationSuccess(int score): WordMixValidationResult;
+    public record WordMixValidationSuccess(int score, List<string> words): WordMixValidationResult(words);
 
     public static class WordMixResultValidator
     {
@@ -47,26 +48,31 @@ namespace HomePage
             var board = Board.ParseFromString(boardString);
             if (!ValidateLetters(board.AllLetters, availableLetters))
             {
-                return new WordMixValidationError("The letters in the board does not match the available letters");
+                return new WordMixValidationError("The letters in the board does not match the available letters", [], []);
             }
 
             if (!ValidateConnectivity(board))
             {
-                return new WordMixValidationError("Not all board letters are connected.");
+                return new WordMixValidationError("Not all board letters are connected.", [], []);
             }
 
             return ValidateWords(board, dbContext);
         }
 
-        private static WordMixValidationResult ValidateWords(Board board, AppDbContext dbContext)
+        public static WordMixValidationResult ValidateWords(Board board, AppDbContext dbContext) => ValidateWords(board, GetAllWords(dbContext));
+
+        public static WordMixValidationResult ValidateWords(Board board, HashSet<string> allWords)
         {
-            var allWords = GetAllWords(dbContext);
             var totalScore = 0;
             string? error = null;
-            Iterate(board.BoardMatrix.GetLength(0), board.BoardMatrix.GetLength(1), (o, i) => board.BoardMatrix[o, i]);
+            var errorWords = new List<(int x, int y, Direction direction)>();
+            var words = new List<string>();
             Iterate(board.BoardMatrix.GetLength(1), board.BoardMatrix.GetLength(0), (o, i) => board.BoardMatrix[i, o]);
+            errorWords = [.. errorWords.Select(t => (t.y, t.x, Direction.Right))];
+            Iterate(board.BoardMatrix.GetLength(0), board.BoardMatrix.GetLength(1), (o, i) => board.BoardMatrix[o, i]);
+            
             totalScore -= board.UnusedLetters.Sum(x => x.Score);
-            return error != null ? new WordMixValidationError(error) : new WordMixValidationSuccess(totalScore);
+            return error != null ? new WordMixValidationError(error, errorWords, words) : new WordMixValidationSuccess(totalScore, words);
 
             void Iterate(int outerMax, int innerMax, Func<int, int, Letter> getLetter)
             {
@@ -77,6 +83,7 @@ namespace HomePage
                         var letter = getLetter(outer, inner);
                         if (letter != null)
                         {
+                            var innerStart = inner;
                             var word = letter.Character.ToString();
                             var score = letter.Score;
                             inner++;
@@ -90,6 +97,7 @@ namespace HomePage
 
                             if (word.Length > 1)
                             {
+                                words.Add(word);
                                 if (allWords.Contains(word))
                                 {
                                     totalScore += score;
@@ -97,6 +105,7 @@ namespace HomePage
                                 else
                                 {
                                     error = $"{word} is not a valid word.";
+                                    errorWords.Add((outer, innerStart, Direction.Down));
                                 }
                             }
                         }
@@ -185,13 +194,17 @@ namespace HomePage
 
             public Letter[,] BoardMatrix { get; set; }
 
+            public int Width => BoardMatrix.GetLength(0);
+
+            public int Height => BoardMatrix.GetLength(1);
+
             public IEnumerable<Letter> AllLetters
             {
                 get
                 {
-                    for (var x = 0; x < BoardMatrix.GetLength(0); x++)
+                    for (var x = 0; x < Width; x++)
                     {
-                        for (var y = 0; y < BoardMatrix.GetLength(1); y++)
+                        for (var y = 0; y < Height; y++)
                         {
                             if (BoardMatrix[x, y] != null)
                             {
@@ -206,6 +219,30 @@ namespace HomePage
                     }
                 }
             }
+
+            public override string ToString()
+            {
+                var sb = new StringBuilder();
+                for (var x = 0; x < Width; x++)
+                {
+                    for (var y = 0; y < Height; y++)
+                    {
+                        var letter = BoardMatrix[x, y];
+                        if (letter != null)
+                        {
+                            sb.Append($"{x},{y},{letter.Score},{letter.Character};");
+                        }
+                    }
+                }
+
+                foreach (var letter in UnusedLetters)
+                {
+                    sb.Append($"-,-,{letter.Score},{letter.Character};");
+                }
+
+                return sb.ToString();
+            }
+
             public static Board ParseFromString(string boardString)
             {
                 var result = new Board();
@@ -249,6 +286,17 @@ namespace HomePage
                 }
 
                 return base.Equals(obj);
+            }
+
+            public static List<Letter> ParseAvailableLetters(string availableLetters)
+            {
+                var result = new List<Letter>();
+                for (var i = 0; i < availableLetters.Length; i += 2)
+                {
+                    result.Add(new Letter { Character = availableLetters[i], Score = int.Parse(availableLetters[i + 1].ToString()) });
+                }
+
+                return result;
             }
         }
     }

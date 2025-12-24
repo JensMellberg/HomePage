@@ -12,6 +12,8 @@ namespace HomePage
 
         public static Person Anna = new() { Name = "Anna", UserName = "Anna" };
 
+        public static Person MrRobot = new() { Name = "Mr. Robot", UserName = "MrRobot" };
+
         public static string HtmlColorFromPerson(string person) => person switch
         {
             "Jens" => "#04b528a8",
