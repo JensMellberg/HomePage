@@ -1,7 +1,6 @@
 using HomePage.Data;
 using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using static HomePage.WordMixResultValidator;
 
 namespace HomePage.Pages
 {
@@ -9,7 +8,7 @@ namespace HomePage.Pages
     [RequireLogin]
     public class CurrentWordMixModel(CurrentWordMixRepository currentWordMixRepository, 
         WordMixResultRepository wordMixResultRepository,
-        AppDbContext dbContext, 
+        AppDbContext dbContext,
         SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public string BoardString { get; set; }

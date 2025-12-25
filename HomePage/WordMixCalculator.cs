@@ -11,7 +11,7 @@ namespace HomePage
 
         private readonly object WriteLock = new();
 
-        private static ConcurrentDictionary<string, List<string>> WordsByPossibleLetters = [];
+        private static readonly ConcurrentDictionary<string, List<string>> WordsByPossibleLetters = [];
 
         private readonly object[] HashLocks =
             [.. Enumerable.Range(0, 64).Select(_ => new object())];

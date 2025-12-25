@@ -42,13 +42,20 @@ namespace HomePage.Repositories
                 var calculator = new WordMixCalculator(letters, allWords, logger);
                 var (score, board) = calculator.CalculateBestBoardWithTimeout(MrRobotTimeout);
 
-                dbContext.WordMixResult.Add(new WordMixResult
+                var existingRobotResult = dbContext.WordMixResult.FirstOrDefault(x => x.Date == day && x.Person == Person.MrRobot.Name);
+                if (existingRobotResult != null)
                 {
-                    Date = day,
-                    Score = score,
-                    Board = board.ToString(),
-                    Person = Person.MrRobot.UserName
-                });
+                    existingRobotResult.Score = score;
+                    existingRobotResult.Board = board.ToString();
+                } else {
+                    dbContext.WordMixResult.Add(new WordMixResult
+                    {
+                        Date = day,
+                        Score = score,
+                        Board = board.ToString(),
+                        Person = Person.MrRobot.UserName
+                    });
+                }
 
                 dbContext.SaveChanges();
             }).Start();
