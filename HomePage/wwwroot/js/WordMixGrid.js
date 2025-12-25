@@ -331,10 +331,6 @@ function validateConnection() {
 function validateBoard() {
     let totalScore = 0
     const board = squares
-    let connectionError = validateConnection()
-    if (connectionError) {
-        return connectionError
-    }
 
     function validateSingle(elems, woord, points) {
         if (dict[woord.toLowerCase()]) {
@@ -350,6 +346,7 @@ function validateBoard() {
     }
 
     function iterate(outerMax, innerMax, getLetter) {
+        let errors = []
         for (let outer = 0; outer < outerMax; outer++) {
             for (let inner = 0; inner < innerMax; inner++) {
                 const letter = getLetter(outer, inner)
@@ -367,18 +364,26 @@ function validateBoard() {
 
                     if (word.length > 1) {
                         if (!validateSingle(elements, word, score)) {
-                            return word + ' är inte giltigt.'
+                            errors.push(word + ' är inte giltigt.')
                         }
                     }
                 }
             }
         }
+
+        return errors
     }
 
-    let error1 = iterate(board.length, board[0].length, (o, i) => board[o][i].letter)
-    let error2 = iterate(board[0].length, board.length, (o, i) => board[i][o].letter)
-    if (error1 || error2) {
-        return error1 || error2
+    let errors1 = iterate(board.length, board[0].length, (o, i) => board[o][i].letter)
+    let errors2 = iterate(board[0].length, board.length, (o, i) => board[i][o].letter)
+    const allErrors = errors1.concat(errors2)
+    if (allErrors.length > 0) {
+        return allErrors.join('\n')
+    }
+
+    let connectionError = validateConnection()
+    if (connectionError) {
+        return connectionError
     }
 
     totalScore -= storage.letters.map(x => x.points).reduce((sum, val) => sum + val, 0)
