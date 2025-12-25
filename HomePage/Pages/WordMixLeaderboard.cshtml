@@ -1,0 +1,76 @@
+﻿@page
+@model HomePage.Pages.WordMixLeaderboardModel
+@{
+    ViewData["Title"] = "Topplista";
+}
+
+<button type="button" onclick="window.location.href = 'WordMixStats'" style="position: absolute; top: 5px; left: 5px;">Tillbaka</button>
+<div class="page-wrapper" style="gap: 12px; margin-top: 32px;">
+    <div class="spending-group" style="background-color:#8bf5eb">
+        <div class="spending-group-header">
+            <span class="spending-group-title">Inbördes vinster</span>
+        </div>
+
+        @foreach (var kv in Model.WinsAgainstOthers.OrderByDescending(x => x.Value))
+        {
+            <div class="spending-entry-wrapper" style="border: none; gap: 8px;">
+                <div class="spending-group-entry">@Model.NamesByUsername[kv.Key]: @kv.Value</div>
+            </div>
+        }
+    </div>
+
+    <div class="spending-group" style="background-color:#8bf5eb">
+        <div class="spending-group-header">
+            <span class="spending-group-title">Vinster</span>
+        </div>
+
+        @foreach (var kv in Model.TotalWins.OrderByDescending(x => x.Value))
+        {
+            <div class="spending-entry-wrapper" style="border: none; gap: 8px;">
+                <div class="spending-group-entry">@Model.NamesByUsername[kv.Key]: @kv.Value</div>
+            </div>
+        }
+    </div>
+
+    <div class="spending-group" style="background-color:#8bf5eb">
+        <div class="spending-group-header">
+            <span class="spending-group-title">Vinstandel vid deltagande</span>
+        </div>
+
+        @foreach (var kv in Model.WinsByParticipation.OrderByDescending(x => x.Value))
+        {
+            <div class="spending-entry-wrapper" style="border: none; gap: 8px;">
+                <div class="spending-group-entry">@Model.NamesByUsername[kv.Key]: @kv.Value%</div>
+            </div>
+        }
+    </div>
+
+    <div class="spending-group" style="background-color:#8bf5eb">
+        <div class="spending-group-header">
+            <span class="spending-group-title">Oavgjorda med Mr. Robot</span>
+        </div>
+
+        @foreach (var kv in Model.MrRobotTies.OrderByDescending(x => x.Value))
+        {
+            <div class="spending-entry-wrapper" style="border: none; gap: 8px;">
+                <div class="spending-group-entry">@Model.NamesByUsername[kv.Key]: @kv.Value</div>
+            </div>
+        }
+    </div>
+
+    @if (Model.PersonalResults.Any())
+    {
+        <div class="spending-group" style="background-color:#8bf5eb">
+            <div class="spending-group-header">
+                <span class="spending-group-title">Personliga resultat</span>
+            </div>
+
+            @foreach (var kv in Model.PersonalResults)
+            {
+                <div class="spending-entry-wrapper" style="border: none; gap: 8px;">
+                    <div class="spending-group-entry">@Model.NamesByUsername[kv.Key]: Vinster: @kv.Value.wins Förluster: @kv.Value.losses</div>
+                </div>
+            }
+        </div>
+    }
+</div>
