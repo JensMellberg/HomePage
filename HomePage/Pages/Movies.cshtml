@@ -24,7 +24,7 @@
             }
         </select>
     </div>
-    <span>Senaste filmen: @Model.LastSeen.Name</span>
+    <span>Senaste filmen: @Model.LastSeen?.Name</span>
     <input type="hidden" value="@Model.AllMoviesJson" id="moviesJson" />
     <input type="hidden" id="loggedInPerson" value="@Model.LoggedInPerson?.UserName" />
     <div class="food-grid">
@@ -32,11 +32,11 @@
         {
             <div class="food-row">
                 <div class="food-grid-cell">
-                    <img class="movie-poster" src="@movie.ImageUrl"/>
+                    <img onclick="movieSearch('@movie.Name')" class="movie-poster" src="@movie.ImageUrl"/>
                 </div>
                 <div class="food-grid-cell">
-                    @if (movie.IsCompleted) {
-                        <div class="food-grid-cell-inner">
+                    <div class="food-grid-cell-inner">
+                        <div style="display: flex; gap: 4px;">
                             @if (Model.HasAccessToMovie(movie))
                             {
                                 <a href="CreateMovie?Id=@movie.Id">
@@ -47,18 +47,20 @@
                             {
                                 <span>@movie.Name</span>
                             }
-                            <span onclick="makeRanking('@movie.Id', '@Person.Jens.UserName')"> @movie.RankingText(Person.Jens)</span>
-                            <span onclick="makeRanking('@movie.Id', '@Person.Anna.UserName')"> @movie.RankingText(Person.Anna)</span>
+
+                            @if (!Model.IsAdmin && !movie.Rankings.Any(x => x.Person == Model.LoggedInPerson?.UserName))
+                            {
+                                <button type="button" style="width: 32px; height: 24px; font-size: 10px;" onclick="makeRanking('@movie.Id', '@Model.LoggedInPerson?.UserName')">
+                                    ⭐
+                                </button>
+                            }
                         </div>
-                    }
-                    else if (Model.HasAccessToMovie(movie)) {
-                        <a href="CreateMovie?Id=@movie.Id">
-                            @movie.Name
-                        </a>
-                    }
-                    else {
-                        <span>@movie.Name</span>
-                    }
+                       
+                        @foreach (var ranking in movie.GetRankingsWithDefaults())
+                        {
+                            <span onclick="makeRanking('@movie.Id', '@ranking.Person')"> @movie.RankingText(ranking, s => Model.DisplayNameByUsername[s])</span>
+                        }
+                    </div>
                 </div>
                 <div class="food-grid-cell">
                     <span>@movie.Year</span>
@@ -82,6 +84,29 @@
 <script src="~/js/StarRanker.js" asp-append-version="true"></script>
 <script src="~/js/JsonResultUnpacker.js" asp-append-version="true"></script>
 <script>
+    function movieSearch(movieName) {
+        const urlEncoded = encodeURIComponent(movieName)
+        $.ajax({
+            type: "POST",
+            url: 'EndPoint',
+            data: {
+                action: 'MovieSearch',
+                movieSearch: urlEncoded
+            },
+            success: (d) => onSearchResponse(d)
+        });
+    }
+
+    function onSearchResponse(jsonString) {
+        const d = JSON.parse(jsonString)
+        const bestGuess = d.d.filter(x => x.qid === 'movie')[0]
+
+        if (bestGuess && bestGuess.id) {
+            window.open('https://www.imdb.com/title/' + bestGuess.id + '/', '_blank')
+        }
+    }
+
+
     function markCompleted(id) {
          $.ajax({
             type: "POST",

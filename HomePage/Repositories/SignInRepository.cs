@@ -33,6 +33,7 @@ namespace HomePage
             };
             dbContext.UserInfo.Add(user);
             dbContext.SaveChanges();
+            logger.Information($"New account {username} created.", null);
 
             return true;
         }

@@ -64,6 +64,7 @@ namespace HomePage.Repositories
             }
 
             dbContext.SaveChanges();
+            logger.Information($"User {person} set a new word mix score of {score}.", person);
         }
     }
 }

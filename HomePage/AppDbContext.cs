@@ -61,6 +61,8 @@ namespace HomePage.Data
 
         public DbSet<UserGroup> UserGroup { get; set; }
 
+        public DbSet<MovieRankning> MovieRankning { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<LogRow>()
