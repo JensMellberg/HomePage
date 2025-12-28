@@ -1,17 +1,18 @@
-using System.Net.Http.Headers;
-using System.Text;
 using HomePage.Chores;
 using HomePage.Data;
 using HomePage.Repositories;
 using HomePage.Spending;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class EndpointModel(AppDbContext dbContext, SignInRepository signInRepository, ChoreRepository choreRepository) : BasePage(signInRepository)
+    public class EndpointModel(AppDbContext dbContext,
+        SignInRepository signInRepository,
+        ChoreRepository choreRepository, 
+        DatabaseLogger logger,
+        SettingsRepository settingsRepository) : BasePage(signInRepository)
     {
         public void OnGet()
         {
@@ -89,7 +90,8 @@ namespace HomePage.Pages
             if (action == "ImageUrl")
             {
                 var pair = ImageRepository.Instance.GetImageUrl();
-                return new JsonResult(new { url = pair.Item1, taken = pair.Item2 });
+                var lastUpdated = dbContext.Settings.Single().LastHomePageChange;
+                return new JsonResult(new { lastUpdated, url = pair.Item1, taken = pair.Item2 });
             }
 
             var redirectResult = GetPotentialClientRedirectResult(true, true, "/Index");
@@ -101,8 +103,11 @@ namespace HomePage.Pages
             var chore = choreRepository.GetChore(action);
             if (chore != null)
             {
+                var chorePerson = chore.ChorePerson();
                 var streak = chore.Update();
+                logger.Information($"{chorePerson} performed chore {chore.Id} with a new streak of {streak}.", null);
                 dbContext.SaveChanges();
+                settingsRepository.UpdateHomePageChange();
                 return Utils.CreateClientResult(new { streak });
             }
 
@@ -116,21 +121,6 @@ namespace HomePage.Pages
             public string place { get; set; }
 
             public int amount { get; set; }
-        }
-
-        public class Root
-        {
-            public List<OutputItem> Output { get; set; }
-        }
-
-        public class OutputItem
-        {
-            public List<ContentItem> Content { get; set; }
-        }
-
-        public class ContentItem
-        {
-            public string Text { get; set; }
         }
     }
 }

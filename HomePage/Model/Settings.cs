@@ -8,6 +8,8 @@
 
         public DateTime LastRedDayUpdateDate { get; set; }
 
+        public DateTimeOffset LastHomePageChange { get; set; }
+
         public bool ShouldBackUp(DateTime date) => LastBackupDate.Date < date.Date;
     }
 }

@@ -12,6 +12,8 @@ namespace HomePage
 
         public void MultiplyAmount(double multipler) => Amount.Multiply(multipler);
 
+        public IngredientInstance Copy() => new() { Ingredient = Ingredient, Amount = Amount.Copy() };
+
         public static IngredientInstance Create(Ingredient ingredient, double amount, string? unit)
         {
             var unitInstance = UnitTypes.CreateInstance(ingredient.UnitType, amount);

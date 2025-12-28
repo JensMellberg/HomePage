@@ -1,13 +1,14 @@
 using System.Text.RegularExpressions;
 using HomePage.Data;
 using HomePage.Model;
+using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace HomePage.Pages
 {
     [RequireAdmin]
-    public class CreateDayFoodModel(AppDbContext dbContext, SignInRepository signInRepository, DatabaseLogger logger) : BasePage(signInRepository)
+    public class CreateDayFoodModel(AppDbContext dbContext, SignInRepository signInRepository, DatabaseLogger logger, SettingsRepository settingsRepository) : BasePage(signInRepository)
     {
         public string DateKey { get; set; }
 
@@ -88,6 +89,11 @@ namespace HomePage.Pages
                     dbContext.DayFood.Add(dayFood);
                     logger.Information($"Added food {dayFood.CombinedName} for day {date.ToReadable()}.", LoggedInPerson?.UserName);
                 }
+            }
+
+            if (date.Date == DateHelper.DateNow)
+            {
+                settingsRepository.UpdateHomePageChange();
             }
 
             dbContext.SaveChanges();

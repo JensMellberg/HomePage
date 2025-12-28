@@ -41,13 +41,15 @@
 
     public abstract class UnitInstance(double amount)
     {
-        private double amount = amount;
+        protected double amount = amount;
 
         public abstract string UnitType { get; }
 
         internal abstract List<UnitValue> UnitValues { get; }
 
         public void Multiply(double multiplier) => amount *= multiplier;
+
+        public abstract UnitInstance Copy();
 
         public void UpdateAmount(double newAmount, string unit)
         {
@@ -96,6 +98,8 @@
 
         internal override List<UnitValue> UnitValues => AllUnitValues;
 
+        public override UnitInstance Copy() => new AmountInstance(amount);
+
         public static List<UnitValue> AllUnitValues =>
         [
             new UnitValue { Unit = "st", Value = 1 }
@@ -105,6 +109,8 @@
     public class WeightInstance(double amount) : UnitInstance(amount)
     {
         public override string UnitType => UnitTypes.Weight;
+
+        public override UnitInstance Copy() => new WeightInstance(amount);
 
         internal override List<UnitValue> UnitValues => AllUnitValues;
 
@@ -118,6 +124,8 @@
     public class VolumeInstance(double amount) : UnitInstance(amount)
     {
         public override string UnitType => UnitTypes.Volume;
+
+        public override UnitInstance Copy() => new VolumeInstance(amount);
 
         internal override List<UnitValue> UnitValues => AllUnitValues;
 

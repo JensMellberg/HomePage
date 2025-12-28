@@ -18,8 +18,11 @@ namespace HomePage.Repositories
             var days = json?.response ?? [];
             var values = days
                 .Select(x => new ThemeDay { Key = x.id, ThemeDate = DateHelper.FromKey(DateHelper.KeyFromKeyWithZeros(x.date)), DayName = x.name });
+            var existing = dbContext.ThemeDay.Select(x => x.Key).ToHashSet();
+            values = values.Where(x => existing.Contains(x.Key));
             dbContext.ThemeDay.RemoveRange(dbContext.ThemeDay);
             dbContext.ThemeDay.AddRange(values);
+            dbContext.SaveChanges();
         }
 
         private class ApiReponse

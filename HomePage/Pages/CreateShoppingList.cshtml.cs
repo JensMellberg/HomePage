@@ -1,11 +1,8 @@
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
 using System.Text.Json;
 using HomePage.Data;
 using HomePage.Model;
 using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
@@ -16,13 +13,13 @@ namespace HomePage.Pages
         DayFoodRepository dayFoodRepository, 
         SignInRepository signInRepository) : BasePage(signInRepository)
     {
-        public string ShoppingList { get; set; }
-
         public string PossibleIngredients { get; set; }
 
         public string AllUnitValues = JsonSerializer.Serialize(UnitTypes.GetAllUnitValues());
 
         public string IngredientsJson { get; set; }
+
+        public string SkippedIngredientsJson { get; set; }
 
 
         public IActionResult OnGet(string from, string to)
@@ -53,11 +50,11 @@ namespace HomePage.Pages
                 ingredients.Add(standardItem.Id, instance);
             }
 
-            var sb = new StringBuilder();
-            var ingredientsList = new List<IngredientInstance>();
+            var ingredientsList = new List<(bool isSkipped, IngredientInstance ingredient)>();
 
             foreach (var ingredient in ingredients.Values.OrderBy(x => x.SortOrder))
             {
+                var original = ingredient.Copy();
                 if (foodStorageItems.TryGetValue(ingredient.IngredientId, out var foodStorageIngredient))
                 {
                     ingredient.Subtract(foodStorageIngredient);
@@ -65,24 +62,25 @@ namespace HomePage.Pages
 
                 if (ingredient.IsNonZero)
                 {
-                    sb.Append(ingredient.Ingredient.Name);
-                    sb.Append(' ');
-                    sb.Append(ingredient.GetStaticDisplayString());
-                    sb.Append("\n");
-                    ingredientsList.Add(ingredient);
+                    ingredientsList.Add((false, ingredient));
+                }
+
+                if (original.Amount.Amount != ingredient.Amount.Amount)
+                {
+                    ingredientsList.Add((true, original));
                 }
             }
 
-            ShoppingList = sb.ToString();
-            IngredientsJson = JsonSerializer.Serialize(ingredientsList.Select(x =>
+            IngredientsJson = JsonSerializer.Serialize(ingredientsList.OrderBy(x => x.isSkipped).Select(x =>
             {
-                var displayValues = x.GetDisplayValues();
+                var displayValues = x.ingredient.GetDisplayValues();
                 return new
                 {
-                    id = x.IngredientId,
+                    id = x.ingredient.IngredientId,
                     amount = displayValues.amount,
                     unit = displayValues.unit,
-                    category = x.Ingredient.CategoryId
+                    category = x.ingredient.Ingredient.CategoryId,
+                    isSkipped = x.isSkipped
                 };
             }));
 

@@ -122,8 +122,9 @@
 <script src="~/js/JsonResultUnpacker.js" asp-append-version="true"></script>
 <script src="~/js/Streak.js" asp-append-version="true"></script>
 <script>
-    var currentDayNbr = new Date().getDate()
-    var crntHourNbr = new Date().getHours() % 24
+    var lastUpdated = new Date()
+    var currentDayNbr = lastUpdated.getDate()
+    var crntHourNbr = lastUpdated.getHours() % 24
     document.body.style.backgroundColor = 'rgb(20 12 69)'
     setTimeout(() => updateImage(), @Model.MilliSecondsUntilNextPicture)
     updateClock()
@@ -172,6 +173,7 @@
                     makeFirework(clientX, clientY, counter)
                     //window.showStreak(result.streak, clientX, clientY)
                     choreIcon.onclick = () => true
+                    lastUpdated = new Date()
                 }
             });
         }
@@ -222,6 +224,11 @@
             },
             url: "/Endpoint",
             success: (e) => {
+                if (new Date(e.lastUpdated) > lastUpdated) {
+                    window.location.reload()
+                    return
+                }
+
                 $('.background').attr('src', e.url)
                 const wrapper = $('.image-taken-text')
                 if (e.taken) {

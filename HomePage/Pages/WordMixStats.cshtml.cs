@@ -1,9 +1,6 @@
 using HomePage.Data;
-using HomePage.Model;
 using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using static HomePage.WordMixResultValidator;
 
 namespace HomePage.Pages
 {

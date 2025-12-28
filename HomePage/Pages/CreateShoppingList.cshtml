@@ -8,8 +8,6 @@
 <button type="button" onclick="addToStorage()">Lägg till i skafferi</button>
 <button type="button" onclick="window.history.back();">Tillbaka</button>
 
-<input type="hidden" value="@Model.ShoppingList" id="shoppingList" />
-
 <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;" id="shoplist">
 </div>
 
@@ -27,7 +25,6 @@
             rowWrapper.className = 'input-wrapper'
 
             let instance = IngredientInstance.create(categories, possibleIngredients, unitTypes, ingredient.id, ingredient.amount, ingredient.unit, ingredient.category)
-            allRows.push(instance)
             let elements = instance.createElements(false)
             let span = document.createElement('span')
             let ingredientActual = possibleIngredients.find(x => x.id == elements.dropdown.value)
@@ -35,18 +32,31 @@
             rowWrapper.appendChild(span)
             rowWrapper.appendChild(elements.amountBox)
             rowWrapper.appendChild(elements.unitDropdown)
-            rowWrapper.appendChild(elements.deleteButton)
-            elements.deleteButton.onclick = () => {
-                allRows = allRows.filter(x => x !== instance)
-                rowWrapper.remove()
-                return false
+
+            if (ingredient.isSkipped) {
+                elements.amountBox.disabled = true;
+                elements.unitDropdown.disabled = true;
+                span.style.color = 'grey'
+            } else {
+                allRows.push(instance)
+                rowWrapper.appendChild(elements.deleteButton)
+                elements.deleteButton.onclick = () => {
+                    allRows = allRows.filter(x => x !== instance)
+                    rowWrapper.remove()
+                    return false
+                }
             }
 
             wrapper.appendChild(rowWrapper)
         }
 
     function copyShoppingList() {
-        const shoppingListText = document.getElementById('shoppingList').value
+        const getNameFromIngredientId = id => {
+            return possibleIngredients.filter(x => x.id === id)[0].name
+        }
+
+        const ingredients = allRows.map(x => x.getIngredient()).map(x => ({ name: getNameFromIngredientId(x.id), unit: x.unit, amount: x.amount }))
+        const shoppingListText = ingredients.map(x => x.name + ' ' + x.amount + ' ' + x.unit).join('\n')
         const textarea = document.createElement('textarea');
         textarea.value = shoppingListText;
         textarea.style.position = 'fixed';
@@ -58,7 +68,7 @@
             document.execCommand('copy');
             alert('Kopierat!');
         } catch (err) {
-            console.error('Fallback copy failed:', err);
+            console.error('Copy failed:', err);
         }
 
         document.body.removeChild(textarea);

@@ -13,6 +13,13 @@ namespace HomePage.Repositories
             Task.Run(() => PerformBackup(force));
         }
 
+        public void UpdateHomePageChange()
+        {
+            var settings = Settings;
+            settings.LastHomePageChange = DateTimeOffset.UtcNow;
+            dbContext.SaveChanges();
+        }
+
         public Stream? GetLatestBackup(out string fileName)
         {
             var backupFolder = config["BackupFolderPath"];

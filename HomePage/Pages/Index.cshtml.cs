@@ -77,17 +77,7 @@ namespace HomePage.Pages
             DayOfWeek = DateHelper.WeekNumberToString[(int)today.DayOfWeek];
             Month = DateHelper.MonthNumberToString[today.Month];
 
-            Activities = dbContext.CalendarActivity.ToList().Where(x =>
-            {
-                var startDay = x.CalendarDate;
-                if (x.IsReoccuring)
-                {
-                    startDay = startDay.AddYears(today.Year - startDay.Year);
-                }
-
-                var lastDay = startDay.AddDays(x.DurationInDays);
-                return today > startDay && today < lastDay;
-            });
+            Activities = dbContext.CalendarActivity.ToList().Where(x => x.ShouldShowOnDay(today));
 
             List<string> exemptFromChores = [];
             if (Activities.Any(x => x.IsVacation && (x.Person == "Both" || x.Person == Person.Jens.Name)))
@@ -141,7 +131,7 @@ namespace HomePage.Pages
             ImageUrl = imagePair.Item1;
             ImageTaken = imagePair.Item2;
             RedDay = redDayRepository.InfoForDate(today.Date);
-            //new ThemeDayRepository().UpdateFromJsonFile();
+            //themeDayRepository.UpdateFromJsonFile();
             ThemeDays = themeDayRepository.InfoForDate(today.Date);
 
             bool AddChore(BaseChore chore)
@@ -206,6 +196,11 @@ namespace HomePage.Pages
                 var dayFood = new DayFood { Id = idToUse, Date = dateTime, Portions = 1, FoodConnections = [foodConnection] };
                 dbContext.DayFood.Add(dayFood);
                 dbContext.SaveChanges();
+                if (dateTime == DateHelper.DateNow)
+                {
+                    settingsRepository.UpdateHomePageChange();
+                }
+
                 return Utils.CreateRedirectClientResult("WeekFood?" + GetFirstOfWeekQueryString(dateTime));
             }
         }

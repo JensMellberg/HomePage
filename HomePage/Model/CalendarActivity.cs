@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomePage.Model
 {
@@ -26,6 +27,18 @@ namespace HomePage.Model
 
         [NotMapped]
         public DateTime? DateInCalendar { get; set; }
+
+        public bool ShouldShowOnDay(DateTime day)
+        {
+            var startDay = CalendarDate;
+            if (IsReoccuring)
+            {
+                startDay = startDay.AddYears(day.Year - startDay.Year);
+            }
+
+            var lastDay = startDay.AddDays(DurationInDays);
+            return day > startDay && day < lastDay;
+        }
 
         public string ReplacedText(int yearNow)
         {

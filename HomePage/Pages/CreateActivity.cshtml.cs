@@ -1,11 +1,12 @@
 using HomePage.Data;
 using HomePage.Model;
+using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomePage.Pages
 {
     [RequireAdmin]
-    public class CreateActivityModel(AppDbContext dbContext, SignInRepository signInRepository) : BasePage(signInRepository)
+    public class CreateActivityModel(AppDbContext dbContext, SignInRepository signInRepository, SettingsRepository settingsRepository) : BasePage(signInRepository)
     {
         public CalendarActivity Activity { get; set; }
 
@@ -36,11 +37,16 @@ namespace HomePage.Pages
                 existing.IsVacation = isvacation == "on";
             } else
             {
-                var activity = new CalendarActivity { Key = activityId, Text = text, Person = person, CalendarDate = convertedDate, DurationInDays = duration, IsReoccuring = isreoccuring == "on", IsVacation = isvacation == "on" };
-                dbContext.CalendarActivity.Add(activity);
+                existing = new CalendarActivity { Key = activityId, Text = text, Person = person, CalendarDate = convertedDate, DurationInDays = duration, IsReoccuring = isreoccuring == "on", IsVacation = isvacation == "on" };
+                dbContext.CalendarActivity.Add(existing);
             }
 
             dbContext.SaveChanges();
+            if (existing.ShouldShowOnDay(DateHelper.DateTimeNow))
+            {
+                settingsRepository.UpdateHomePageChange();
+            }
+
             var firstOfWeekDate = DateHelper.GetFirstOfWeek(convertedDate);
             return Redirect($"/Calendar?{DateHelper.FormatDateForQueryString(firstOfWeekDate)}");
         }
