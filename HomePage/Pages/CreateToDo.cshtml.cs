@@ -25,8 +25,15 @@ namespace HomePage.Pages
 
         public IActionResult OnPost(Guid id, string name)
         {
-            var toDo = new ToDoItem { Key = id, Name = name };
-            dbContext.ToDo.Add(toDo);
+            var existing = dbContext.ToDo.Find(id);
+            if (existing != null)
+            {
+                existing.Name = name;
+            } else {
+                var toDo = new ToDoItem { Key = id, Name = name };
+                dbContext.ToDo.Add(toDo);
+            }
+            
             dbContext.SaveChanges();
 
             return Redirect($"/ToDo");
