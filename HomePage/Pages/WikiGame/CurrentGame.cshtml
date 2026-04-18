@@ -1,0 +1,112 @@
+﻿@page
+@model HomePage.Pages.WikiGame.CurrentGameModel
+@{
+    ViewData["Title"] = "Dagens Wikipedia race";
+}
+
+<link rel="stylesheet" href="~/css/wikigame.css" asp-append-version="true" />
+
+<div class="page-wrapper" style="height: 100vh;">
+    <span class="step-counter" style="position: absolute; top: 5px;">Sidor besökta: @Model.PreviousClicks</span>
+    <button onclick="window.location.href = 'Results'" style="position: absolute; top: 15px; left: 0;">Tillbaka</button>
+    <div class="input-wrapper" style="position: absolute; right: 0; top: 30px;">
+        <input type="checkbox" onclick="toggleConfirmation(event)" id="confirm-checkbox" />
+        <span>Fråga innan navigering</span>
+    </div>
+    <div class="wiki-container">
+        @Html.Raw(Model.PageHtml)
+    </div>
+</div>
+
+<script src="~/js/Firework.js" asp-append-version="true"></script>
+<script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
+<script src="~/js/JsonResultUnpacker.js" asp-append-version="true"></script>
+<script>
+    var isNavigating = false
+    var confirmNavigation = false
+    var savedConfirmation = localStorage.getItem("confirmWikiGame")
+    if (savedConfirmation === 'yes') {
+        confirmNavigation = true
+        document.getElementById('confirm-checkbox').checked = true
+    }
+
+    document.addEventListener('click', e => {
+        const link = e.target.closest('.wiki-link');
+        if (!link || isNavigating) {
+            return;
+        }
+
+        e.preventDefault();
+
+        const page = link.dataset.page;
+        if (confirmNavigation) {
+           Alert.openDialog('Vill du gå till sidan "' + page.replaceAll('_', ' ') + '"', [
+                {text: 'Ja tack!', action: () => {Popup.closePopup(); navigateToPage(page);}},
+                {text: 'Nä', action: () => {Popup.closePopup();}}
+            ])
+        } else {
+            navigateToPage(page);
+        }
+    });
+
+    if ('@Model.HasWon' === 'True') {
+         setTimeout(() => shootFireworks(), 800)
+    }
+
+    function toggleConfirmation(e) {
+        if (e.target.checked) {
+            localStorage.setItem('confirmWikiGame', 'yes');
+            confirmNavigation = true
+        } else {
+            localStorage.setItem('confirmWikiGame', 'no');
+            confirmNavigation = false
+        }
+    }
+
+    function navigateToPage(pageName) {
+        isNavigating = true
+        Spinner.show()
+         $.ajax({
+            type: "POST",
+            data: {
+                pageName: pageName
+            },
+            url: "/WikiGame/CurrentGame",
+            success: (data) => {
+                isNavigating = false
+                Spinner.hide()
+                const result = JsonResultUnpacker.unpackResult(data, window)
+                if (!result) {
+                    return;
+                }
+
+                $('.wiki-container').html(result.html)
+                $('.step-counter').text('Sidor besökta: ' + result.steps)
+                if (result.isWin) {
+                    alert('Du hittade Hitler!')
+                    shootFireworks()
+                }
+            },
+            error: () => {
+                alert('Någonting gick fel.')
+                isNavigating = false
+                Spinner.hide()
+            }
+        });
+    }
+
+    function shootFireworks() {
+        const clientX = Math.floor(Math.random() * window.innerWidth);
+        const clientY = Math.floor(Math.random() * window.innerHeight);
+        const counter = 3
+        makeFirework(clientX, clientY, counter)
+        setTimeout(() => shootFireworks(), 800)
+    }
+
+    function makeFirework(clientX, clientY, counter) {
+        createFirework(clientX, clientY)
+        if (counter > 0) {
+            setTimeout(() => createFirework(clientX, clientY, counter - 1), 150)
+        }
+    }
+</script>

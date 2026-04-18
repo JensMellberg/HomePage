@@ -13,6 +13,12 @@ namespace HomePage.Data
 
         public DbSet<ToDoItem> ToDo { get; set; }
 
+        public DbSet<WikiGameStart> WikiGameStarts { get; set; }
+
+        public DbSet<WikiGameNavigation> WikiGameNavigations { get; set; }
+
+        public DbSet<CachedWikiGamePage> CachedWikiGamePages { get; set; }
+
         public DbSet<CalendarActivity> CalendarActivity { get; set; }
 
         public DbSet<Category> Category { get; set; }
@@ -26,6 +32,8 @@ namespace HomePage.Data
         public DbSet<RedDay> RedDay { get; set; }
 
         public DbSet<WordMixResult> WordMixResult { get; set; }
+
+        public DbSet<PokemonTDResult> PokemonTDResult { get; set; }
 
         public DbSet<Movie> Movie { get; set; }
 
@@ -58,6 +66,8 @@ namespace HomePage.Data
         public DbSet<ChoreModel> ChoreModel { get; set; }
 
         public DbSet<ChoreStreak> ChoreStreak { get; set; }
+
+        public DbSet<ExcludedGoodie> ExcludedFromGoodies { get; set; }
 
         public DbSet<UserGroup> UserGroup { get; set; }
 
@@ -93,7 +103,10 @@ namespace HomePage.Data
                 .HasKey(fi => new { fi.FoodId, fi.IngredientId});
 
             modelBuilder.Entity<ChoreStreak>()
-            .HasKey(c => new { c.ChoreId, c.Person});
+                .HasKey(c => new { c.ChoreId, c.Person});
+
+            modelBuilder.Entity<WikiGameNavigation>()
+                .HasKey(x => new { x.Date, x.UserName, x.Step });
         }
     }
 }

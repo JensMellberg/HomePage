@@ -1,0 +1,49 @@
+﻿@page
+@model HomePage.Pages.WikiGame.ResultsModel
+@{
+    ViewData["Title"] = "Wikipedia race";
+}
+<div class="page-wrapper" style="height: 100vh;">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+        <a href="CurrentGame" style="align-self: center;">Dagens sida</a>
+        <div style="border: 1px solid black; padding: 3px;">
+            <span>Följ länkarna på wikipediasidorna tills du hittar till sidan för Adolf hitler. Färre antal klick är bättre.</span>
+        </div>
+    </div>
+
+    @if (Model.TodayResult != null) {
+        <div class="word-mix-top-bar" style="justify-content: center">
+            <div class="word-mix-other-current">
+                @foreach (var entry in Model.TodayResult.Results)
+                {
+                    if (Model.IsFinished) {
+                        <a href="Result?user=@entry.UserName!.EncodeForClient()&date=@DateHelper.ToKey(Model.TodayResult.Date)">@Model.AccountNames[entry.UserName]: @entry.Steps</a>
+                    }
+                    else {
+                        <span>@Model.AccountNames[entry.UserName]: @entry.Steps</span>
+                    }
+                }
+            </div>
+        </div>
+    }
+    
+    <div class="word-mix-history-outer">
+        @foreach (var dayResult in Model.PreviousResults)
+        {
+            <div class="word-mix-history-wrapper">
+                <div class="word-mix-score-date">
+                    <span>@dayResult.Date.Day @DateHelper.MonthNumberToString[dayResult.Date.Month]</span>
+                </div>
+                <div class="word-mix-other-current" style="border: none;">
+                    @foreach (var entry in dayResult.Results)
+                    {
+                        <a href="Result?user=@entry.UserName!.EncodeForClient()&date=@DateHelper.ToKey(dayResult.Date)">@Model.AccountNames[entry.UserName]: @entry.Steps</a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>
+

@@ -1,8 +1,10 @@
 using HomePage.Chores;
 using HomePage.Data;
+using HomePage.Model;
 using HomePage.Repositories;
 using HomePage.Spending;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace HomePage.Pages
@@ -18,7 +20,7 @@ namespace HomePage.Pages
         {
         }
 
-        public ActionResult OnPost(string action, string transactions, Guid itemKey, string groupId, string movieSearch, string username, string password)
+        public ActionResult OnPost(string action, string transactions, Guid itemKey, string groupId, string movieSearch, string username, string password, string ingredients)
         {
             if (action == "MovieSearch")
             {
@@ -82,6 +84,29 @@ namespace HomePage.Pages
                 }
 
                 item.SetGroupId = groupId;
+                dbContext.SaveChanges();
+
+                return new JsonResult(new { success = true });
+            }
+
+            if (action == "SaveIngredients")
+            {
+                if (!IsAdmin)
+                {
+                    return Redirect("/Login");
+                }
+
+                var food = dbContext.Food
+                    .Include(x => x.FoodConnections)
+                    .Include(x => x.Categories)
+                    .Include(x => x.FoodIngredients)
+                    .FirstOrDefault(x => x.Id == itemKey);
+                if (food == null)
+                {
+                    return new JsonResult(new { success = false });
+                }
+
+                food.FoodIngredients = ingredients?.Split('¤')?.Select(FoodIngredient.Parse)?.ToList() ?? [];
                 dbContext.SaveChanges();
 
                 return new JsonResult(new { success = true });

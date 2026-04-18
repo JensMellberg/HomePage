@@ -1,0 +1,49 @@
+﻿@page
+@model HomePage.Pages.PokemonTDLeaderboardModel
+@{
+    ViewData["Title"] = "PokemonTD";
+}
+
+<div class="page-wrapper" style="gap: 12px; margin-top: 32px;">
+    <button id="download">Ladda ner PokemonTD</button>
+    @foreach (var kv in Model.ResultsPerDifficulty) {
+        <div class="spending-group" style="background-color:#8bf5eb">
+            <div class="spending-group-header">
+                <span class="spending-group-title">@kv.Key.ToString()</span>
+            </div>
+
+            @foreach (var result in kv.Value)
+            {
+                <div class="spending-entry-wrapper" style="border: none; gap: 8px;">
+                    <div class="spending-group-entry amount-entry">@result.ToString()</div>
+                    <div class="spending-group-entry date-entry">@Model.NamesByUsername[result.Person.ToLower()]</div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+    const userAgent = navigator.userAgent.toLowerCase();
+    const btn = document.getElementById("download");
+    let fileName
+    let downloadUrl
+    if (userAgent.includes("android")) {
+        downloadUrl = "https://github.com/JensMellberg/PokemonTD/tree/master/PokemonTDAndroid/bin/Release/net8.0-android/publish/PokemonTDAndroid.PokemonTDAndroid-Signed.apk";
+        fileName = "PokemonTD.apk";
+    } else if (userAgent.includes("windows")) {
+        downloadUrl = "https://github.com/JensMellberg/PokemonTD/tree/master/PokemonTDDesktop/bin/Release/net8.0-windows/PokemonTD-windows.zip";
+        fileName = "PokemonTD.zip";
+    } else {
+        btn.disabled = true;
+    }
+
+    btn.onclick = () => {
+        const a = document.createElement("a");
+        a.href = downloadUrl;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+</script>

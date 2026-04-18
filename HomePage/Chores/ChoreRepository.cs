@@ -6,7 +6,7 @@ namespace HomePage.Chores
     public class ChoreRepository(AppDbContext dbContext)
     {
         private static readonly string[] ChoreIds = [FlowerChore.ChoreId, BedSheetChore.ChoreId, EyeChore.ChoreId,
-            FlossChore.ChoreId, FlossChoreJens.ChoreId, SinkChore.ChoreId, WorkoutChore.ChoreId];
+            FlossChore.ChoreId, FlossChoreJens.ChoreId, SinkChore.ChoreId, WorkoutChore.ChoreId, RecycleChore.ChoreId];
 
         public IEnumerable<BaseChore> GetAllChores() => ChoreIds.Select(GetChore)!;
 
@@ -44,6 +44,7 @@ namespace HomePage.Chores
                 WorkoutChore.ChoreId => new WorkoutChore(model),
                 SinkChore.ChoreId => new SinkChore(model),
                 BedSheetChore.ChoreId => new BedSheetChore(model),
+                RecycleChore.ChoreId => new RecycleChore(model),
                 _ => throw new Exception($"Uknown chore id {choreId}"),
             };
         }

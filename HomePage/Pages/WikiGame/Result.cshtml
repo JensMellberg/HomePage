@@ -1,0 +1,24 @@
+﻿@page
+@using HomePage.Repositories
+@model HomePage.Pages.WikiGame.ResultModel
+@{
+    ViewData["Title"] = "Wikipedia race";
+}
+<div class="word-mix-top-bar" style="margin-top: 1px;">
+    <div class="word-mix-score-wrapper">
+        <div class="profile-photo @Model.PersonClass"></div>
+        <span>@Model.Score</span>
+    </div>
+    <button onclick="window.location.href='Results'" style="height: 32px; margin-top: 8px;">Tillbaka</button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px;">
+    @foreach (var path in Model.PathTaken)
+    {
+        @if (path == WikiGameRepository.GoalPageTitle) {
+            <span><b>@path</b></span>
+        }
+        else {
+            <span><b>@path -></b></span>
+        }
+    }
+</div>

@@ -6,6 +6,7 @@
 
 <div class="page-wrapper">
     <a href="CreateFood">Ny maträtt</a>
+    <button type="button" onclick="window.location.href = 'OldGoodies'" style="position: absolute; top: 5px; right: 5px;">Gamla godingar</button>
     <div class="filters-wrapper">
         <input type="text" value="@Model.CurrentFilter" placeholder="filtrera..." onchange="updateTextFilter(this.value)" />
         <button type="button" onclick="showPicker()">Kategorier</button>

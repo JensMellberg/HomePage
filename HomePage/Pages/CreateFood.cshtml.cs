@@ -18,12 +18,16 @@ namespace HomePage.Pages
 
         public bool CanSplit { get; set; }
 
+        public string NewlyCreatedIngredientId { get; set; }
+
         public string PossibleIngredients { get; set; }
 
         public string AllUnitValues = JsonSerializer.Serialize(UnitTypes.GetAllUnitValues());
 
+        public bool AllowCreateNewIngredient { get; set; }
 
-        public IActionResult OnGet(Guid foodId, string date)
+
+        public IActionResult OnGet(Guid foodId, string date, string ingredientId)
         {
             if (!IsAdmin)
             {
@@ -31,6 +35,7 @@ namespace HomePage.Pages
             }
 
             DateKey = date;
+            NewlyCreatedIngredientId = ingredientId;
             if (foodId == Guid.Empty)
             {
                 Food = new Food();
@@ -41,6 +46,7 @@ namespace HomePage.Pages
                 Food = dbContext.Food.Include(x => x.FoodIngredients).ThenInclude(x => x.Ingredient).Include(x => x.Categories).Include(x => x.FoodConnections).FirstOrDefault(x => x.Id == foodId) ?? new Food();
                 IsNew = !CanDelete(Food);
                 CanSplit = IsNew;
+                AllowCreateNewIngredient = true;
             }
 
             PossibleIngredients = ingredientRepository.ClientEncodedList();

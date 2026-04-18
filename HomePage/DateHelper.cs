@@ -85,6 +85,17 @@
             return returnDate;
         }
 
+        public static DateTime GetNextOfWeekday(DateTime date, DayOfWeek[] days)
+        {
+            var returnDate = date;
+            while (!days.Contains(returnDate.DayOfWeek))
+            {
+                returnDate = returnDate.AddDays(1);
+            }
+
+            return returnDate;
+        }
+
         public static string ToReadable(this DateTime date) => date.ToString("dd/MM-yyyy");
 
         public static readonly Dictionary<int, string> MonthNumberToString = new Dictionary<int, string>() {

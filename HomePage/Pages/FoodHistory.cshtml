@@ -18,6 +18,15 @@
             <span>Kategorier</span>
             <div class="category-shower">@string.Join(", ", Model.Food.Categories.Select(xa => xa.Name))</div>
         </div>
+        <div class="input-wrapper">
+            <span>Ingredienser</span>
+            <div class="category-shower">
+                @foreach (var fi in Model.Food.FoodIngredients.Select(xa => xa.ToIngredientInstance()))
+                {
+                    <div>@fi.Ingredient.Name @fi.GetStaticDisplayString()</div>
+                }
+            </div>
+        </div>
     </div>
     <div style="width: 103%; overflow-x: auto;">
         <div class="food-grid">

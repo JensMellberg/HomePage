@@ -1,0 +1,62 @@
+﻿@page
+@model HomePage.Pages.OldGoodiesModel
+@{
+    ViewData["Title"] = "Gamla godingar";
+}
+
+<div class="page-wrapper">
+    <button type="button" onclick="window.location.href = 'AllFoods'" style="position: absolute; top: 5px; right: 5px;">Tillbaka</button>
+    <div class="filters-wrapper" style="margin-top: 48px">
+        <div class="input-wrapper">
+            <span>Minsta betyg</span>
+            <input type="number"
+                value="@Model.MinimumScore.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                step="0.1"
+                style="width: 60px"
+                onchange="updateScore(this.value)" />
+        </div>
+    </div>
+
+    <div class="food-grid">
+        @foreach (var tuple in Model.SortedFood)
+        {
+            <div class="food-row">
+                <div class="food-grid-cell">
+                    <button type="button" class="recipe-button" onclick="excludeFood('@tuple.food.Id')">X</button>
+                    <div class="foodhistoryplaceholder" foodId="@tuple.food.Id"></div>
+                    @tuple.food.Name
+                </div>
+                <span class="food-grid-cell">
+                    @((DateHelper.DateNow - tuple.lastEaten).Days) dagar sedan
+                </span>
+                <span class="food-grid-cell">
+                    Betyg: @tuple.score
+                </span>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="~/js/JsonResultUnpacker.js"></script>
+<script>
+    function updateScore(score) {
+        score = score.toString().replace(',', '.');
+        window.location = '/OldGoodies?minimumScore=' + score
+    }
+
+    function excludeFood(id) {
+        $.ajax({
+            type: "POST",
+            url: "/OldGoodies",
+            data: {
+                foodId: id,
+                minimumScore: '@Model.MinimumScore.ToString(System.Globalization.CultureInfo.InvariantCulture)'
+            },
+            success: (e) => {
+                if (JsonResultUnpacker.unpackResult(e, window)) {
+                    window.location.refresh
+                }
+            }
+        });
+    }
+</script>

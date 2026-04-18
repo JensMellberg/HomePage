@@ -8,6 +8,6 @@ namespace HomePage.Chores
 
         protected override string PersonName => Person.Jens.Name;
 
-        protected override int DaysBetween => 31;
+        protected override DateTime GetNextDate() => GetLastUpdatedDate.AddDays(31);
     }
 }

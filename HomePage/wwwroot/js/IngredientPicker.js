@@ -1,5 +1,5 @@
 ﻿class IngredientPicker {
-	static createPicker(categories, possibleIngredients, unitTypes, existing, callback) {
+	static createPicker(categories, possibleIngredients, unitTypes, existing, callback, newIngredientCallback) {
 		const wrapper = HtmlUtils.createElement('div', 'category-picker');
 		const wrapperInner = HtmlUtils.addElement('div', 'ingredient-picker-inner', wrapper);
 		const wrapperInnerInner = HtmlUtils.addElement('div', 'ingredient-picker-inner-inner', wrapperInner);
@@ -40,9 +40,18 @@
 
 		const newButton = HtmlUtils.addElement('button', 'sectionButton', wrapperInner)
 		newButton.type = 'button'
-		newButton.innerText = 'Ny ingrediens';
+		newButton.innerText = 'Lägg till ingrediens';
 		newButton.onclick = () => {
 			addRow(null, 1, 'st', null)
+		}
+
+		if (newIngredientCallback) {
+			const newButton = HtmlUtils.addElement('button', 'sectionButton', wrapperInner)
+			newButton.type = 'button'
+			newButton.innerText = 'Skapa ny ingrediens';
+			newButton.onclick = () => {
+				newIngredientCallback(allRows.map(x => x.getIngredient()))
+			}
 		}
 
 		const okButton = HtmlUtils.addElement('button', 'sectionButton', wrapper);

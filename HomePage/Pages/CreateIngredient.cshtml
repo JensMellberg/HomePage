@@ -7,6 +7,7 @@
 <div class="page-wrapper mainscreen">
     <form class="dayfood-form" method="post">
         <input type="hidden" name="id" value="@Model.Ingredient.Id" />
+        <input type="hidden" asp-for="ReturnUrl" />
         <div class="input-wrapper">
             <span>Namn</span>
             <input type="text" name="name" required value="@Model.Ingredient.Name" />

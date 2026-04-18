@@ -85,14 +85,36 @@
         const ingredientElement = document.getElementById('ingredients')
         const encodedIngredients = ingredientElement.value
         const decodedIngredients = decodeIngredients(encodedIngredients)
+        let allowCreateNew = '@Html.Raw(Model.AllowCreateNewIngredient)' === 'True'
+        let createNewCallback = !allowCreateNew ? undefined : x => createNewIngredient(x)
         const categories = '@Html.Raw(string.Join(',', IngredientCategory.Categories.OrderBy(x => x)))'.split(',')
-        IngredientPicker.createPicker(categories, possibleIngredients, unitTypes, decodedIngredients, x => updateIngredients(x))
+        IngredientPicker.createPicker(categories, possibleIngredients, unitTypes, decodedIngredients, x => updateIngredients(x), x => createNewCallback(x))
     }
 
     function updateIngredients(ingredients) {
         const encodedIngredients = encodeIngredients(ingredients)
         const ingredientElement = document.getElementById('ingredients')
         ingredientElement.value = encodedIngredients
+    }
+
+    function createNewIngredient(ingredients) {
+        let foodId = '@Model.Food.Id'
+        let returnUrl = window.location.href.replace('ingredientId', 'unusedParameter')
+        $.ajax({
+            type: "POST",
+            url: "/Endpoint",
+            data: {
+                action: 'SaveIngredients',
+                itemKey: foodId,
+                ingredients: encodeIngredients(ingredients)
+            },
+            success: (e) => {
+                window.location.href = 'CreateIngredient?returnUrl=' + encodeURIComponent(returnUrl)
+            },
+            error: (e) => {
+                alert('någonting gick fel.')
+            }
+        });
     }
 
     function showCategoryPicker(foodId) {
@@ -125,5 +147,16 @@
         for (const categry of cachedCategories) {
             categry.isSelected = chosen.map(x => x.id).includes(categry.id);
         }
+    }
+
+    let newlyEncodedIngredientId = '@Html.Raw(Model.NewlyCreatedIngredientId)'
+    if (newlyEncodedIngredientId) {
+        let ingredientModel = possibleIngredients.filter(x => x.id === newlyEncodedIngredientId)[0]
+        let defaultUnit = unitTypes[ingredientModel.unit]
+        let ingredientElement = document.getElementById('ingredients')
+        let ingredients = decodeIngredients(ingredientElement.value)
+        ingredients.push(({ id: newlyEncodedIngredientId, amount: 1, unit: defaultUnit, category: ingredientModel.category }))
+        ingredientElement.value = encodeIngredients(ingredients)
+        setTimeout(() => showIngredientPicker(), 50)
     }
 </script>

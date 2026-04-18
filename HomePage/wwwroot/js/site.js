@@ -79,3 +79,20 @@ for (let i = 0; i < notesHolders.length; i++) {
 	NotesPopup.addLink(notesHolders[i], notes);
 }
 
+class Spinner {
+	static show() {
+		const spinnerOverlay = document.createElement('div')
+		spinnerOverlay.className = 'spinner-overlay'
+		spinnerOverlay.id = 'spinner-overlay'
+		const spinner = document.createElement('div')
+		spinner.className = 'spinner'
+		spinnerOverlay.appendChild(spinner)
+		document.body.appendChild(spinnerOverlay)
+	}
+
+	static hide() {
+		document.getElementById('spinner-overlay').remove()
+	}
+}
+
+

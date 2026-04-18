@@ -21,6 +21,7 @@ namespace HomePage
             builder.Services.AddTransient<FoodStorageRepository>();
             builder.Services.AddTransient<IngredientRepository>();
             builder.Services.AddTransient<FoodRepository>();
+            builder.Services.AddTransient<PokemonTDResultRepository>();
             builder.Services.AddTransient<DayFoodRepository>();
             builder.Services.AddTransient<RedDayRepository>();
             builder.Services.AddTransient<SpendingGroupRepository>();
@@ -29,6 +30,7 @@ namespace HomePage
             builder.Services.AddTransient<SettingsRepository>();
             builder.Services.AddTransient<DatabaseLogger>();
             builder.Services.AddTransient<ChoreRepository>();
+            builder.Services.AddTransient<WikiGameRepository>();
             builder.Services.AddRazorPages();
 
             builder.Services.AddSession(options => {
@@ -37,8 +39,8 @@ namespace HomePage
             builder.Services.AddExceptionHandler<CustomExceptionHandler>();
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddControllers();
 
-            
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())
@@ -73,6 +75,8 @@ namespace HomePage
             app.UseAuthorization();
 
             app.MapRazorPages();
+
+            app.MapControllers();
 
             app.Run();
         }

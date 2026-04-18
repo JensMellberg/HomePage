@@ -6,14 +6,11 @@ namespace HomePage.Chores
     {
         public const string ChoreId = "Flower";
 
-        protected override int DaysBetween
+        protected override DateTime GetNextDate()
         {
-            get
-            {
-                var today = DateTime.Now;
-                var waterDayFactor = today.Month > 5 && today.Month < 9 ? 3 : 4;
-                return waterDayFactor;
-            }
+            var today = DateHelper.DateNow;
+            var daysBetween = today.Month > 5 && today.Month < 9 ? 3 : 4;
+            return GetLastUpdatedDate.AddDays(daysBetween);
         }
     }
 }

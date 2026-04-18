@@ -16,7 +16,10 @@ namespace HomePage.Pages
 
         public string AllUnitValues = JsonSerializer.Serialize(UnitTypes.GetAllUnitValues());
 
-        public IActionResult OnGet(Guid id)
+        [BindProperty]
+        public string ReturnUrl { get; set; }
+
+        public IActionResult OnGet(Guid id, string returnUrl)
         {
             if (id == Guid.Empty)
             {
@@ -27,6 +30,7 @@ namespace HomePage.Pages
                 Ingredient = dbContext.Ingredient.Single(x => x.Id == id);
             }
 
+            ReturnUrl = returnUrl;
             Categories = string.Join(',', IngredientCategory.Categories.OrderBy(x => x));
             return Page();
         }
@@ -55,6 +59,11 @@ namespace HomePage.Pages
             }
 
             dbContext.SaveChanges();
+
+            if (!string.IsNullOrEmpty(ReturnUrl))
+            {
+                return Redirect($"{ReturnUrl}&ingredientId={id}");
+            }
 
             return Redirect($"/Ingredients");
         }

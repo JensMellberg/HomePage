@@ -2,12 +2,10 @@
 
 namespace HomePage.Chores
 {
-    public class BedSheetChore(ChoreModel source) : SinglePersonChore(source)
+    public class BedSheetChore(ChoreModel source) : BaseChore(source)
     {
         public const string ChoreId = "Bed";
 
-        protected override int DaysBetween => 14;
-
-        protected override string PersonName => Person.Anna.Name;
+        protected override DateTime GetNextDate() => GetLastUpdatedDate.AddDays(14);
     }
 }

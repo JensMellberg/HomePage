@@ -37,6 +37,28 @@ namespace HomePage.Migrations
                     b.ToTable("FoodCategories", (string)null);
                 });
 
+            modelBuilder.Entity("HomePage.Model.CachedWikiGamePage", b =>
+                {
+                    b.Property<string>("Title")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("AllowedLinks")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("LastUsed")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PageContent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Title");
+
+                    b.ToTable("CachedWikiGamePages");
+                });
+
             modelBuilder.Entity("HomePage.Model.CalendarActivity", b =>
                 {
                     b.Property<string>("Key")
@@ -183,6 +205,17 @@ namespace HomePage.Migrations
                     b.HasIndex("FoodId");
 
                     b.ToTable("DayFoodDishConnection");
+                });
+
+            modelBuilder.Entity("HomePage.Model.ExcludedGoodie", b =>
+                {
+                    b.Property<Guid>("FoodId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("FoodId");
+
+                    b.ToTable("ExcludedFromGoodies");
                 });
 
             modelBuilder.Entity("HomePage.Model.ExtraWord", b =>
@@ -429,6 +462,34 @@ namespace HomePage.Migrations
                     b.ToTable("MovieRankning");
                 });
 
+            modelBuilder.Entity("HomePage.Model.PokemonTDResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("DamageTestResult")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Difficulty")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsWin")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LevelCompleted")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Person")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PokemonTDResult");
+                });
+
             modelBuilder.Entity("HomePage.Model.RedDay", b =>
                 {
                     b.Property<int>("Id")
@@ -574,6 +635,43 @@ namespace HomePage.Migrations
                     b.HasIndex("UserGroupId");
 
                     b.ToTable("UserInfo");
+                });
+
+            modelBuilder.Entity("HomePage.Model.WikiGameNavigation", b =>
+                {
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Step")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.HasKey("Date", "UserName", "Step");
+
+                    b.ToTable("WikiGameNavigations");
+                });
+
+            modelBuilder.Entity("HomePage.Model.WikiGameStart", b =>
+                {
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.HasKey("Date");
+
+                    b.ToTable("WikiGameStarts");
                 });
 
             modelBuilder.Entity("HomePage.Model.WordMixResult", b =>

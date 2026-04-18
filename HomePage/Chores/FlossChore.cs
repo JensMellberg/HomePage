@@ -2,12 +2,10 @@
 
 namespace HomePage.Chores
 {
-    public class FlossChore(ChoreModel source) : SinglePersonChore(source)
+    public class FlossChore(ChoreModel source) : FlossChoreBase(source)
     {
         public const string ChoreId = "Floss";
 
         protected override string PersonName => Person.Anna.Name;
-
-        protected override int DaysBetween => 3;
     }
 }

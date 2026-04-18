@@ -102,11 +102,17 @@ namespace HomePage
         public void LogInAndSetCookie(ISession session, HttpResponse response, UserInfo user)
         {
             SetLoggedInSession(session, user);
+            var cookieId = AddCookieForUser(user);
+            response.Cookies.Append("Auth-Id", cookieId.ToString(), new CookieOptions { Expires = DateHelper.DateTimeNow.AddMonths(1) });
+        }
+
+        public Guid AddCookieForUser(UserInfo user)
+        {
             var cookieId = Guid.NewGuid();
             var expires = DateHelper.DateTimeNow.AddMonths(1);
-            response.Cookies.Append("Auth-Id", cookieId.ToString(), new CookieOptions { Expires = expires });
             dbContext.SignInCookie.Add(new SignInCookie { CookieId = cookieId, Expires = expires, UserId = user.UserName });
             dbContext.SaveChanges();
+            return cookieId;
         }
 
         public void SetLoggedInSession(ISession session, UserInfo user)
@@ -172,6 +178,12 @@ namespace HomePage
                     dbContext.SaveChanges();
                 }
             }
+        }
+
+        public bool VerifyAuthCookie(string userName, Guid cookieId)
+        {
+            var user = dbContext.UserInfo.Include(x => x.Cookies).FirstOrDefault(x => x.UserName == userName);
+            return user?.Cookies.Any(x => x.CookieId == cookieId) == true;
         }
     }
 }

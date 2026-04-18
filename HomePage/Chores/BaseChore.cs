@@ -27,13 +27,11 @@ namespace HomePage.Chores
             streak.Streak = count;
         }
 
-        protected abstract int DaysBetween { get; }
-
         public string Id => source.Id;
 
         public bool TryResetStreak(List<string> exemptPersons)
         {
-            if (DateHelper.AdjustedDateNow.Date > GetDateToShow())
+            if (DateHelper.AdjustedDateNow.Date > GetNextDate())
             {
                 var nextPerson = GetNextPerson();
                 if (!exemptPersons.Contains(nextPerson))
@@ -58,7 +56,7 @@ namespace HomePage.Chores
 
         public string? ChorePerson()
         {
-            if (DateHelper.AdjustedDateNow >= GetDateToShow())
+            if (DateHelper.AdjustedDateNow >= GetNextDate())
             {
                 return GetNextPerson();
             }
@@ -75,11 +73,7 @@ namespace HomePage.Chores
 
         protected virtual string GetNextPerson() => GetLastUpdatedPerson == Person.Jens.Name ? Person.Anna.Name : Person.Jens.Name;
 
-        private DateTime GetDateToShow()
-        {
-            var lastUpdated = GetLastUpdatedDate;
-            return lastUpdated.AddDays(DaysBetween);
-        }
+        protected abstract DateTime GetNextDate();
 
         public int Update()
         {
