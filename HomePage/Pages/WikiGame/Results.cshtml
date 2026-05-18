@@ -4,10 +4,13 @@
     ViewData["Title"] = "Wikipedia race";
 }
 <div class="page-wrapper" style="height: 100vh;">
+    <input type="hidden" data-summary="@Model.Summary" id="summary" />
     <div style="display: flex; flex-direction: column; gap: 8px">
         <a href="CurrentGame" style="align-self: center;">Dagens sida</a>
+        <a href="Suggestions" style="align-self: center;">Föreslå morgondagens sida</a>
         <div style="border: 1px solid black; padding: 3px;">
-            <span>Följ länkarna på wikipediasidorna tills du hittar till sidan för Adolf hitler. Färre antal klick är bättre.</span>
+            <span>Följ länkarna på wikipediasidorna tills du hittar till sidan för @Model.TodaysGoal. Färre antal klick är bättre.</span>
+            <button onclick="showSummary()" class="recipe-button">?</button>
         </div>
     </div>
 
@@ -30,14 +33,19 @@
     <div class="word-mix-history-outer">
         @foreach (var dayResult in Model.PreviousResults)
         {
-            <div class="word-mix-history-wrapper">
-                <div class="word-mix-score-date">
+            <div class="word-mix-history-wrapper" style="margin-top: 60px">
+                <div class="wikigame-score-date">
                     <span>@dayResult.Date.Day @DateHelper.MonthNumberToString[dayResult.Date.Month]</span>
+                    <span style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">@dayResult.GoalTitle</span>
                 </div>
                 <div class="word-mix-other-current" style="border: none;">
                     @foreach (var entry in dayResult.Results)
                     {
-                        <a href="Result?user=@entry.UserName!.EncodeForClient()&date=@DateHelper.ToKey(dayResult.Date)">@Model.AccountNames[entry.UserName]: @entry.Steps</a>
+                        @if (!entry.HasFinished) {
+                            <a style="opacity: 0.5"href="Result?user=@entry.UserName!.EncodeForClient()&date=@DateHelper.ToKey(dayResult.Date)">@Model.AccountNames[entry.UserName]: @entry.Steps (ej i mål)</a>
+                        } else {
+                            <a href="Result?user=@entry.UserName!.EncodeForClient()&date=@DateHelper.ToKey(dayResult.Date)">@Model.AccountNames[entry.UserName]: @entry.Steps</a>
+                        }
                     }
                 </div>
             </div>
@@ -46,4 +54,19 @@
 </div>
 
 <script src="~/js/homeButton.js" asp-append-version="true"></script>
+<script>
+    function showSummary() {
+        const notes = document.getElementById("summary").dataset.summary;
+        const createNotes = () => {
+            const noteWrapper = document.createElement('div');
+            const noteElement = document.createElement('span')
+            noteElement.innerText = notes
+            noteWrapper.className = 'note-wrapper'
+            noteWrapper.appendChild(noteElement)
+            return noteWrapper
+        }
+
+        Popup.putOnOverLay(createNotes(), true, () => { Popup.closePopup(); })
+    }
+</script>
 

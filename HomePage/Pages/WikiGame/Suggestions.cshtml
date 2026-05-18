@@ -1,0 +1,85 @@
+﻿@page
+@model HomePage.Pages.WikiGame.SuggestionsModel
+@{
+    ViewData["Title"] = "Wikipedia race målsidor";
+}
+
+<div class="page-wrapper">
+    <a href="CreateSuggestion">Nytt förslag</a>
+    <button type="button" onclick="window.location.href = 'Results'" style="position: absolute; top: 5px; right: 5px;">Tillbaka</button>
+    
+    <div class="food-grid">
+        @foreach (var suggestion in Model.Suggestions) {
+            <div class="food-row">
+                <div class="food-grid-cell">
+                    @suggestion.Title.Replace("_", " ") (@suggestion.Creator)
+                </div>
+                <div class="food-grid-cell">
+                    @suggestion.Votes röster
+                </div>
+                @if (!suggestion.Voters.Contains(Model.LoggedInPerson?.UserName ?? "")) {
+                    <div class="food-grid-cell">
+                        <button onclick="voteForSuggestion('@suggestion.Id')">Rösta på</button>
+                    </div>
+                }
+                else {
+                    <div class="food-grid-cell">
+                        <button onclick="voteForSuggestion('@suggestion.Id')">Ta bort röst</button>
+                    </div>
+                }
+                @if (Model.IsAdmin || suggestion.Creator == Model.LoggedInPerson?.UserName)
+                {
+                    <div class="food-grid-cell">
+                        <button onclick="deleteSuggestion('@suggestion.Id')">Ta bort</button>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<script src="~/js/JsonResultUnpacker.js" asp-append-version="true"></script>
+<script>
+    function deleteSuggestion(id) {
+         $.ajax({
+            type: "POST",
+            data: {
+                id: id
+            },
+            url: "/WikiGame/Suggestions",
+            success: (data) => {
+                const result = JsonResultUnpacker.unpackResult(data, window)
+                if (!result) {
+                    return;
+                }
+
+                window.location.reload()
+            },
+            error: () => {
+                alert('Någonting gick fel.')
+            }
+        });
+    }
+
+        function voteForSuggestion(id) {
+         $.ajax({
+            type: "POST",
+            data: {
+                id: id,
+                isVote: true
+            },
+            url: "/WikiGame/Suggestions",
+            success: (data) => {
+                const result = JsonResultUnpacker.unpackResult(data, window)
+                if (!result) {
+                    return;
+                }
+
+                window.location.reload()
+            },
+            error: () => {
+                alert('Någonting gick fel.')
+            }
+        });
+    }
+</script>

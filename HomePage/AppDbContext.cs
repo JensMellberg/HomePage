@@ -19,6 +19,8 @@ namespace HomePage.Data
 
         public DbSet<CachedWikiGamePage> CachedWikiGamePages { get; set; }
 
+        public DbSet<WikiGameSuggestion> WikiGameSuggestions { get; set; }
+
         public DbSet<CalendarActivity> CalendarActivity { get; set; }
 
         public DbSet<Category> Category { get; set; }
@@ -104,9 +106,6 @@ namespace HomePage.Data
 
             modelBuilder.Entity<ChoreStreak>()
                 .HasKey(c => new { c.ChoreId, c.Person});
-
-            modelBuilder.Entity<WikiGameNavigation>()
-                .HasKey(x => new { x.Date, x.UserName, x.Step });
         }
     }
 }

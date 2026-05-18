@@ -1,0 +1,63 @@
+﻿@page
+@model HomePage.Pages.WikiGame.CreateSuggestionModel
+@{
+    ViewData["Title"] = "Skapa förslag";
+}
+
+<div class="page-wrapper mainscreen">
+    <form class="dayfood-form" method="post" id="theForm">
+
+        <div class="input-wrapper">
+            <span>Wikipediasida (klistra in länken till sidan eller skriv en exakt titel)</span>
+            <input type="text" name="recipeUrl" value="" id="url-field"/>
+        </div>
+        <div class="button-wrapper">
+            <button type="button" onclick="validateUrl()">Skapa förslag</button>
+            <button type="button" onclick="window.history.back();">Avbryt</button>
+        </div>
+    </form>
+</div>
+
+<script src="~/js/JsonResultUnpacker.js" asp-append-version="true"></script>
+<script>
+    function validateUrl() {
+        const url = document.getElementById('url-field').value
+        if (!url) {
+            Alert.openAlert('Fyll i en länk.')
+            return
+        }
+
+        Spinner.show()
+         $.ajax({
+            type: "POST",
+            data: {
+                url: url,
+                isValidate: true
+            },
+            url: "/WikiGame/CreateSuggestion",
+            success: (data) => {
+                Spinner.hide()
+                const result = JsonResultUnpacker.unpackResult(data, window)
+                if (!result) {
+                    return;
+                }
+
+                if (result.success) {
+                    window.location.href = 'Suggestions'
+                } else {
+                    if (result.reason == "NotFound") {
+                        Alert.openAlert('Hittade inte wikipediasidan')
+                    } else if (result.reason == "Exists") {
+                        Alert.openAlert('Sidan finns redan')
+                    } else {
+                        Alert.openAlert('Någonting gick fel')
+                    }
+                }
+            },
+            error: () => {
+                Spinner.hide()
+                alert('Någonting gick fel.')
+            }
+        });
+    }
+</script>

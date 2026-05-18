@@ -7,5 +7,7 @@
         public int Steps { get; set; }
 
         public required List<string> PathTaken { get; set; }
+
+        public bool HasFinished { get; set; }
     }
 }

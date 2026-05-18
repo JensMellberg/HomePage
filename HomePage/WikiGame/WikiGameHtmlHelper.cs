@@ -1,4 +1,6 @@
-﻿using HtmlAgilityPack;
+﻿using System.Net;
+using System.Text.RegularExpressions;
+using HtmlAgilityPack;
 
 namespace HomePage.WikiGame
 {
@@ -13,9 +15,9 @@ namespace HomePage.WikiGame
             RemoveNodes(doc, "//script|//style");
 
             RemoveNodes(doc, "//span[contains(@class,'mw-editsection')]");
-            RemoveNodes(doc, "//div[contains(@class,'reflist')]");
             RemoveNodes(doc, "//base");
             FixTables(doc);
+            FixSections(doc);
 
             var allowedLinks = new List<string>();
 
@@ -93,6 +95,21 @@ namespace HomePage.WikiGame
             }
         }
 
+        private static void FixSections(HtmlDocument doc)
+        {
+            var xpath = "//section";
+            var sections = doc.DocumentNode.SelectNodes(xpath);
+            if (sections == null)
+            {
+                return;
+            }
+
+            foreach (var section in sections)
+            {
+                section.SetAttributeValue("style", "display: block;");
+            }
+        }
+
         private static bool IsValidWikiLink(string href)
         {
             href = href.Trim();
@@ -126,7 +143,16 @@ namespace HomePage.WikiGame
 
         private static string ExtractPageName(string href)
         {
-            return href.Replace("/wiki/", "").Replace("./", "").Trim();
+             var page = href
+                .Replace("/wiki/", "")
+                .Replace("./", "")
+                .Trim();
+
+            page = Uri.UnescapeDataString(page);
+            page = WebUtility.HtmlDecode(page);
+            page = Regex.Unescape(page);
+
+            return page;
         }
 
         private static void RemoveLinkButKeepText(HtmlNode link)

@@ -1,11 +1,10 @@
 ﻿.wiki-container {
-	max-width: 800px;
-	height: 89vh;
+	max-width: 900px;
+	height: calc(100vh - 87px);
 	border: 2px solid black;
 	overflow: auto;
 	width: 95vw;
-	max-width: 800px;
-	top: 10%;
+	top: 85px;
 	position: absolute;
 	padding: 3px;
 }

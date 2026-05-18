@@ -14,7 +14,8 @@
 <div style="display: flex; flex-direction: column; gap: 8px;">
     @foreach (var path in Model.PathTaken)
     {
-        @if (path == WikiGameRepository.GoalPageTitle) {
+        @if (path == Model.PathTaken.Last())
+        {
             <span><b>@path</b></span>
         }
         else {

@@ -7,12 +7,18 @@
 <link rel="stylesheet" href="~/css/wikigame.css" asp-append-version="true" />
 
 <div class="page-wrapper" style="height: 100vh;">
-    <span class="step-counter" style="position: absolute; top: 5px;">Sidor besökta: @Model.PreviousClicks</span>
+    <div class="saved-links-wrapper">
+    </div>
+    <input type="hidden" data-title="@Model.CurrentTitle" id="currentTitle" />
+    <span class="step-counter" style="position: absolute; top: 2px;">Sidor besökta: @Model.PreviousClicks</span>
+    <button id="back-button" onclick="navigateToPage('GOBACKONCE')" style="position: absolute; top: 50px; left: 0; display: @Model.BackbuttonDisplay">Backa till förra sidan</button>
+    <button id="saved-links-button" onclick="pickSavedLinks()" style="position: absolute; top: 50px; right: 0;">Sparade länkar</button>
     <button onclick="window.location.href = 'Results'" style="position: absolute; top: 15px; left: 0;">Tillbaka</button>
-    <div class="input-wrapper" style="position: absolute; right: 0; top: 30px;">
+    <div class="input-wrapper" style="position: absolute; right: 0; top: 25px;">
         <input type="checkbox" onclick="toggleConfirmation(event)" id="confirm-checkbox" />
         <span>Fråga innan navigering</span>
     </div>
+
     <div class="wiki-container">
         @Html.Raw(Model.PageHtml)
     </div>
@@ -24,7 +30,13 @@
 <script>
     var isNavigating = false
     var confirmNavigation = false
+    var savedLinks = loadSavedLinks()
     var savedConfirmation = localStorage.getItem("confirmWikiGame")
+
+    if (savedLinks.length === 0) {
+        document.getElementById('saved-links-button').style.display = 'none'
+    }
+
     if (savedConfirmation === 'yes') {
         confirmNavigation = true
         document.getElementById('confirm-checkbox').checked = true
@@ -42,6 +54,7 @@
         if (confirmNavigation) {
            Alert.openDialog('Vill du gå till sidan "' + page.replaceAll('_', ' ') + '"', [
                 {text: 'Ja tack!', action: () => {Popup.closePopup(); navigateToPage(page);}},
+                {text: 'Spara länk', action: () => {Popup.closePopup(); saveLink(page);}},
                 {text: 'Nä', action: () => {Popup.closePopup();}}
             ])
         } else {
@@ -83,9 +96,18 @@
                 $('.wiki-container').html(result.html)
                 $('.step-counter').text('Sidor besökta: ' + result.steps)
                 if (result.isWin) {
-                    alert('Du hittade Hitler!')
+                    Alert.openAlert('Jippie!')
                     shootFireworks()
                 }
+
+                if (result.canGoBack) {
+                    $('#back-button').show()
+                } else {
+                    $('#back-button').hide()
+                }
+
+                $('#saved-links-button').hide()
+                savedLinks = []
             },
             error: () => {
                 alert('Någonting gick fel.')
@@ -108,5 +130,46 @@
         if (counter > 0) {
             setTimeout(() => createFirework(clientX, clientY, counter - 1), 150)
         }
+    }
+
+    function loadSavedLinks() {
+        const currentTitle = document.getElementById('currentTitle').dataset.title
+        const links = localStorage.getItem('WikiGameSavedLinks')
+        if (!links) {
+            return []
+        }
+
+        const tokens = links.split('¤')
+        if (currentTitle !== tokens[0]) {
+            return []
+        }
+
+        return tokens.slice(1)
+    }
+
+    function saveSavedLinks(links) {
+        const currentTitle = document.getElementById('currentTitle').dataset.title
+        const linksString = [currentTitle, ...links].join("¤");
+        localStorage.setItem('WikiGameSavedLinks', linksString)
+    }
+
+    function saveLink(link) {
+        savedLinks.push(link)
+        saveSavedLinks(savedLinks)
+        document.getElementById('saved-links-button').style.display = 'block'
+    }
+
+    function pickSavedLinks() {
+        const buttons = savedLinks.map(x => ({
+            text: x.replaceAll('_', ' '),
+            action: () => { Popup.closePopup(); navigateToPage(x); }
+        }))
+
+        buttons.push(({
+            text: 'Avbryt',
+            action: () => {Popup.closePopup();}
+        }))
+
+        Alert.openDialog('Sparade länkar', buttons)
     }
 </script>

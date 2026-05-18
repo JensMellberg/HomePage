@@ -15,7 +15,7 @@ namespace HomePage.Pages.WikiGame
         public IActionResult OnGet(DateTime date, string user)
         {
             var result = wikiGameRepository.GetUserResultForDate(user, date);
-            if (result == null || (date >= DateHelper.DateNow && !wikiGameRepository.UserHasResultToday(LoggedInPerson?.UserName)))
+            if (result == null || (date >= DateHelper.DateNow && !wikiGameRepository.UserHasFinishedToday(LoggedInPerson?.UserName)))
             {
                 logger.Error("Tried to access wiki game result that was not allowed. " + date, LoggedInPerson?.UserName);
                 return new RedirectToPageResult("/AccessDenied");

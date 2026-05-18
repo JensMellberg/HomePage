@@ -12,14 +12,19 @@ namespace HomePage.Pages.WikiGame
 
         public List<WikiGameDayResult> PreviousResults { get; set; }
         public bool IsFinished { get; set; }
+        public string TodaysGoal { get; set; }
+
+        public string Summary { get; set; }
         public IActionResult OnGet()
         {
-            wikiGameRepository.GetStartPageTitle(DateHelper.DateNow);
+            var start = wikiGameRepository.GetStartPage(DateHelper.DateNow);
             AccountNames = dbContext.UserInfo.ToDictionary(x => x.UserName, x => x.DisplayName);
             var results = wikiGameRepository.GetAllResults();
             TodayResult = results.FirstOrDefault(x => x.Date == DateHelper.DateNow);
             PreviousResults = results.Where(x => x.Date != DateHelper.DateNow).ToList();
-            IsFinished = wikiGameRepository.UserHasResultToday(LoggedInPerson?.UserName);
+            IsFinished = wikiGameRepository.UserHasFinishedToday(LoggedInPerson?.UserName);
+            TodaysGoal = start.GoalTitle.Replace("_", " ");
+            Summary = start.Summary;
 
             return Page();
         }

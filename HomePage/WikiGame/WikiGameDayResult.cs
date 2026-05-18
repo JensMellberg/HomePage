@@ -4,6 +4,8 @@
     {
         public DateTime Date { get; set; }
 
+        public required string GoalTitle { get; set; }
+
         public required List<WikiGameUserResult> Results { get; set; }
     }
 }
