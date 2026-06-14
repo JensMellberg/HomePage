@@ -9,5 +9,7 @@
         public bool IsWin { get; set; }
 
         public bool CanGoBack { get; set; }
+
+        public string Title { get; set; }
     }
 }

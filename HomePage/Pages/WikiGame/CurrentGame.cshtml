@@ -14,10 +14,6 @@
     <button id="back-button" onclick="navigateToPage('GOBACKONCE')" style="position: absolute; top: 50px; left: 0; display: @Model.BackbuttonDisplay">Backa till förra sidan</button>
     <button id="saved-links-button" onclick="pickSavedLinks()" style="position: absolute; top: 50px; right: 0;">Sparade länkar</button>
     <button onclick="window.location.href = 'Results'" style="position: absolute; top: 15px; left: 0;">Tillbaka</button>
-    <div class="input-wrapper" style="position: absolute; right: 0; top: 25px;">
-        <input type="checkbox" onclick="toggleConfirmation(event)" id="confirm-checkbox" />
-        <span>Fråga innan navigering</span>
-    </div>
 
     <div class="wiki-container">
         @Html.Raw(Model.PageHtml)
@@ -27,19 +23,16 @@
 <script src="~/js/Firework.js" asp-append-version="true"></script>
 <script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
 <script src="~/js/JsonResultUnpacker.js" asp-append-version="true"></script>
+<script src="~/js/WikiGamePageStorage.js" asp-append-version="true"></script>
 <script>
     var isNavigating = false
-    var confirmNavigation = false
+    var storageEntries = loadWikiGameStorage()
     var savedLinks = loadSavedLinks()
-    var savedConfirmation = localStorage.getItem("confirmWikiGame")
+
+    loadScrollPosition()
 
     if (savedLinks.length === 0) {
         document.getElementById('saved-links-button').style.display = 'none'
-    }
-
-    if (savedConfirmation === 'yes') {
-        confirmNavigation = true
-        document.getElementById('confirm-checkbox').checked = true
     }
 
     document.addEventListener('click', e => {
@@ -49,35 +42,21 @@
         }
 
         e.preventDefault();
-
         const page = link.dataset.page;
-        if (confirmNavigation) {
-           Alert.openDialog('Vill du gå till sidan "' + page.replaceAll('_', ' ') + '"', [
-                {text: 'Ja tack!', action: () => {Popup.closePopup(); navigateToPage(page);}},
-                {text: 'Spara länk', action: () => {Popup.closePopup(); saveLink(page);}},
-                {text: 'Nä', action: () => {Popup.closePopup();}}
-            ])
-        } else {
-            navigateToPage(page);
-        }
+        Alert.openDialog('Vill du gå till sidan "' + page.replaceAll('_', ' ') + '"', [
+            {text: 'Ja tack!', action: () => {Popup.closePopup(); navigateToPage(page);}},
+            {text: 'Spara länk', action: () => {Popup.closePopup(); saveLink(page);}},
+            {text: 'Nä', action: () => {Popup.closePopup();}}
+        ])
     });
 
     if ('@Model.HasWon' === 'True') {
          setTimeout(() => shootFireworks(), 800)
     }
 
-    function toggleConfirmation(e) {
-        if (e.target.checked) {
-            localStorage.setItem('confirmWikiGame', 'yes');
-            confirmNavigation = true
-        } else {
-            localStorage.setItem('confirmWikiGame', 'no');
-            confirmNavigation = false
-        }
-    }
-
     function navigateToPage(pageName) {
         isNavigating = true
+        saveScrollPosition()
         Spinner.show()
          $.ajax({
             type: "POST",
@@ -106,8 +85,10 @@
                     $('#back-button').hide()
                 }
 
-                $('#saved-links-button').hide()
-                savedLinks = []
+                document.getElementById('currentTitle').dataset.title = result.title
+                savedLinks = loadSavedLinks()
+                $('#saved-links-button').toggle(savedLinks.length > 0)
+                loadScrollPosition()
             },
             error: () => {
                 alert('Någonting gick fel.')
@@ -132,25 +113,59 @@
         }
     }
 
+    function todayDate() {
+        return new Date().getDate()
+    }
+
+    function loadWikiGameStorage() {
+        const storage = localStorage.getItem('WikiGameSavedStorage')
+        if (!storage) {
+            return []
+        }
+
+        entries = JSON.parse(storage)
+        return entries.filter(x => x.date == todayDate())
+    }
+
     function loadSavedLinks() {
         const currentTitle = document.getElementById('currentTitle').dataset.title
-        const links = localStorage.getItem('WikiGameSavedLinks')
-        if (!links) {
-            return []
-        }
+        const currentPage = storageEntries.filter(x => x.title == currentTitle)
 
-        const tokens = links.split('¤')
-        if (currentTitle !== tokens[0]) {
-            return []
-        }
+        return currentPage.length > 0 ? currentPage[0].savedLinks : []
+    }
 
-        return tokens.slice(1)
+    function loadScrollPosition() {
+        const currentTitle = document.getElementById('currentTitle').dataset.title
+        const currentPage = storageEntries.filter(x => x.title == currentTitle)
+        if (currentPage.length > 0) {
+            document.querySelectorAll('.wiki-container')[0].scrollTop = currentPage[0].scrollPosition
+        } else {
+            document.querySelectorAll('.wiki-container')[0].scrollTop = 0
+        }
     }
 
     function saveSavedLinks(links) {
+        const currentPage = getOrAddCurrentPageStorage()
+        currentPage.savedLinks = links
+        localStorage.setItem('WikiGameSavedStorage', JSON.stringify(storageEntries))
+    }
+
+    function saveScrollPosition() {
+        const currentPage = getOrAddCurrentPageStorage()
+        currentPage.scrollPosition = $('.wiki-container').scrollTop()
+        localStorage.setItem('WikiGameSavedStorage', JSON.stringify(storageEntries))
+    }
+
+    function getOrAddCurrentPageStorage() {
         const currentTitle = document.getElementById('currentTitle').dataset.title
-        const linksString = [currentTitle, ...links].join("¤");
-        localStorage.setItem('WikiGameSavedLinks', linksString)
+        const filteredPages = storageEntries.filter(x => x.title == currentTitle)
+        if (filteredPages.length > 0) {
+            return filteredPages[0]
+        }
+        
+        const newPage = new WikiGamePageStorage(todayDate(), currentTitle, savedLinks, null)
+        storageEntries.push(newPage)
+        return newPage
     }
 
     function saveLink(link) {

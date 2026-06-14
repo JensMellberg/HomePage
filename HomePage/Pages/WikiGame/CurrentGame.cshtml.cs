@@ -59,7 +59,8 @@ namespace HomePage.Pages.WikiGame
                 navigateResult.Html,
                 navigateResult.Steps,
                 navigateResult.IsWin,
-                navigateResult.CanGoBack
+                navigateResult.CanGoBack,
+                navigateResult.Title
             });
         }
     }

@@ -39,12 +39,14 @@ namespace HomePage.Repositories
                 return null;
             }
 
-            var newPage = GetPageContent(title, startPage.Language);
             (var readableGoalTitle, var _) = WikipediaClient.GetPageInfo(goal, startPage.Language);
             var nextPageInfo = WikipediaClient.GetPageInfo(title, startPage.Language);
+            var isWin = nextPageInfo.title == readableGoalTitle;
+
+            var newPage = GetPageContent(title, startPage.Language, isWin);
             
             Guid? backId = null;
-            if (nextPageInfo.title != readableGoalTitle)
+            if (!isWin)
             {
                 backId = currentPage.steps == 0 ? Guid.Empty : currentPage.lastNavigationId;
             }
@@ -62,8 +64,9 @@ namespace HomePage.Repositories
             {
                 Html = newPage.PageContent,
                 Steps = currentPage.steps + 1,
-                IsWin = nextPageInfo.title == readableGoalTitle,
-                CanGoBack = nextPageInfo.title != readableGoalTitle
+                IsWin = isWin,
+                CanGoBack = !isWin,
+                Title = title
             };
         }
 
@@ -89,7 +92,7 @@ namespace HomePage.Repositories
             dbContext.WikiGameNavigations.Add(new WikiGameNavigation 
             { 
                 Title = newPage.Title, 
-                UserName = username, 
+                UserName = username,
                 Step = lastNavigation.Step + 1,
                 BackId = backNavigation.BackId
             });
@@ -99,7 +102,8 @@ namespace HomePage.Repositories
                 Html = newPage.PageContent,
                 Steps = lastNavigation.Step + 1,
                 IsWin = false,
-                CanGoBack = backId != null && backId != Guid.Empty
+                CanGoBack = backId != null && backId != Guid.Empty,
+                Title = newPage.Title
             };
         }
 
