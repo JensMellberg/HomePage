@@ -14,6 +14,8 @@ namespace HomePage.Chores
 
         protected virtual string ConvertStreakPerson(string person) => person;
 
+        protected virtual bool HasStreak => true;
+
         public ChoreStreak GetStreak(string person)
         {
             person = ConvertStreakPerson(person);
@@ -66,6 +68,11 @@ namespace HomePage.Chores
 
         private int IncreaseStreak(string person)
         {
+            if (!HasStreak)
+            {
+                return 0;
+            }
+
             var current = GetStreak(person).Streak;
             UpdateStreak(person, current + 1);
             return current + 1;

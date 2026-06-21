@@ -7,5 +7,7 @@ namespace HomePage.Chores
         public const string ChoreId = "Recycle";
 
         protected override DateTime GetNextDate() => GetLastUpdatedDate.AddDays(5);
+
+        protected override bool HasStreak => false;
     }
 }

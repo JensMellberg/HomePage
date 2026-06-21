@@ -9,7 +9,19 @@ namespace HomePage.Chores
         protected override DateTime GetNextDate()
         {
             var today = DateHelper.DateNow;
-            var daysBetween = today.Month > 5 && today.Month < 9 ? 3 : 4;
+            int daysBetween;
+            if (today.Month < 5 || today.Month > 8)
+            {
+                daysBetween = 4;
+            }
+            else if (today.Month == 5 || today.Month == 8)
+            {
+                daysBetween = 3;
+            }
+            else
+            {
+                daysBetween = 2;
+            }
             return GetLastUpdatedDate.AddDays(daysBetween);
         }
     }
