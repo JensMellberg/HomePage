@@ -7,6 +7,10 @@
 <button type="button" onclick="window.location.href = 'FoodStorage'" style="position: absolute; top: 5px; right: 5px;">Till skafferi</button>
 <div class="page-wrapper">
     <a href="CreateIngredient">Ny ingrediens</a>
+    <div class="filters-wrapper">
+        <input type="text" value="@Model.CurrentFilter" placeholder="filtrera..." onchange="updateTextFilter(this.value)" />
+        <input type="hidden" value="@Model.CurrentFilter" id="currentfilter" />
+    </div>
     <div class="food-grid">
         @foreach (var ingredient in Model.Ingredients)
         {
@@ -32,3 +36,8 @@
 </div>
 
 <script src="~/js/homeButton.js" asp-append-version="true"></script>
+<script>
+    function updateTextFilter(value) {
+        window.location = '/Ingredients?filter=' + value
+    }
+</script>
