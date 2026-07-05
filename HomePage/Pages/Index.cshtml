@@ -73,6 +73,10 @@
             {
                 <div class="notesplaceholder" notes="@Model.TodayFood.MainFood.Notes"></div>
             }
+            @if (Model.TodayFood.MainFood?.NeedsPreparation == true || Model.TodayFood.SideDishes.Any(x => x.NeedsPreparation))
+            {
+                <span class="recipe-button">⏱️</span>
+            }
         </div>
     }
 

@@ -2,6 +2,28 @@
 
 namespace HomePage.Model
 {
+    public enum WikiGameGoalDifficulty
+    {
+        Easy,
+        Normal,
+        Hard,
+        Extreme,
+        Unknown = -1
+    }
+
+    public static class WikiGameGoalDifficultyExtensions
+    {
+        public static string ToReadable(this WikiGameGoalDifficulty value) => value switch
+        {
+            WikiGameGoalDifficulty.Easy => "Lätt",
+            WikiGameGoalDifficulty.Normal => "Medel",
+            WikiGameGoalDifficulty.Hard => "Svår",
+            WikiGameGoalDifficulty.Extreme => "Skitsvår",
+            WikiGameGoalDifficulty.Unknown => "Okänd",
+            _ => throw new NotImplementedException(),
+        };
+    }
+
     public class WikiGameStart
     {
         [Key]
@@ -17,5 +39,9 @@ namespace HomePage.Model
 
         [MaxLength(10)]
         public required string Language { get; set; }
+
+        public WikiGameGoalDifficulty GoalDifficulty { get; set; }
+
+        public string GoalTitleWithDifficulty => GoalTitle.Replace("_", " ") + " (" + GoalDifficulty.ToReadable() + ")";
     }
 }

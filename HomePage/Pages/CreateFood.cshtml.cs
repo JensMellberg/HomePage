@@ -53,7 +53,9 @@ namespace HomePage.Pages
             return Page();
         }
 
-        public IActionResult OnPost(Guid foodId, string foodName, string date, string recipeUrl, string categories, string delete, string notes, string ingredients, string inFolder, string isSideDish)
+        public IActionResult OnPost(Guid foodId, string foodName, string date, string recipeUrl, 
+            string categories, string delete, string notes, string ingredients, string inFolder, 
+            string isSideDish, string needsPrep)
         {
             var redirectResult = GetPotentialRedirectResult(true, true);
             if (redirectResult != null)
@@ -84,6 +86,7 @@ namespace HomePage.Pages
                     existing.Notes = notes;
                     existing.FoodIngredients = parsedIngredients;
                     existing.InFolder = inFolder == "on";
+                    existing.NeedsPreparation = needsPrep == "on";
                     existing.IsSideDish = isSideDish == "on";
                 } else
                 {
@@ -96,7 +99,8 @@ namespace HomePage.Pages
                         Notes = notes,
                         FoodIngredients = parsedIngredients,
                         InFolder = inFolder == "on",
-                        IsSideDish = isSideDish == "on"
+                        IsSideDish = isSideDish == "on",
+                        NeedsPreparation = needsPrep == "on"
                     };
 
                     dbContext.Food.Add(food);

@@ -13,7 +13,7 @@
     <span class="step-counter" style="position: absolute; top: 2px;">Sidor besökta: @Model.PreviousClicks</span>
     <button id="back-button" onclick="navigateToPage('GOBACKONCE')" style="position: absolute; top: 50px; left: 0; display: @Model.BackbuttonDisplay">Backa till förra sidan</button>
     <button id="saved-links-button" onclick="pickSavedLinks()" style="position: absolute; top: 50px; right: 0;">Sparade länkar</button>
-    <button onclick="window.location.href = 'Results'" style="position: absolute; top: 15px; left: 0;">Tillbaka</button>
+    <button onclick="onBackButtonClick()" style="position: absolute; top: 15px; left: 0;">Tillbaka</button>
 
     <div class="wiki-container">
         @Html.Raw(Model.PageHtml)
@@ -52,6 +52,11 @@
 
     if ('@Model.HasWon' === 'True') {
          setTimeout(() => shootFireworks(), 800)
+    }
+
+    function onBackButtonClick() {
+        saveScrollPosition()
+        window.location.href = 'Results'
     }
 
     function navigateToPage(pageName) {

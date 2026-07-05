@@ -45,6 +45,10 @@
                     {
                         <span class="recipe-button">📗</span>
                     }
+                    @if (food.NeedsPreparation)
+                    {
+                        <span class="recipe-button">⏱️</span>
+                    }
                     @if (food.HasHistory) {
                         <div class="foodhistoryplaceholder" foodId="@food.Id"></div>
                     }
@@ -72,6 +76,10 @@
                     @if (food.InFolder)
                     {
                         <span class="recipe-button">📗</span>
+                    }
+                    @if (food.NeedsPreparation)
+                    {
+                        <span class="recipe-button">⏱️</span>
                     }
                     <a href="CreateFood?foodId=@food.Id">
                         @food.Name (@food.Categories.Count)

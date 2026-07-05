@@ -33,6 +33,10 @@
                     {
                         <span class="recipe-button">📗</span>
                     }
+                    @if (dayFood.MainFood?.NeedsPreparation == true || dayFood.SideDishes.Any(x => x.NeedsPreparation))
+                    {
+                        <span class="recipe-button">⏱️</span>
+                    }
                     @if (dayFood.MainFood?.HasHistory == true)
                     {
                         <div class="foodhistoryplaceholder" foodId="@dayFood.MainFood.Id"></div>

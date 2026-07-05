@@ -4,6 +4,7 @@ using HomePage.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HomePage.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260627075823_AddGoalDifficulty")]
+    partial class AddGoalDifficulty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,30 +38,6 @@ namespace HomePage.Migrations
                     b.HasIndex("FoodId");
 
                     b.ToTable("FoodCategories", (string)null);
-                });
-
-            modelBuilder.Entity("HomePage.Model.CachedWikiGameLinks", b =>
-                {
-                    b.Property<long>("PageId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CacheDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("IncomingLinks")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OutgoingLinks")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.HasKey("PageId");
-
-                    b.ToTable("CachedWikiGameLinks");
                 });
 
             modelBuilder.Entity("HomePage.Model.CachedWikiGamePage", b =>
@@ -280,9 +259,6 @@ namespace HomePage.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<bool>("NeedsPreparation")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");

@@ -47,7 +47,7 @@ namespace HomePage
                         if (cancellationToken.IsCancellationRequested)
                         {
                             return;
-                        } 
+                        }
 
                         var startBoard = new Board { BoardMatrix = new Letter[10, 10], UnusedLetters = letters.ToList() };
                         var startX = 5 - word.Length / 2;

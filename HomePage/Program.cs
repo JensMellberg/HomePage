@@ -2,6 +2,7 @@ using HomePage.Chores;
 using HomePage.Data;
 using HomePage.Repositories;
 using HomePage.Spending;
+using HomePage.WikiGame;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
@@ -15,7 +16,9 @@ namespace HomePage
 
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<UserContext>();
+            builder.Services.Configure<RobotConfig>(builder.Configuration.GetSection("RobotConfig"));
             builder.Services.AddSingleton<BruteForceProtector>();
+            builder.Services.AddTransient<WikipediaLinksCache>();
             builder.Services.AddTransient<CurrentWordMixRepository>();
             builder.Services.AddTransient<WordMixResultRepository>();
             builder.Services.AddTransient<FoodStorageRepository>();

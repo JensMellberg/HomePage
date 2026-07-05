@@ -1,12 +1,12 @@
 ﻿using HomePage.Data;
 using HomePage.Model;
-using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Options;
 using System.Text;
 using static HomePage.WordMixResultValidator;
 
 namespace HomePage.Repositories
 {
-    public class CurrentWordMixRepository(AppDbContext dbContext, IServiceScopeFactory scopeFactory)
+    public class CurrentWordMixRepository(AppDbContext dbContext, IServiceScopeFactory scopeFactory, IOptions<RobotConfig> options)
     {
         private static TimeSpan MrRobotTimeout => TimeSpan.FromMinutes(30);
 
@@ -18,7 +18,10 @@ namespace HomePage.Repositories
             {
                 var today = DateHelper.DateNow;
                 Recreate(current);
-                AddRobotResult(today, current);
+                if (options.Value.RunWordMix)
+                {
+                    AddRobotResult(today, current);
+                }
             }
 
             return current;

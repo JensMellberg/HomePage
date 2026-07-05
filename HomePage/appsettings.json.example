@@ -10,5 +10,9 @@
     "DefaultConnection": "Server=localhost;Database=HomePage;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True;"
   },
   "BackupFolderPath": "<FOLDER_PATH>",
-  "BackupSqlFolderPath": "<ALTERNATIVE_PATH_FROM_SQL_SCRIPT>"
+  "BackupSqlFolderPath": "<ALTERNATIVE_PATH_FROM_SQL_SCRIPT>",
+  "RobotConfig": {
+    "RunWordMix": false,
+    "RunWikiRace": false
+  }
 }

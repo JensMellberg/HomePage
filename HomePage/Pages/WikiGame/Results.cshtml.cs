@@ -19,11 +19,12 @@ namespace HomePage.Pages.WikiGame
         {
             var start = wikiGameRepository.GetStartPage(DateHelper.DateNow);
             AccountNames = dbContext.UserInfo.ToDictionary(x => x.UserName, x => x.DisplayName);
+            AccountNames.Add(Person.MrRobot.UserName, Person.MrRobot.Name);
             var results = wikiGameRepository.GetAllResults();
             TodayResult = results.FirstOrDefault(x => x.Date == DateHelper.DateNow);
             PreviousResults = results.Where(x => x.Date != DateHelper.DateNow).ToList();
             IsFinished = wikiGameRepository.UserHasFinishedToday(LoggedInPerson?.UserName);
-            TodaysGoal = start.GoalTitle.Replace("_", " ");
+            TodaysGoal = start.GoalTitleWithDifficulty;
             Summary = start.Summary;
 
             return Page();

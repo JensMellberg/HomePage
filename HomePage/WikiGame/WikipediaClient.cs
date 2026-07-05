@@ -1,6 +1,7 @@
-﻿using System.Web;
-using Microsoft.IdentityModel.Tokens;
+﻿using System.Net;
+using System.Web;
 using Newtonsoft.Json;
+using static System.Net.WebRequestMethods;
 
 namespace HomePage.WikiGame
 {
@@ -8,20 +9,30 @@ namespace HomePage.WikiGame
     {
         private static readonly HttpClient client = SetupClient();
 
-        public static string GetRandomTitle(string language)
+        public static WikipediaPageMetadata GetRandomPage(string language)
         {
             var url = $"{BaseUrl(language)}/api/rest_v1/page/random/summary";
             var json = client.GetStringAsync(url).Result;
             var result = JsonConvert.DeserializeObject<WikiPageModel>(json);
-            if (result?.title is null)
+            if (result is null)
             {
                 throw new Exception("Failed to get wikipedia page.");
             }
 
-            return result!.title;
+            return new WikipediaPageMetadata(result.pageid, result.title);
         }
 
-        public static (string title, string summary) GetPageInfo(string title, string language)
+        public static List<WikipediaPageMetadata> GetOutgoingLinksFromPage(string title, string language, out long totalRequests)
+        {
+            return CollectLinks((gplcontinue) => GetOutgoingLinksResult(title, language, gplcontinue), out totalRequests);
+        }
+
+        public static List<WikipediaPageMetadata> GetIncomingLinksToPage(string title, string language, out long totalRequests)
+        {
+            return CollectLinks((gblcontinue) => GetIncomingLinksResult(title, language, gblcontinue), out totalRequests);
+        }
+
+        public static WikipediaPageMetadataWithSummary GetPageInfo(string title, string language)
         {
             var url = $"{BaseUrl(language)}/api/rest_v1/page/summary/{title}";
             var json = client.GetStringAsync(url).Result;
@@ -31,16 +42,116 @@ namespace HomePage.WikiGame
                 throw new Exception("Failed to get wikipedia page.");
             }
 
-            return (result!.title, result!.extract);
+            return new(result!.pageid, result!.title, result!.extract);
+        }
+
+        public static long GetPageViews(string title, string language)
+        {
+            var url = $"https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/{language}.wikipedia.org/all-access" + 
+                 $"/user/{EncodeTitle(title)}/monthly/20250101/20251231";
+            var json = client.GetStringAsync(url).Result;
+            var result = JsonConvert.DeserializeObject<PageViewResult>(json);
+            if (result?.items is null)
+            {
+                throw new Exception("Failed to get wikipedia page.");
+            }
+
+            return result.items.Sum(x => x.views) / result.items.Length;
         }
 
         public static string GetPageContent(string title, string language)
         {
-            var normalized = title.Replace(' ', '_');
-            var url = $"{BaseUrl(language)}/api/rest_v1/page/mobile-html/{HttpUtility.UrlEncode(normalized)}";
+            var url = $"{BaseUrl(language)}/api/rest_v1/page/mobile-html/{EncodeTitle(title)}";
             var content = client.GetStringAsync(url).Result;
             return content;
         }
+
+        private static GenericLinksResult GetOutgoingLinksResult(string title, string language, string? gplcontinue)
+        {
+            var gplcontinueQs = gplcontinue != null ? $"&gplcontinue={gplcontinue}" : "";
+            var url = $"{BaseUrl(language)}/w/api.php?action=query&titles={EncodeTitle(title)}&generator=links&gplnamespace=0" +
+               $"&gpllimit=max&format=json&formatversion=2{gplcontinueQs}";
+            var json = GetJsonWithRetries(url);
+            var result = JsonConvert.DeserializeObject<LinksResultApiModel>(json);
+            if (result is null)
+            {
+                throw new Exception("Failed to get outgoing links.");
+            }
+
+            return new GenericLinksResult
+            {
+                Continue = result.Continue?.gplcontinue,
+                Pages = result.Query?.pages ?? []
+            };
+        }
+
+        private static string GetJsonWithRetries(string url)
+        {
+            HttpResponseMessage response;
+
+            for (int attempt = 0; ; attempt++)
+            {
+                response = client.GetAsync(url).Result;
+
+                if (response.StatusCode != HttpStatusCode.TooManyRequests)
+                {
+                    break;
+                }
+
+                if (attempt >= 5)
+                {
+                    throw new Exception("Wikipedia API rate limit exceeded.");
+                }
+
+                var delay = response.Headers.RetryAfter?.Delta
+                            ?? TimeSpan.FromSeconds(Math.Pow(2, attempt));
+
+                Thread.Sleep(delay);
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            var json = response.Content.ReadAsStringAsync().Result;
+            return json;
+        }
+
+        private static GenericLinksResult GetIncomingLinksResult(string title, string language, string? gblcontinue)
+        {
+            var gblcontinueQs = gblcontinue != null ? $"&gblcontinue={gblcontinue}" : "";
+            var url = $"{BaseUrl(language)}/w/api.php?action=query&gbltitle={EncodeTitle(title)}&generator=backlinks&gblnamespace=0" +
+               $"&gbllimit=max&format=json&formatversion=2{gblcontinueQs}";
+            var json = GetJsonWithRetries(url);
+            var result = JsonConvert.DeserializeObject<LinksResultApiModel>(json);
+            if (result is null)
+            {
+                throw new Exception("Failed to get outgoing links.");
+            }
+
+            return new GenericLinksResult
+            {
+                Continue = result.Continue?.gblcontinue,
+                Pages = result.Query?.pages ?? []
+            };
+        }
+
+        private static List<WikipediaPageMetadata> CollectLinks(Func<string?, GenericLinksResult> getPages, out long totalRequests)
+        {
+            totalRequests = 0;
+            var links = new List<WikipediaPageMetadata>();
+            string? continueString = null;
+            do
+            {
+                var linksResult = getPages(continueString);
+                links.AddRange(linksResult.Pages.Select(x => new WikipediaPageMetadata(x.pageid, x.title)));
+                continueString = linksResult.Continue;
+                totalRequests++;
+            }
+            while (continueString != null);
+
+            return links;
+        }
+
+        private static string EncodeTitle(string title) => HttpUtility.UrlEncode(title.Replace(' ', '_'));
 
         private static string BaseUrl(string language) => $"https://{language}.wikipedia.org";
 
@@ -56,6 +167,40 @@ namespace HomePage.WikiGame
         {
             public string title { get; set; }
             public string extract { get; set; }
+            public long pageid { get; set; }
+        }
+
+        private class LinksResultApiModel
+        {
+            public WikiQuery Query { get; set; }
+            public ContinueApiModel? Continue { get; set; }
+        }
+
+        private class ContinueApiModel
+        {
+            public string gplcontinue { get; set; }
+            public string gblcontinue { get; set; }
+        }
+
+        private class WikiQuery
+        {
+            public WikiPageModel[] pages { get; set; }
+        }
+
+        private class GenericLinksResult
+        {
+            public string? Continue;
+            public WikiPageModel[] Pages { get; set; }
+        }
+
+        private class PageViewResult
+        {
+            public PageViewItem[] items { get; set; }
+        }
+
+        private class PageViewItem
+        {
+            public long views { get; set; }
         }
     }
 }

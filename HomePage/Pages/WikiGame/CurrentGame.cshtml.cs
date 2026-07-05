@@ -20,7 +20,7 @@ namespace HomePage.Pages.WikiGame
 
         public IActionResult OnGet()
         {
-            var currentPage = wikiGameRespository.GetCurrentUserPage(LoggedInPerson!.UserName);
+            var currentPage = wikiGameRespository.GetCurrentUserPage(LoggedInPerson!.UserName, DateHelper.DateNow);
             PageHtml = currentPage.html;
             PreviousClicks = currentPage.steps;
             HasWon = currentPage.allowedLinks.Count == 0;
@@ -45,7 +45,7 @@ namespace HomePage.Pages.WikiGame
             }
             else
             {
-                navigateResult = wikiGameRespository.NavigateToPage(pageName, LoggedInPerson!.UserName);
+                navigateResult = wikiGameRespository.NavigateToPage(pageName, LoggedInPerson!.UserName, DateHelper.DateNow);
             }
 
             if (navigateResult == null)

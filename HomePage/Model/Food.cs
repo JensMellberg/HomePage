@@ -18,6 +18,8 @@ namespace HomePage.Model
 
         public bool InFolder { get; set; }
 
+        public bool NeedsPreparation { get; set; }
+
         public List<Category> Categories { get; set; } = [];
 
         [NotMapped]

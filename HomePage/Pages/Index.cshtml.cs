@@ -3,6 +3,7 @@ using HomePage.Chores;
 using HomePage.Data;
 using HomePage.Model;
 using HomePage.Repositories;
+using HomePage.WikiGame;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -36,7 +37,8 @@ namespace HomePage.Pages
         SignInRepository signInRepository, 
         SettingsRepository settingsRepository,
         ChoreRepository choreRepository,
-        CurrentWordMixRepository currentWordMixRepository) : BasePage(signInRepository)
+        CurrentWordMixRepository currentWordMixRepository,
+        WikiGameRepository wikiGameRepository) : BasePage(signInRepository)
     {
 
         public int Day { get; set; }
@@ -111,6 +113,7 @@ namespace HomePage.Pages
 
             settingsRepository.PerformBackupAsync(false);
             currentWordMixRepository.GetCurrent();
+            wikiGameRepository.GetStartPage(DateHelper.DateNow);
 
             var dayFoods = dayFoodRepository.GetPopulatedDayFood();
             var todaysFood = dayFoods.FirstOrDefault(x => x.Date == today.Date);

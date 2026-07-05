@@ -1,6 +1,8 @@
-﻿using HomePage.Model;
+﻿using System.Text.Json;
+using HomePage.Model;
 using HomePage.Spending;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HomePage.Data
 {
@@ -12,6 +14,8 @@ namespace HomePage.Data
         }
 
         public DbSet<ToDoItem> ToDo { get; set; }
+
+        public DbSet<CachedWikiGameLinks> CachedWikiGameLinks { get; set; }
 
         public DbSet<WikiGameStart> WikiGameStarts { get; set; }
 
@@ -77,6 +81,20 @@ namespace HomePage.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            var options = new JsonSerializerOptions();
+
+            var converter = new ValueConverter<List<CachedWikipediaLink>?, string?>(
+               v => v == null ? null : JsonSerializer.Serialize(v, options),
+               v => v == null ? null : JsonSerializer.Deserialize<List<CachedWikipediaLink>>(v, options));
+
+            modelBuilder.Entity<CachedWikiGameLinks>()
+                .Property(x => x.IncomingLinks)
+                .HasConversion(converter);
+
+            modelBuilder.Entity<CachedWikiGameLinks>()
+                .Property(x => x.OutgoingLinks)
+                .HasConversion(converter);
+
             modelBuilder.Entity<LogRow>()
                 .Property(x => x.LogRowSeverity)
                 .HasConversion<string>();

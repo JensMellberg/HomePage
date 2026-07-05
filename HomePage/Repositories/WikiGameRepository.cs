@@ -1,15 +1,18 @@
 ﻿using HomePage.Data;
 using HomePage.Model;
 using HomePage.WikiGame;
+using Microsoft.Extensions.Options;
 
 namespace HomePage.Repositories
 {
-    public class WikiGameRepository(AppDbContext dbContext, DatabaseLogger logger)
+    public class WikiGameRepository(AppDbContext dbContext, DatabaseLogger logger, IOptions<RobotConfig> robotConfig, IServiceScopeFactory scopeFactory)
     {
-        public (string html, int steps, List<string> allowedLinks, Guid? lastNavigationId, string title) GetCurrentUserPage(string username)
+        private const int MinimumGoalPageLinks = 100;
+        private const int MinimumGoalPageViews = 15000;
+        public (string html, int steps, List<string> allowedLinks, Guid? lastNavigationId, string title) GetCurrentUserPage(string username, DateTime date)
         {
-            var startPage = GetStartPage(DateHelper.DateNow);
-            var playerNavigations = GetNavigations(username, DateHelper.DateNow);
+            var startPage = GetStartPage(date);
+            var playerNavigations = GetNavigations(username, date);
             var steps = 0;
             CachedWikiGamePage page;
             Guid? lastNavigationId = null;
@@ -22,26 +25,26 @@ namespace HomePage.Repositories
             } 
             else
             {
-                page = GetPageContent(GetStartPage(DateHelper.DateNow).Title, startPage.Language);
+                page = GetPageContent(GetStartPage(date).Title, startPage.Language);
             }
             
             return (page.PageContent, steps, page.AllowedLinks, lastNavigationId, page.Title);
         }
 
-        public WikiGameNavigationResult? NavigateToPage(string title, string username)
+        public WikiGameNavigationResult? NavigateToPage(string title, string username, DateTime date)
         {
-            var startPage = GetStartPage(DateHelper.DateNow);
+            var startPage = GetStartPage(date);
             var goal = startPage.GoalTitle;
-            var currentPage = GetCurrentUserPage(username);
+            var currentPage = GetCurrentUserPage(username, date);
             if (!currentPage.allowedLinks.Contains(title))
             {
                 logger.Error($"{username} cannot navigate to page {title} since there is no outgoing links to it.", username);
                 return null;
             }
 
-            (var readableGoalTitle, var _) = WikipediaClient.GetPageInfo(goal, startPage.Language);
+            var readableGoalTitle = WikipediaClient.GetPageInfo(goal, startPage.Language).Title;
             var nextPageInfo = WikipediaClient.GetPageInfo(title, startPage.Language);
-            var isWin = nextPageInfo.title == readableGoalTitle;
+            var isWin = nextPageInfo.Title == readableGoalTitle;
 
             var newPage = GetPageContent(title, startPage.Language, isWin);
             
@@ -56,7 +59,8 @@ namespace HomePage.Repositories
                 Title = title, 
                 UserName = username, 
                 Step = currentPage.steps + 1,
-                BackId = backId
+                BackId = backId,
+                Date = date
             });
 
             dbContext.SaveChanges();
@@ -120,13 +124,26 @@ namespace HomePage.Repositories
             var start = dbContext.WikiGameStarts.FirstOrDefault(x => x.Date == date);
             if (start == null) {
                 var goalTitle = GetNewGoalTitle();
-                var newTitle = WikipediaClient.GetRandomTitle(goalTitle.language);
-                
-                var newStart = new WikiGameStart { Title = newTitle, GoalTitle = goalTitle.title, Language = goalTitle.language, Summary = goalTitle.summary };
+                var newTitle = WikipediaClient.GetRandomPage(goalTitle.language).Title;
+                var difficulty = GetTitleDifficulty(goalTitle.title, goalTitle.language);
+
+                var newStart = new WikiGameStart { 
+                    Title = newTitle, 
+                    GoalTitle = goalTitle.title, 
+                    Language = goalTitle.language, 
+                    Summary = goalTitle.summary,
+                    GoalDifficulty = difficulty
+                };
+
                 dbContext.WikiGameStarts.Add(newStart);
                 CleanUpCache();
                 dbContext.SaveChanges();
                 start = newStart;
+
+                if (robotConfig.Value.RunWikiRace)
+                {
+                    AddRobotResult(date);
+                }
             }
 
             return start;
@@ -189,7 +206,7 @@ namespace HomePage.Repositories
                 results.Add(new WikiGameDayResult
                 {
                     Date = dayStart.Date,
-                    GoalTitle = dayStart.GoalTitle.Replace('_', ' '),
+                    GoalTitle = dayStart.GoalTitleWithDifficulty,
                     Results = usersWithResults
                         .Select(x => GetUserResultForDate(x, dayStart.Date, dayStart.Title)!)
                         .Where(x => x != null && (!isToday || x.HasFinished))
@@ -242,6 +259,58 @@ namespace HomePage.Repositories
             return dbContext.WikiGameSuggestions.OrderByDescending(x => x.Votes).ThenBy(x => x.Title).ToList();
         }
 
+        public void AddRobotResult(DateTime date)
+        {
+            var start = dbContext.WikiGameStarts.FirstOrDefault(x => x.Date == date);
+            if (start == null || dbContext.WikiGameNavigations.Where(x => x.Date == date && x.UserName == Person.MrRobot.UserName).Any())
+            {
+                return;
+            }
+
+            new Thread(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+                Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
+
+                using var scope = scopeFactory.CreateScope();
+                var logger = scope.ServiceProvider.GetRequiredService<DatabaseLogger>();
+                logger.Information($"Calculating best wikipedia path for date {date.ToReadable()}", null);
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var secondRepository = scope.ServiceProvider.GetRequiredService<WikiGameRepository>();
+                var linksCache = scope.ServiceProvider.GetRequiredService<WikipediaLinksCache>();
+
+                linksCache.CleanStaleEntries();
+                var calculator = new WikipediaCalculator(start.Language, secondRepository, linksCache);
+                using var cts = new CancellationTokenSource(TimeSpan.FromHours(2));
+                try
+                {
+                    var result = calculator.FindOptimalPath(start.Title, start.GoalTitle, cts.Token);
+                    if (result == null || result.Count == 0)
+                    {
+                        return;
+                    }
+
+                    logger.Information($"Optimal wikipedia path finished calculations. Made {calculator.TotalRequestsMade} requests. {linksCache.TotalCacheHits} cache hits.", null);
+                    foreach (var navigation in result.Skip(1))
+                    {
+                        secondRepository.NavigateToPage(navigation.NormalizedTitle, Person.MrRobot.UserName, date);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    logger.Information($"Timed out when calculating optimal wikipedia path. Made {calculator.TotalRequestsMade} requests. {linksCache.TotalCacheHits} cache hits.", null);
+                }
+                catch (Exception e)
+                {
+                    logger.Log(LogRowSeverity.Error, $"Error when calculating optimal wikipedia path: {e.Message}", null, e.StackTrace);
+                }
+                finally
+                {
+                    linksCache.SaveCacheToDatabase();
+                }
+            }).Start();
+        }
+
         private void CleanUpCache()
         {
             var oldEntries = dbContext.CachedWikiGamePages.Where(x => x.LastUsed.AddDays(7) < DateHelper.DateTimeNow).ToList();
@@ -257,16 +326,68 @@ namespace HomePage.Repositories
             }
 
             var mostVotes = allSuggestions.First().Votes;
-            var suggestions = allSuggestions.Where(x => x.Votes == mostVotes).ToList();
-            var index = Random.Shared.Next(suggestions.Count);
-            var suggestion = suggestions[index];
-            suggestion.Voters = [];
-            suggestion.Votes = 0;
+            string language;
+            string title;
+            if (mostVotes > 0)
+            {
+                var suggestions = allSuggestions.Where(x => x.Votes == mostVotes).ToList();
+                var index = Random.Shared.Next(suggestions.Count);
+                var suggestion = suggestions[index];
+                suggestion.Voters = [];
+                suggestion.Votes = 0;
 
-            (var readableTitle, var summary) = WikipediaClient.GetPageInfo(suggestion.Title, suggestion.Language);
+                language = suggestion.Language;
+                title = suggestion.Title;
+            }
+            else
+            {
+                language = "en";
+                title = GetRandomGoalTitle(language, 10, 100);
+            }
 
-            return (readableTitle, suggestions[index].Language, summary);
+            var pageInfo = WikipediaClient.GetPageInfo(title, language);
+            return (pageInfo.Title, language, pageInfo.Summary);
         }
 
+        private static WikiGameGoalDifficulty GetTitleDifficulty(string title, string language)
+        {
+            var pageViews = WikipediaClient.GetPageViews(title, language);
+            return pageViews switch
+            {
+                < 5000 => WikiGameGoalDifficulty.Extreme,
+                < 20000 => WikiGameGoalDifficulty.Hard,
+                < 100000 => WikiGameGoalDifficulty.Normal,
+                _ => WikiGameGoalDifficulty.Easy
+            };
+        }
+
+        private string GetRandomGoalTitle(string language, int minimumRequests, int maximumRequests)
+        {
+            var totalRequests = 0;
+            var bestTitle = "";
+            long maxViews = 0;
+            var bestLinksCount = 0;
+
+            while (maxViews < MinimumGoalPageViews || totalRequests < minimumRequests || bestLinksCount < MinimumGoalPageLinks)
+            {
+                var title = WikipediaClient.GetRandomPage(language).Title;
+                var pageViews = WikipediaClient.GetPageViews(title, language);
+                totalRequests++;
+                if (pageViews > maxViews)
+                {
+                    var linkCount = WikipediaClient.GetIncomingLinksToPage(title, language, out var _).Count;
+                    maxViews = pageViews;
+                    bestLinksCount = linkCount;
+                    bestTitle = title;
+                }
+
+                if (totalRequests > maximumRequests)
+                {
+                    break;
+                }
+            }
+
+            return bestTitle;
+        }
     }
 }
