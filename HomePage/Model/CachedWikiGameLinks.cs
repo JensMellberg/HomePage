@@ -9,15 +9,10 @@ namespace HomePage.Model
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long PageId { get; set; }
 
-        [MaxLength(2000)]
-        public required string Title { get; set; }
-
         public DateTime CacheDate { get; set; }
 
-        public List<CachedWikipediaLink>? IncomingLinks { get; set; }
+        public List<long>? IncomingLinks { get; set; }
 
-        public List<CachedWikipediaLink>? OutgoingLinks { get; set; }
+        public List<long>? OutgoingLinks { get; set; }
     }
-
-    public record CachedWikipediaLink(long Id, string Title);
 }

@@ -129,6 +129,11 @@ namespace HomePage.Pages
             if (chore != null)
             {
                 var chorePerson = chore.ChorePerson();
+                if (chorePerson == null)
+                {
+                    return Utils.CreateErrorClientResult(null);
+                }
+
                 var streak = chore.Update();
                 logger.Information($"{chorePerson} performed chore {chore.Id} with a new streak of {streak}.", null);
                 dbContext.SaveChanges();

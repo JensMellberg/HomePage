@@ -10,24 +10,22 @@ namespace HomePage.WikiGame
 
         private Dictionary<long, CachedWikiGameLinks> LocalCache { get; set; } = [];
 
-        private const int DaysToCache = 10;
+        private const int DaysToCache = 5;
 
         public long TotalCacheHits { get; private set; } = 0;
 
-        public IEnumerable<WikipediaPageMetadata> GetOutgoingLinks(long pageId, string title, string language, out long requestsMade)
+        public IEnumerable<long> GetOutgoingLinks(long pageId, string language, out long requestsMade)
             => GetLinks(
                 pageId,
-                title,
                 language,
                 out requestsMade,
                 cache => cache.OutgoingLinks,
                 (cache, links) => cache.OutgoingLinks = links,
                 WikipediaClient.GetOutgoingLinksFromPage);
 
-        public IEnumerable<WikipediaPageMetadata> GetIncomingLinks(long pageId, string title, string language, out long requestsMade)
+        public IEnumerable<long> GetIncomingLinks(long pageId, string language, out long requestsMade)
             => GetLinks(
                 pageId,
-                title,
                 language,
                 out requestsMade,
                 cache => cache.IncomingLinks,
@@ -74,8 +72,7 @@ namespace HomePage.WikiGame
             if (newEntries.Count > 0)
             {
                 dbContext.CachedWikiGameLinks.AddRange(newEntries);
-            }
-                
+            } 
 
             dbContext.SaveChanges();
             CacheToSave.Clear();
@@ -87,13 +84,12 @@ namespace HomePage.WikiGame
             dbContext.CachedWikiGameLinks.Where(x => x.CacheDate < cutOffDate).ExecuteDelete();
         }
 
-        private IEnumerable<WikipediaPageMetadata> GetLinks(
+        private IEnumerable<long> GetLinks(
             long pageId,
-            string title,
             string language,
             out long requestsMade,
-            Func<CachedWikiGameLinks, IEnumerable<CachedWikipediaLink>?> getCachedLinks,
-            Action<CachedWikiGameLinks, List<CachedWikipediaLink>> setCachedLinks,
+            Func<CachedWikiGameLinks, IEnumerable<long>?> getCachedLinks,
+            Action<CachedWikiGameLinks, List<long>> setCachedLinks,
             LinkFetcher fetchLinks)
         {
             requestsMade = 0;
@@ -104,7 +100,7 @@ namespace HomePage.WikiGame
                 if (cachedLinks != null)
                 {
                     TotalCacheHits++;
-                    return ConvertFromCacheModel(cachedLinks);
+                    return cachedLinks;
                 }
             }
 
@@ -115,21 +111,21 @@ namespace HomePage.WikiGame
                 if (cachedLinks != null)
                 {
                     TotalCacheHits++;
+                    dbCache.CacheDate = DateHelper.DateTimeNow;
                     StoreInDictionary(LocalCache, dbCache);
-                    return ConvertFromCacheModel(cachedLinks);
+                    return cachedLinks;
                 }
             }
 
-            var links = fetchLinks(title, language, out requestsMade);
+            var links = fetchLinks(pageId, null, language, out requestsMade);
 
             var linksToCache = links
-                .Select(x => new CachedWikipediaLink(x.Id, x.Title))
+                .Select(x => x.Id)
                 .ToList();
 
             var cacheObject = dbCache ?? new CachedWikiGameLinks
             {
                 PageId = pageId,
-                Title = title,
                 CacheDate = DateHelper.DateTimeNow
             };
 
@@ -138,10 +134,11 @@ namespace HomePage.WikiGame
             StoreInDictionary(LocalCache, cacheObject);
             StoreInDictionary(CacheToSave, cacheObject);
 
-            return links;
+            return linksToCache;
         }
 
         private delegate List<WikipediaPageMetadata> LinkFetcher(
+            long? pageId,
             string title,
             string language,
             out long requestsMade);
@@ -161,15 +158,11 @@ namespace HomePage.WikiGame
                 }  
 
                 existing.CacheDate = updated.CacheDate;
-                existing.Title = updated.Title;
             }
             else
             {
                 dict.Add(updated.PageId, updated);
             }
         }
-
-        private static IEnumerable<WikipediaPageMetadata> ConvertFromCacheModel(IEnumerable<CachedWikipediaLink> cacheLinks)
-            => cacheLinks.Select(x => new WikipediaPageMetadata(x.Id, x.Title));
     }
 }

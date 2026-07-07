@@ -15,21 +15,17 @@ namespace HomePage.WikiGame
             var nextRestPeriod = RestInterval;
             List<WikipediaPageMetadata>? result = null;
             var invalidPages = new HashSet<long>();
-            var pageById = new Dictionary<long, WikipediaPageMetadata>();
             var fromPageInfo = WikipediaClient.GetPageInfo(fromPage, language);
-            pageById.Add(fromPageInfo.Id, fromPageInfo);
-
             var toPageInfo = WikipediaClient.GetPageInfo(toPage, language);
-            pageById.Add(toPageInfo.Id, toPageInfo);
 
             var visitedFrom = new Dictionary<long, (int dist, long previous)>();
             var visitedTo = new Dictionary<long, (int dist, long previous)>();
 
-            var fromQueue = new Queue<(WikipediaPageMetadata page, int dist)>();
-            var toQueue = new Queue<(WikipediaPageMetadata page, int dist)>();
+            var fromQueue = new Queue<(long page, int dist)>();
+            var toQueue = new Queue<(long page, int dist)>();
 
-            EnqueueAllOutgoingLinks(fromPageInfo, fromQueue, 1);
-            EnqueueAllIncomingLinks(toPageInfo, toQueue, 1);
+            EnqueueAllOutgoingLinks(fromPageInfo.Id, fromQueue, 1);
+            EnqueueAllIncomingLinks(toPageInfo.Id, toQueue, 1);
             if (result != null)
             {
                 return result;
@@ -40,24 +36,10 @@ namespace HomePage.WikiGame
                 if (fromQueue.Count < toQueue.Count)
                 {
                     EmptyFromQueue();
-                    if (result != null)
-                    {
-                        return result;
-                    }
-
-                    RestIfNeeded();
-                    EmptyToQueue();
                 }
                 else
                 {
                     EmptyToQueue();
-                    if (result != null)
-                    {
-                        return result;
-                    }
-
-                    RestIfNeeded();
-                    EmptyFromQueue();
                 }
 
                 if (result != null)
@@ -83,7 +65,7 @@ namespace HomePage.WikiGame
             {
                 if (fromQueue.Count > 0)
                 {
-                    var tempQueue = new Queue<(WikipediaPageMetadata page, int dist)>();
+                    var tempQueue = new Queue<(long page, int dist)>();
                     while (fromQueue.Count > 0)
                     {
                         var (current, dist) = fromQueue.Dequeue();
@@ -102,7 +84,7 @@ namespace HomePage.WikiGame
             {
                 if (toQueue.Count > 0)
                 {
-                    var tempQueue = new Queue<(WikipediaPageMetadata page, int dist)>();
+                    var tempQueue = new Queue<(long page, int dist)>();
                     while (toQueue.Count > 0)
                     {
                         var (current, dist) = toQueue.Dequeue();
@@ -117,29 +99,28 @@ namespace HomePage.WikiGame
                 }
             }
 
-            void EnqueueAllOutgoingLinks(WikipediaPageMetadata page, Queue<(WikipediaPageMetadata, int)> queue, int dist)
+            void EnqueueAllOutgoingLinks(long page, Queue<(long, int)> queue, int dist)
             {
                 if (token.IsCancellationRequested)
                 {
                     throw new OperationCanceledException();
                 }
 
-                var outGoingLinks = linksCache.GetOutgoingLinks(page.Id, page.Title, language, out var localRequests);
+                var outGoingLinks = linksCache.GetOutgoingLinks(page, language, out var localRequests);
                 TotalRequestsMade += localRequests;
                 foreach (var link in outGoingLinks)
                 {
-                    if (visitedFrom.ContainsKey(link.Id))
+                    if (visitedFrom.ContainsKey(link))
                     {
                         continue;
                     }
 
                     queue.Enqueue((link, dist));
-                    pageById.TryAdd(link.Id, link);
-                    visitedFrom.Add(link.Id, (dist, page.Id));
+                    visitedFrom.Add(link, (dist, page));
 
-                    if (visitedTo.ContainsKey(link.Id) || link.Id == toPageInfo.Id)
+                    if (visitedTo.ContainsKey(link) || link == toPageInfo.Id)
                     {
-                        OnMatchFound(page.Id, link.Id);
+                        OnMatchFound(page, link);
                         if (result != null)
                         {
                             return;
@@ -148,28 +129,27 @@ namespace HomePage.WikiGame
                 }
             }
 
-            void EnqueueAllIncomingLinks(WikipediaPageMetadata page, Queue<(WikipediaPageMetadata, int)> queue, int dist)
+            void EnqueueAllIncomingLinks(long page, Queue<(long, int)> queue, int dist)
             {
                 if (token.IsCancellationRequested)
                 {
                     throw new OperationCanceledException();
                 }
 
-                var incomingLinks = linksCache.GetIncomingLinks(page.Id, page.Title, language, out var localRequests);
+                var incomingLinks = linksCache.GetIncomingLinks(page, language, out var localRequests);
                 TotalRequestsMade += localRequests;
                 foreach (var link in incomingLinks)
                 {
-                    if (visitedTo.ContainsKey(link.Id))
+                    if (visitedTo.ContainsKey(link))
                     {
                         continue;
                     }
                     queue.Enqueue((link, dist));
-                    pageById.TryAdd(link.Id, link);
-                    visitedTo.Add(link.Id, (dist, page.Id));
+                    visitedTo.Add(link, (dist, page));
 
-                    if (visitedFrom.ContainsKey(link.Id))
+                    if (visitedFrom.ContainsKey(link))
                     {
-                        OnMatchFound(link.Id, page.Id);
+                        OnMatchFound(link, page);
                         if (result != null)
                         {
                             return;
@@ -188,7 +168,7 @@ namespace HomePage.WikiGame
                 while (crntBackPath != fromPageInfo.Id)
                 {
                     var navigation = visitedFrom[crntBackPath];
-                    backPath.Insert(0, pageById[crntBackPath]);
+                    backPath.Insert(0, WikipediaClient.GetPageInfoFromId(crntBackPath, language));
                     crntBackPath = navigation.previous;
                     if (invalidPages.Contains(crntBackPath))
                     {
@@ -200,7 +180,7 @@ namespace HomePage.WikiGame
                 while (crntFrontPath != toPageInfo.Id)
                 {
                     var navigation = visitedTo[crntFrontPath];
-                    frontPath.Add(pageById[crntFrontPath]);
+                    frontPath.Add(WikipediaClient.GetPageInfoFromId(crntFrontPath, language));
                     crntFrontPath = navigation.previous;
                     if (invalidPages.Contains(crntFrontPath))
                     {

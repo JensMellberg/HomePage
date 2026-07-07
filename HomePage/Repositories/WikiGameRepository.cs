@@ -349,14 +349,24 @@ namespace HomePage.Repositories
             return (pageInfo.Title, language, pageInfo.Summary);
         }
 
-        private static WikiGameGoalDifficulty GetTitleDifficulty(string title, string language)
+        private WikiGameGoalDifficulty GetTitleDifficulty(string title, string language)
         {
-            var pageViews = WikipediaClient.GetPageViews(title, language);
+            long pageViews = 0;
+            try
+            {
+                pageViews = WikipediaClient.GetPageViews(title, language);
+            }
+            catch (Exception e)
+            {
+                logger.Error($"Error when getting page views for page {title}. {e.Message}", null);
+                return WikiGameGoalDifficulty.Unknown;
+            }
+           
             return pageViews switch
             {
                 < 5000 => WikiGameGoalDifficulty.Extreme,
                 < 20000 => WikiGameGoalDifficulty.Hard,
-                < 100000 => WikiGameGoalDifficulty.Normal,
+                < 80000 => WikiGameGoalDifficulty.Normal,
                 _ => WikiGameGoalDifficulty.Easy
             };
         }
@@ -371,11 +381,21 @@ namespace HomePage.Repositories
             while (maxViews < MinimumGoalPageViews || totalRequests < minimumRequests || bestLinksCount < MinimumGoalPageLinks)
             {
                 var title = WikipediaClient.GetRandomPage(language).Title;
-                var pageViews = WikipediaClient.GetPageViews(title, language);
+
+                long pageViews = 0;
+                try
+                {
+                    pageViews = WikipediaClient.GetPageViews(title, language);
+                } 
+                catch (Exception e)
+                {
+                    logger.Error($"Error when getting page views for page {title}. {e.Message}", null);
+                }
+                
                 totalRequests++;
                 if (pageViews > maxViews)
                 {
-                    var linkCount = WikipediaClient.GetIncomingLinksToPage(title, language, out var _).Count;
+                    var linkCount = WikipediaClient.GetIncomingLinksToPage(null, title, language, out var _).Count;
                     maxViews = pageViews;
                     bestLinksCount = linkCount;
                     bestTitle = title;
