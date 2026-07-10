@@ -1,9 +1,6 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Web;
-using Microsoft.SqlServer.Server;
 using Newtonsoft.Json;
-using static System.Net.WebRequestMethods;
 
 namespace HomePage.WikiGame
 {
@@ -24,14 +21,14 @@ namespace HomePage.WikiGame
             return new WikipediaPageMetadata(result.pageid, result.title);
         }
 
-        public static List<WikipediaPageMetadata> GetOutgoingLinksFromPage(long? pageId, string title, string language, out long totalRequests)
+        public static List<WikipediaPageMetadata> GetOutgoingLinksFromPage(long? pageId, string title, string language, DatabaseLogger logger, out long totalRequests)
         {
-            return CollectLinks((gplcontinue) => GetOutgoingLinksResult(pageId, title, language, gplcontinue), out totalRequests);
+            return CollectLinks((gplcontinue) => GetOutgoingLinksResult(pageId, title, language, gplcontinue, logger), int.MaxValue, out totalRequests);
         }
 
-        public static List<WikipediaPageMetadata> GetIncomingLinksToPage(long? pageId, string title, string language, out long totalRequests)
+        public static List<WikipediaPageMetadata> GetIncomingLinksToPage(long? pageId, string title, string language, DatabaseLogger logger, out long totalRequests)
         {
-            return CollectLinks((gblcontinue) => GetIncomingLinksResult(pageId, title, language, gblcontinue), out totalRequests);
+            return CollectLinks((gblcontinue) => GetIncomingLinksResult(pageId, title, language, gblcontinue, logger), 5000, out totalRequests);
         }
 
         public static WikipediaPageMetadataWithSummary GetPageInfo(string title, string language)
@@ -82,7 +79,7 @@ namespace HomePage.WikiGame
             return content;
         }
 
-        private static GenericLinksResult GetOutgoingLinksResult(long? pageId, string title, string language, string? gplcontinue)
+        private static GenericLinksResult GetOutgoingLinksResult(long? pageId, string title, string language, string? gplcontinue, DatabaseLogger logger)
         {
             var gplcontinueQs = gplcontinue != null ? $"&gplcontinue={gplcontinue}" : "";
             var url = $"{BaseUrl(language)}/w/api.php?action=query&{GetIdentifierQueryString()}&generator=links&gplnamespace=0" +
@@ -105,7 +102,7 @@ namespace HomePage.WikiGame
                 : $"titles={EncodeTitle(title)}";
         }
 
-        private static string GetJsonWithRetries(string url)
+        private static string GetJsonWithRetries(string url, DatabaseLogger? logger = null)
         {
             HttpResponseMessage response;
 
@@ -125,6 +122,10 @@ namespace HomePage.WikiGame
 
                 var delay = response.Headers.RetryAfter?.Delta
                             ?? TimeSpan.FromSeconds(Math.Pow(2, attempt));
+                if (logger != null)
+                {
+                    logger.Warning($"Hit too many requests on wikipedia, waiting for {delay.TotalSeconds} seconds.", null);
+                }
 
                 Thread.Sleep(delay);
             }
@@ -135,7 +136,7 @@ namespace HomePage.WikiGame
             return json;
         }
 
-        private static GenericLinksResult GetIncomingLinksResult(long? pageId, string title, string language, string? gblcontinue)
+        private static GenericLinksResult GetIncomingLinksResult(long? pageId, string title, string language, string? gblcontinue, DatabaseLogger logger)
         {
             var gblcontinueQs = gblcontinue != null ? $"&gblcontinue={gblcontinue}" : "";
             var url = $"{BaseUrl(language)}/w/api.php?action=query&{GetIdentifierQueryString()}&generator=backlinks&gblnamespace=0" +
@@ -158,7 +159,7 @@ namespace HomePage.WikiGame
                 : $"gbltitle={EncodeTitle(title)}";
         }
 
-        private static List<WikipediaPageMetadata> CollectLinks(Func<string?, GenericLinksResult> getPages, out long totalRequests)
+        private static List<WikipediaPageMetadata> CollectLinks(Func<string?, GenericLinksResult> getPages, int maxLinks, out long totalRequests)
         {
             totalRequests = 0;
             var links = new List<WikipediaPageMetadata>();
@@ -170,7 +171,7 @@ namespace HomePage.WikiGame
                 continueString = linksResult.Continue;
                 totalRequests++;
             }
-            while (continueString != null);
+            while (continueString != null && links.Count < maxLinks);
 
             return links;
         }

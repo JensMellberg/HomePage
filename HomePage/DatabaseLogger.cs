@@ -5,11 +5,11 @@ namespace HomePage
 {
     public class DatabaseLogger(IServiceScopeFactory serviceScopeFactory)
     {
-        public void Information(string message, string? person) => Log(LogRowSeverity.Information, message, person);
+        public void Information(string message, string? person = null) => Log(LogRowSeverity.Information, message, person);
 
-        public void Warning(string message, string? person) => Log(LogRowSeverity.Warning, message, person);
+        public void Warning(string message, string? person = null) => Log(LogRowSeverity.Warning, message, person);
 
-        public void Error(string message, string? person) => Log(LogRowSeverity.Error, message, person);
+        public void Error(string message, string? person = null) => Log(LogRowSeverity.Error, message, person);
 
         public void Log(LogRowSeverity severity, string message, string? person, string? stackTrace = null)
         {

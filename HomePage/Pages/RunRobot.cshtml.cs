@@ -13,7 +13,7 @@ namespace HomePage.Pages
         WikiGameRepository wikiGameRepository,
         DatabaseLogger logger) : BasePage(signInRepository)
     {
-        public IActionResult OnGet(string date, string game)
+        public IActionResult OnGet(string date, string game, int timeout)
         {
             if (date != null && game == "WordMix")
             {
@@ -45,7 +45,7 @@ namespace HomePage.Pages
                     return new RedirectToPageResult("/Error");
                 }
 
-                wikiGameRepository.AddRobotResult(dateTime);
+                wikiGameRepository.AddRobotResult(dateTime, timeout == 0 ? null : TimeSpan.FromMinutes(timeout));
             }
 
             var referer = Request.Headers.Referer.ToString();

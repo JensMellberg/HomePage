@@ -259,7 +259,7 @@ namespace HomePage.Repositories
             return dbContext.WikiGameSuggestions.OrderByDescending(x => x.Votes).ThenBy(x => x.Title).ToList();
         }
 
-        public void AddRobotResult(DateTime date)
+        public void AddRobotResult(DateTime date, TimeSpan? timeout = null)
         {
             var start = dbContext.WikiGameStarts.FirstOrDefault(x => x.Date == date);
             if (start == null || dbContext.WikiGameNavigations.Where(x => x.Date == date && x.UserName == Person.MrRobot.UserName).Any())
@@ -281,7 +281,7 @@ namespace HomePage.Repositories
 
                 linksCache.CleanStaleEntries();
                 var calculator = new WikipediaCalculator(start.Language, secondRepository, linksCache);
-                using var cts = new CancellationTokenSource(TimeSpan.FromHours(2));
+                using var cts = new CancellationTokenSource(timeout ?? TimeSpan.FromHours(2));
                 try
                 {
                     var result = calculator.FindOptimalPath(start.Title, start.GoalTitle, cts.Token);
@@ -366,7 +366,7 @@ namespace HomePage.Repositories
             {
                 < 5000 => WikiGameGoalDifficulty.Extreme,
                 < 20000 => WikiGameGoalDifficulty.Hard,
-                < 80000 => WikiGameGoalDifficulty.Normal,
+                < 60000 => WikiGameGoalDifficulty.Normal,
                 _ => WikiGameGoalDifficulty.Easy
             };
         }
@@ -378,6 +378,7 @@ namespace HomePage.Repositories
             long maxViews = 0;
             var bestLinksCount = 0;
 
+            logger.Information("Generating new random wiki game goal page.", null);
             while (maxViews < MinimumGoalPageViews || totalRequests < minimumRequests || bestLinksCount < MinimumGoalPageLinks)
             {
                 var title = WikipediaClient.GetRandomPage(language).Title;
@@ -395,14 +396,16 @@ namespace HomePage.Repositories
                 totalRequests++;
                 if (pageViews > maxViews)
                 {
-                    var linkCount = WikipediaClient.GetIncomingLinksToPage(null, title, language, out var _).Count;
+                    var linkCount = WikipediaClient.GetIncomingLinksToPage(null, title, language, logger, out var _).Count;
                     maxViews = pageViews;
                     bestLinksCount = linkCount;
                     bestTitle = title;
+                    logger.Information($"Found candidate page {title} with {pageViews} views after {totalRequests} requests.", null);
                 }
 
                 if (totalRequests > maximumRequests)
                 {
+                    logger.Information($"Hit maximum amount of random page tries.", null);
                     break;
                 }
             }

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HomePage.WikiGame
 {
-    public class WikipediaLinksCache(AppDbContext dbContext)
+    public class WikipediaLinksCache(AppDbContext dbContext, DatabaseLogger logger)
     {
         private Dictionary<long, CachedWikiGameLinks> CacheToSave { get; set; } = [];
 
@@ -117,7 +117,7 @@ namespace HomePage.WikiGame
                 }
             }
 
-            var links = fetchLinks(pageId, null, language, out requestsMade);
+            var links = fetchLinks(pageId, null, language, logger, out requestsMade);
 
             var linksToCache = links
                 .Select(x => x.Id)
@@ -141,6 +141,7 @@ namespace HomePage.WikiGame
             long? pageId,
             string title,
             string language,
+            DatabaseLogger logger,
             out long requestsMade);
 
         private void StoreInDictionary(Dictionary<long, CachedWikiGameLinks> dict, CachedWikiGameLinks updated)
