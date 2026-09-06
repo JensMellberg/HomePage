@@ -18,9 +18,13 @@ namespace HomePage.Pages.WikiGame
 
         public string CurrentTitle { get; set; }
 
+        public string Summary { get; set; }
+
         public IActionResult OnGet()
         {
             var currentPage = wikiGameRespository.GetCurrentUserPage(LoggedInPerson!.UserName, DateHelper.DateNow);
+            var startPage = wikiGameRespository.GetStartPage(DateHelper.DateNow);
+            Summary = startPage.GoalTitleWithDifficulty + ". " + startPage.Summary;
             PageHtml = currentPage.html;
             PreviousClicks = currentPage.steps;
             HasWon = currentPage.allowedLinks.Count == 0;

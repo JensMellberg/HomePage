@@ -2,8 +2,6 @@ using HomePage.Data;
 using HomePage.Model;
 using HomePage.Repositories;
 using HomePage.Spending;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 
 namespace HomePage.Pages
 {

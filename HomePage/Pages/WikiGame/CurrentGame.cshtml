@@ -10,8 +10,10 @@
     <div class="saved-links-wrapper">
     </div>
     <input type="hidden" data-title="@Model.CurrentTitle" id="currentTitle" />
+    <input type="hidden" data-summary="@Model.Summary" id="summary" />
     <span class="step-counter" style="position: absolute; top: 2px;">Sidor besökta: @Model.PreviousClicks</span>
-    <button id="back-button" onclick="navigateToPage('GOBACKONCE')" style="position: absolute; top: 50px; left: 0; display: @Model.BackbuttonDisplay">Backa till förra sidan</button>
+    <button onclick="showSummary()" class="recipe-button" style="position: absolute; top: 10px; right: 0">?</button>
+    <button id="back-button" onclick="onGoBack()" style="position: absolute; top: 50px; left: 0; display: @Model.BackbuttonDisplay">Backa till förra sidan</button>
     <button id="saved-links-button" onclick="pickSavedLinks()" style="position: absolute; top: 50px; right: 0;">Sparade länkar</button>
     <button onclick="onBackButtonClick()" style="position: absolute; top: 15px; left: 0;">Tillbaka</button>
 
@@ -52,6 +54,14 @@
 
     if ('@Model.HasWon' === 'True') {
          setTimeout(() => shootFireworks(), 800)
+    }
+
+    function onGoBack() {
+        Alert.openDialog('Är du säker på att du vill gå till föregående sida?', [
+            {text: 'Ja tack!', action: () => {Popup.closePopup(); navigateToPage('GOBACKONCE');}},
+            {text: 'Nä, gå till resultatsidan istället', action: () => {Popup.closePopup(); onBackButtonClick();}},
+            {text: 'Nä', action: () => {Popup.closePopup();}}
+        ])
     }
 
     function onBackButtonClick() {
@@ -191,5 +201,19 @@
         }))
 
         Alert.openDialog('Sparade länkar', buttons)
+    }
+
+    function showSummary() {
+        const notes = document.getElementById("summary").dataset.summary;
+        const createNotes = () => {
+            const noteWrapper = document.createElement('div');
+            const noteElement = document.createElement('span')
+            noteElement.innerText = notes
+            noteWrapper.className = 'note-wrapper'
+            noteWrapper.appendChild(noteElement)
+            return noteWrapper
+        }
+
+        Popup.putOnOverLay(createNotes(), true, () => { Popup.closePopup(); })
     }
 </script>

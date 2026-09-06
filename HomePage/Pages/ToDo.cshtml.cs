@@ -7,7 +7,7 @@ namespace HomePage.Pages
     [IgnoreAntiforgeryToken]
     public class ToDoModel(AppDbContext dbContext, SignInRepository signInRepository, DatabaseLogger logger) : BasePage(signInRepository)
     {
-        public List<ToDoItem> ToDos { get; set; }
+        public required List<ToDoItem> ToDos { get; set; }
         public void OnGet()
         {
             ToDos = dbContext.ToDo.OrderBy(x => x.IsCompleted).ThenBy(x => x.Name).ToList();

@@ -1,6 +1,4 @@
-﻿using System.Net;
-using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace HomePage.Pages
 {

@@ -5,8 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HomePage.Pages
 {
-    public class SuggestFoodModel(AppDbContext dbContext,
-        SignInRepository signInRepository,
+    public class SuggestFoodModel(SignInRepository signInRepository,
         FoodRepository foodRepository,
         FoodStorageRepository foodStorageRepository,
         IngredientRepository ingredientRepository) : BasePage(signInRepository)
@@ -58,9 +57,9 @@ namespace HomePage.Pages
 
     public class FoodSuggestion
     {
-        public Food Food { get; set; }
+        public required Food Food { get; set; }
 
-        public List<IngredientInstance> MissingIngredients { get; set; }
+        public required List<IngredientInstance> MissingIngredients { get; set; }
 
         public double RankingScore { get; set; }
     }
