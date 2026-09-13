@@ -4,26 +4,29 @@
     ViewData["Title"] = "Att göra";
 }
 
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
 <div class="page-wrapper">
-    <a href="CreateToDo">Ny aktivitet</a>
-    <div class="food-grid">
-        @foreach (var toDo in Model.ToDos)
-        {
-            <div class="food-row">
-                <div class="food-grid-cell">
-                    <a href="CreateToDo?Id=@toDo.Key">
-                        @toDo.Name
-                    </a>
+    <a class="modern-button primary new center-button" href="CreateToDo">Ny aktivitet</a>
+    <div class="food-grid-wrapper">
+        <div class="food-grid">
+            @foreach (var toDo in Model.ToDos)
+            {
+                <div class="food-row">
+                    <div class="food-grid-cell">
+                        <a href="CreateToDo?Id=@toDo.Key">
+                            @toDo.Name
+                        </a>
+                    </div>
+                    <div class="food-grid-cell">
+                        @if (toDo.IsCompleted) {
+                            <span>✅</span>
+                        } else {
+                            <input type="checkbox" class="todo-checkbox" onchange="markCompleted('@toDo.Key')"/>
+                        }
+                    </div>
                 </div>
-                <div class="food-grid-cell">
-                    @if (toDo.IsCompleted) {
-                        <span>✅</span>
-                    } else {
-                        <input type="checkbox" class="todo-checkbox" onchange="markCompleted('@toDo.Key')"/>
-                    }
-                </div>
-            </div>
-        }
+            }
+        </div>
     </div>
 </div>
 

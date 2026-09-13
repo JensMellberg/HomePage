@@ -1,0 +1,32 @@
+﻿.recipe-button {
+	flex-basis: 24px;
+	width: 24px;
+	height: 24px;
+	border-radius: 6px;
+	font-size: 12px;
+}
+
+.recipe-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 27px;
+	width: 27px;
+	height: 27px;
+	padding: 0;
+	box-sizing: border-box;
+	border: none;
+	border-radius: 7px;
+	font-size: 14px;
+	cursor: pointer;
+	transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+button.recipe-button {
+	background: #eeedff;
+}
+
+.recipe-button:active {
+	transform: scale(0.92);
+	filter: brightness(0.95);
+}

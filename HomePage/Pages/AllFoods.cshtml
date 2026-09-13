@@ -5,13 +5,14 @@
 }
 
 <div class="page-wrapper">
-    <a href="CreateFood">Ny maträtt</a>
-    <button type="button" onclick="window.location.href = 'OldGoodies'" style="position: absolute; top: 5px; right: 5px;">Gamla godingar</button>
+    <a href="CreateFood" class="modern-button primary new" style="align-self: center;">Ny maträtt</a>
+    <button type="button" onclick="window.location.href = 'OldGoodies'" style="position: absolute; top: 5px; right: 5px;"
+        class="modern-button secondary">Gamla godingar</button>
     <div class="filters-wrapper">
         <input type="text" value="@Model.CurrentFilter" placeholder="filtrera..." onchange="updateTextFilter(this.value)" />
         <button type="button" onclick="showPicker()">Kategorier</button>
         <button type="button" onclick="showIngredientPicker()">Ingredienser</button>
-        <div class="input-wrapper">
+        <div class="modern-input-wrapper">
             <span>Sortera på:</span>
             <select onchange="updateSorting(this.value)">
                 @foreach (var sorting in Model.SortingOptions)
@@ -34,6 +35,7 @@
         <input type="hidden" value="@Model.CurrentIngredients" id="currentIngredients" />
     </div>
    
+    <div class="food-grid-wrapper">
     <div class="food-grid">
         @foreach (var food in Model.AllFoods) {
             <div class="food-row">
@@ -57,7 +59,7 @@
                     </a>
                 </div>
                 @foreach (var ranking in Model.FoodRankings[food.Id]) {
-                    <span class="food-grid-cell">
+                    <span class="food-grid-cell small-cell">
                         @ranking
                     </span>
                 }
@@ -88,12 +90,14 @@
             </div>
         }
     </div>
+    </div>
 </div>
 
 <script src="~/js/homeButton.js" asp-append-version="true"></script>
 <script src="~/js/CategoryPicker.js" asp-append-version="true"></script>
 <script src="~/js/IngredientInstance.js" asp-append-version="true"></script>
 <script src="~/js/IngredientPicker.js" asp-append-version="true"></script>
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
 <script>
     var possibleIngredients = IngredientInstance.decodePossibleIngredients('@Html.Raw(Model.PossibleIngredients)')
     window.addEventListener("beforeunload", function () {

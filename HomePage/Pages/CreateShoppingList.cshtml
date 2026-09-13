@@ -4,13 +4,19 @@
 	ViewData["Title"] = "Handlingslista";
 }
 
-<button type="button" onclick="copyShoppingList()">Kopiera</button>
-<button type="button" onclick="addToStorage()">Lägg till i skafferi</button>
-<button type="button" onclick="window.history.back();">Tillbaka</button>
+<div class="page-wrapper shopping-list-page">
+    <div class="shopping-list-actions">
+        <button class="modern-button primary" type="button" onclick="copyShoppingList()">Kopiera</button>
+        <button class="modern-button secondary" type="button" onclick="addToStorage()">Lägg till i skafferi</button>
+        <button class="modern-button secondary" type="button" onclick="window.history.back();">Tillbaka</button>
+    </div>
 
-<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;" id="shoplist">
+    <div class="shopping-list" id="shoplist">
+    </div>
 </div>
 
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/shopping-list.css" asp-append-version="true" />
 <script src="~/js/IngredientInstance.js" asp-append-version="true"></script>
 <script src="~/js/JsonResultUnpacker.js" asp-append-version="true"></script>
 <script>
@@ -27,20 +33,22 @@
             let instance = IngredientInstance.create(categories, possibleIngredients, unitTypes, ingredient.id, ingredient.amount, ingredient.unit, ingredient.category)
             let elements = instance.createElements(false)
             let span = document.createElement('span')
-            let ingredientActual = possibleIngredients.find(x => x.id == elements.dropdown.value)
+            let ingredientActual = possibleIngredients.find(x => x.id == ingredient.id)
             span.innerText = ingredientActual.name
             rowWrapper.appendChild(span)
-            rowWrapper.appendChild(elements.amountBox)
-            rowWrapper.appendChild(elements.unitDropdown)
+            rowWrapper.appendChild(elements.ingredientAmountRow)
 
             if (ingredient.isSkipped) {
-                elements.amountBox.disabled = true;
-                elements.unitDropdown.disabled = true;
+                instance.amountInput.disabled = true;
+                instance.unitDropdown.disabled = true;
                 span.style.color = 'grey'
             } else {
                 allRows.push(instance)
-                rowWrapper.appendChild(elements.deleteButton)
-                elements.deleteButton.onclick = () => {
+                const deleteButton = document.createElement('button')
+                deleteButton.type = 'button'
+                deleteButton.innerText = 'X'
+                rowWrapper.appendChild(deleteButton)
+                deleteButton.onclick = () => {
                     allRows = allRows.filter(x => x !== instance)
                     rowWrapper.remove()
                     return false

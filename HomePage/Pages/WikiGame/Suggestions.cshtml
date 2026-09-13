@@ -4,11 +4,13 @@
     ViewData["Title"] = "Wikipedia race målsidor";
 }
 
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
 <div class="page-wrapper">
-    <a href="CreateSuggestion">Nytt förslag</a>
-    <button type="button" onclick="window.location.href = 'Results'" style="position: absolute; top: 5px; right: 5px;">Tillbaka</button>
+    <a class="modern-button secondary new center-button" href="CreateSuggestion">Nytt förslag</a>
+    <button class="modern-button secondary" type="button" onclick="window.location.href = 'Results'" style="position: absolute; top: 5px; right: 5px;">Tillbaka</button>
     
-    <div class="food-grid">
+    <div class="food-grid-wrapper">
+    <div class="food-grid ingredient-grid">
         @foreach (var suggestion in Model.Suggestions) {
             <div class="food-row">
                 <div class="food-grid-cell">
@@ -19,22 +21,23 @@
                 </div>
                 @if (!suggestion.Voters.Contains(Model.LoggedInPerson?.UserName ?? "")) {
                     <div class="food-grid-cell">
-                        <button onclick="voteForSuggestion('@suggestion.Id')">Rösta på</button>
+                        <button class="modern-button secondary" onclick="voteForSuggestion('@suggestion.Id')">Rösta på</button>
                     </div>
                 }
                 else {
                     <div class="food-grid-cell">
-                        <button onclick="voteForSuggestion('@suggestion.Id')">Ta bort röst</button>
+                        <button class="modern-button secondary" onclick="voteForSuggestion('@suggestion.Id')">Ta bort röst</button>
                     </div>
                 }
                 @if (Model.IsAdmin || suggestion.Creator == Model.LoggedInPerson?.UserName)
                 {
                     <div class="food-grid-cell">
-                        <button onclick="deleteSuggestion('@suggestion.Id')">Ta bort</button>
+                        <button class="modern-button secondary" onclick="deleteSuggestion('@suggestion.Id')">Ta bort</button>
                     </div>
                 }
             </div>
         }
+    </div>
     </div>
 </div>
 

@@ -4,10 +4,15 @@
     ViewData["Title"] = "Filmer";
 }
 
-<div class="page-wrapper" style="gap: 2px;">
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/movies.css" asp-append-version="true" />
+<div class="page-wrapper movie-page" style="gap: 2px;">
     <span class="seen-counter">@Model.SeenCounter</span>
-    <a href="CreateMovie">Ny film</a>
-    <button class="sectionButton" type="button" onclick="randomizeMovie()">Slumpa film</button>
+    <div class="button-section-wrapper" style="margin: 0">
+        <a href="CreateMovie" class="modern-button secondary new">Ny film</a>
+        <button class="modern-button secondary" type="button" onclick="randomizeMovie()">Slumpa film</button>
+    </div>
+    
     <div class="input-wrapper">
         <span>Sortera på:</span>
         <select onchange="updateSorting(this.value)">
@@ -27,6 +32,7 @@
     <span>Senaste filmen: @Model.LastSeen?.Name</span>
     <input type="hidden" value="@Model.AllMoviesJson" id="moviesJson" />
     <input type="hidden" id="loggedInPerson" value="@Model.LoggedInPerson?.UserName" />
+    <div class="food-grid-wrapper">
     <div class="food-grid">
         @foreach (var movie in Model.Movies)
         {
@@ -77,6 +83,7 @@
                 </div>
             </div>
         }
+    </div>
     </div>
 </div>
 

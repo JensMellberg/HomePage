@@ -4,14 +4,15 @@
     ViewData["Title"] = "Ingredienser";
 }
 
-<button type="button" onclick="window.location.href = 'FoodStorage'" style="position: absolute; top: 5px; right: 5px;">Till skafferi</button>
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<button class="modern-button secondary" type="button" onclick="window.location.href = 'FoodStorage'" style="position: absolute; top: 5px; right: 5px;">Till skafferi</button>
 <div class="page-wrapper">
-    <a href="CreateIngredient">Ny ingrediens</a>
+    <a class="modern-button primary new center-button" href="CreateIngredient">Ny ingrediens</a>
     <div class="filters-wrapper">
         <input type="text" value="@Model.CurrentFilter" placeholder="filtrera..." onchange="updateTextFilter(this.value)" />
         <input type="hidden" value="@Model.CurrentFilter" id="currentfilter" />
     </div>
-    <div class="food-grid">
+    <div class="food-grid ingredient-grid">
         @foreach (var ingredient in Model.Ingredients)
         {
             <div class="food-row">

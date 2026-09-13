@@ -1,0 +1,305 @@
+﻿.mainscreen .food-row {
+	grid-template-columns: minmax(110px, 0.6fr) minmax(0, 2.8fr) repeat(auto-fit, minmax(31px, 35px));
+	align-items: stretch;
+}
+
+.mainscreen .weekday-cell {
+	justify-content: center;
+	text-align: center;
+	color: #777984;
+	font-size: 11px;
+	font-weight: 650;
+	line-height: 1.2;
+}
+
+.mainscreen .food-cell {
+	display: block;
+	min-width: 0;
+	padding: 6px 7px;
+	box-sizing: border-box;
+}
+
+	.mainscreen .food-cell .recipelinkplaceholder,
+	.mainscreen .food-cell .foodhistoryplaceholder {
+		display: contents;
+	}
+
+
+	.mainscreen .food-cell > .recipe-button {
+		display: inline-flex;
+		vertical-align: middle;
+		margin-right: 3px;
+		margin-bottom: 3px;
+	}
+
+	.mainscreen .food-cell > a,
+	.mainscreen .food-cell > span:not(.recipe-button) {
+		display: block;
+		width: 100%;
+		min-width: 0;
+		box-sizing: border-box;
+		color: #30323d;
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 1.25;
+		overflow-wrap: anywhere;
+		word-break: normal;
+	}
+
+	.mainscreen .food-cell > a {
+		text-decoration: none;
+	}
+
+
+		/* Lägg till mat */
+
+		.mainscreen .food-cell > a[href*="CreateDayFood"] {
+			color: #5b5ce2;
+		}
+/* =========================
+   RANKING CELLS
+   ========================= */
+
+.mainscreen .food-row > .small-cell:not(.weekday-cell) {
+	justify-content: center;
+	text-align: center;
+	padding: 3px;
+	color: #777984;
+	font-size: 11px;
+	font-weight: 650;
+	line-height: 1.15;
+	overflow-wrap: anywhere;
+}
+
+.dates-wrapper {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+	width: 100%;
+	margin: 0;
+	padding: 4px;
+	box-sizing: border-box;
+}
+
+	.dates-wrapper input {
+		width: 100%;
+		min-width: 0;
+		min-height: 42px;
+		padding: 8px 9px;
+		box-sizing: border-box;
+		background: rgba(255, 255, 255, 0.92);
+		color: #30323d;
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		border-radius: 9px;
+		font: inherit;
+		font-size: 13px;
+		font-weight: 550;
+		outline: none;
+		transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+	}
+
+		.dates-wrapper input:focus {
+			background: #fff;
+			border-color: #8582ee;
+			box-shadow: 0 0 0 3px rgba(133, 130, 232, .12);
+		}
+
+.week-food-header {
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center;
+	margin: 4px 2px 10px;
+	justify-content: space-between;
+	padding: 8px;
+}
+
+	.week-food-header > span {
+		padding: 0 10px;
+		color: #292b35;
+		font-size: 16px;
+		font-weight: 750;
+		text-align: center;
+	}
+
+.week-navigation {
+	display: inline-flex;
+	align-items: center;
+	min-height: 36px;
+	padding: 0 11px;
+	box-sizing: border-box;
+	background: #f3f3f7;
+	color: #555762;
+	border: 1px solid #e2e2e8;
+	border-radius: 10px;
+	font-size: 12px;
+	font-weight: 650;
+	text-decoration: none;
+	transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.page-wrapper .food-cell:not(:has(.recipe-button)) {
+	display: flex;
+}
+
+.page-wrapper .food-cell:not(:has(.recipe-button)) > a,
+.page-wrapper .food-cell:not(:has(.recipe-button)) > span:not(.recipe-button) {
+	display: block;
+	width: 100%;
+	margin: 0;
+}
+
+.week-navigation:hover {
+	background: #e9e9ef;
+}
+
+.week-navigation:active {
+	transform: scale(0.96);
+}
+
+
+.week-food-header > .week-navigation:last-child {
+	justify-self: end;
+}
+
+
+.week-food-header > .week-navigation:first-child {
+	justify-self: start;
+}
+
+.goal-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	padding: 2px 1px;
+	box-sizing: border-box;
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+
+.goal-wrapper::-webkit-scrollbar {
+	display: none;
+}
+
+.goal-wrapper > span {
+	display: inline-flex;
+	align-items: center;
+	flex: 0 0 auto;
+	min-height: 30px;
+	padding: 0 10px;
+	box-sizing: border-box;
+	border-radius: 9px;
+	font-size: 11px;
+	font-weight: 650;
+	line-height: 1;
+	white-space: nowrap;
+	box-shadow: 0 1px 3px rgba(20, 20, 40, 0.08);
+}
+
+.goal-wrapper > span::first-letter {
+	font-weight: 750;
+}
+
+@media (max-width: 380px) {
+	.mainscreen .weekday-cell {
+		font-size: 10px;
+	}
+
+	.mainscreen .food-cell {
+		gap: 4px;
+		padding: 6px 5px;
+	}
+
+	.mainscreen .food-cell > a,
+	.mainscreen .food-cell > span:not(.recipe-button) {
+		font-size: 13px;
+	}
+
+	.mainscreen .food-row > .small-cell:not(.weekday-cell) {
+		font-size: 10px;
+	}
+
+	.mainscreen {
+		height: 100%;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+	}
+
+.mainscreen .goal-wrapper {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	margin: 0 0 8px;
+	padding: 2px 1px;
+	box-sizing: border-box;
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+
+.mainscreen .goal-wrapper::-webkit-scrollbar {
+	display: none;
+}
+
+.mainscreen .goal-wrapper > span {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	min-height: 30px;
+	padding: 0 10px;
+	border-radius: 9px;
+	font-size: 11px;
+	font-weight: 650;
+	line-height: 1;
+	white-space: nowrap;
+	background: #f4f4f7;
+	box-shadow: 0 1px 3px rgba(20, 20, 40, 0.08);
+}
+
+
+		/* =========================
+   WEEK HEADER
+   ========================= */
+
+		.mainscreen .week-food-header {
+			flex: 0 0 auto;
+			display: grid;
+			grid-template-columns: 1fr auto 1fr;
+			align-items: center;
+			margin: 0 2px 9px;
+		}
+
+			.mainscreen .week-food-header > span {
+				padding: 0 8px;
+				color: #292b35;
+				font-size: 16px;
+				font-weight: 750;
+				text-align: center;
+			}
+
+		.mainscreen .week-navigation {
+			display: inline-flex;
+			align-items: center;
+			min-height: 36px;
+			padding: 0 10px;
+			box-sizing: border-box;
+			background: #f3f3f7;
+			color: #555762;
+			border: 1px solid #e2e2e8;
+			border-radius: 10px;
+			font-size: 12px;
+			font-weight: 650;
+			text-decoration: none;
+		}
+
+			.mainscreen .week-navigation:first-child {
+				justify-self: start;
+			}
+
+			.mainscreen .week-navigation:last-child {
+				justify-self: end;
+			}
+}

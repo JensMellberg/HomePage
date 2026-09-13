@@ -4,7 +4,8 @@
     ViewData["Title"] = "Föreslå mat";
 }
 
-<button type="button" onclick="window.location.href = 'FoodStorage'" style="position: absolute; top: 5px; right: 5px;">Till skafferi</button>
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<button class="modern-button secondary" type="button" onclick="window.location.href = 'FoodStorage'" style="position: absolute; top: 5px; right: 5px;">Till skafferi</button>
 <div class="page-wrapper">
     <div class="filters-wrapper" style="margin-top: 8px;">
         <button type="button" onclick="showPicker()">Kategorier</button>
@@ -13,27 +14,29 @@
         <input type="hidden" value="@Model.CurrentCategories" id="currentCategories" />
         <input type="hidden" value="@Model.CurrentIngredients" id="currentIngredients" />
     </div>
-    <div class="food-grid">
-        @foreach (var suggestion in Model.Suggestions.OrderBy(x => x.RankingScore))
-        {
-            <div class="food-row">
-                <div class="food-grid-cell">
-                    <a href="CreateFood?foodId=@suggestion.Food.Id" style="font-size: 18px; font-weight: bold;">
-                        @suggestion.Food.Name
-                    </a>
-                </div>
-            </div>
-            @if (suggestion.MissingIngredients.Count > 0) {
+    <div class="food-grid-wrapper">
+        <div class="food-grid">
+            @foreach (var suggestion in Model.Suggestions.OrderBy(x => x.RankingScore))
+            {
                 <div class="food-row">
-                    <span style="margin-left: 12px;">Saknar:</span>
-                </div>
-                foreach (var ingredient in suggestion.MissingIngredients) {
-                    <div class="food-row">
-                        <span style="margin-left: 12px;">@ingredient.Ingredient.Name @ingredient.GetStaticDisplayString()</span>
+                    <div class="food-grid-cell">
+                        <a href="CreateFood?foodId=@suggestion.Food.Id" style="font-size: 18px; font-weight: bold;">
+                            @suggestion.Food.Name
+                        </a>
                     </div>
+                </div>
+                @if (suggestion.MissingIngredients.Count > 0) {
+                    <div class="food-row">
+                        <span style="margin-left: 12px;">Saknar:</span>
+                    </div>
+                    foreach (var ingredient in suggestion.MissingIngredients) {
+                        <div class="food-row">
+                            <span style="margin-left: 12px;">@ingredient.Ingredient.Name @ingredient.GetStaticDisplayString()</span>
+                        </div>
+                    }
                 }
             }
-        }
+        </div>
     </div>
 </div>
 

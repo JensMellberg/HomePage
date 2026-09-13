@@ -3,10 +3,19 @@
 @{
     ViewData["Title"] = "Veckans mat";
 }
-<button type="button" onclick="showShoppingList()" style="position: absolute; top: 5px; right: 5px;">Skapa handlingslista</button>
+
+<button class="modern-button secondary" type="button" onclick="showShoppingList()" style="position: absolute; top: 5px; right: 5px;">Skapa handlingslista</button>
 <div class="page-wrapper mainscreen">
     <div class="goal-wrapper">
-        @foreach (var goal in Model.WeekGoals.OrderBy(x => x.IsBad)) {
+        @foreach (var goal in Model.WeekGoals.Where(x => !x.IsBad)) {
+            <span style="@goal.Style">
+                @goal.Category: @goal.Completed/@goal.Goal
+            </span>
+        }
+    </div>
+    <div class="goal-wrapper">
+        @foreach (var goal in Model.WeekGoals.Where(x => x.IsBad))
+        {
             <span style="@goal.Style">
                 @goal.Category: @goal.Completed/@goal.Goal
             </span>
@@ -14,16 +23,17 @@
     </div>
 
     <div class="week-food-header">
-        <a href="WeekFood?@Model.PrevWeekQs">Föregående vecka</a>
+        <a class="week-navigation" href="WeekFood?@Model.PrevWeekQs">← Föregående</a>
         <span>Vecka @Model.Week</span>
-        <a href="WeekFood?@Model.NextWeekQs">Nästa vecka</a>
+        <a class="week-navigation" href="WeekFood?@Model.NextWeekQs">Nästa →</a>
     </div>
 
     <input type="hidden" id="loggedInPerson" value="@Model.LoggedInPerson?.UserName" />
+    <div class="food-grid-wrapper">
     <div class="food-grid">
         @foreach (var dayFood in Model.DayFoods) {
             <div class="food-row">
-                <span class="weekday-cell food-grid-cell"> @DateHelper.WeekNumberToString[(int)dayFood.Date.DayOfWeek] @dayFood.Date.Day/@dayFood.Date.Month</span>
+                <span class="weekday-cell food-grid-cell small-cell"> @DateHelper.WeekNumberToString[(int)dayFood.Date.DayOfWeek] @dayFood.Date.Day/@dayFood.Date.Month</span>
                 <div class="food-cell food-grid-cell">
                     @if (!string.IsNullOrEmpty(dayFood.MainFood?.RecipeUrl))
                     {
@@ -53,23 +63,26 @@
                 </div>
                 @foreach (var ranking in Model.FoodRankings[DateHelper.ToKey(dayFood.Date)]) {
                     if (Model.IsInFuture(ranking.Date)) {
-                        <span class="food-grid-cell" > </span>
+                        <span class="food-grid-cell small-cell"> </span>
                     }
                     else {
-                        <span class="food-grid-cell" onclick="makeRanking('@DateHelper.ToKey(ranking.Date)', '@ranking.Person')"> @ranking.Person: @ranking.RankingText</span>
+                        <span class="food-grid-cell small-cell" onclick="makeRanking('@DateHelper.ToKey(ranking.Date)', '@ranking.Person')"> @ranking.Person: @ranking.RankingText</span>
                     }
                 }
             </div>
         }
     </div>
+    </div>
 </div>
 
 <script src="~/js/homeButton.js" asp-append-version="true"></script>
 <script src="~/js/StarRanker.js" asp-append-version="true"></script>
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/weekfood.css" asp-append-version="true" />
 <script>
     function showShoppingList() {
         const wrapper = document.createElement('div')
-        wrapper.className = 'ingredient-picker-inner'
+        wrapper.className = 'dates-wrapper'
         const dateFrom = document.createElement('input')
         dateFrom.type = 'date'
         dateFrom.value = '@Html.Raw(Model.ShopListFrom)'

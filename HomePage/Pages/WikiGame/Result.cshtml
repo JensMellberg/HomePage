@@ -4,22 +4,37 @@
 @{
     ViewData["Title"] = "Wikipedia race";
 }
-<div class="word-mix-top-bar" style="margin-top: 1px;">
-    <div class="word-mix-score-wrapper">
-        <div class="profile-photo @Model.PersonClass"></div>
-        <span>@Model.Score</span>
+
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/game-scores.css" asp-append-version="true" />
+<div class="page-wrapper game-result-page">
+    <div class="game-score-result-wrapper" style="margin-top: 1px;">
+        <div class="game-score-result">
+            <div class="profile-photo @Model.PersonClass"></div>
+            <span>@Model.Score</span>
+        </div>
+        <button class="modern-button secondary" onclick="window.location.href='Results'" style="height: 32px; margin-top: 8px;">Tillbaka</button>
     </div>
-    <button onclick="window.location.href='Results'" style="height: 32px; margin-top: 8px;">Tillbaka</button>
-</div>
-<div style="display: flex; flex-direction: column; gap: 8px;">
-    @foreach (var path in Model.PathTaken)
-    {
-        @if (path == Model.PathTaken.Last())
+
+    <div class="path-wrapper">
+        @for (var i = 0; i < Model.PathTaken.Count; i++)
         {
-            <span><b>@path</b></span>
+            var path = Model.PathTaken[i];
+            @if (i == Model.PathTaken.Count - 1)
+            {
+                if (Model.HasFinished) {
+                    <span class="path-item finished"><b>@path</b></span>
+                } else {
+                    <span class="path-item current"><b>@path</b></span>
+                }
+                
+            }
+            else
+            {
+                <span class="path-item"><b>@path -></b></span>
+            }
         }
-        else {
-            <span><b>@path -></b></span>
-        }
-    }
+    </div>
 </div>
+
+

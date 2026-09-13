@@ -4,6 +4,7 @@
     ViewData["Title"] = "Skapa kategori";
 }
 
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
 <div class="page-wrapper mainscreen">
     <form class="dayfood-form" method="post">
         <input type="hidden" name="categoryId" value="@Model.Category.Key" />
@@ -25,8 +26,8 @@
         </div>
        
         <div class="button-wrapper">
-            <input type="submit" value="Spara kategori" />
-            <button type="button" onclick="window.history.back();">Avbryt</button>
+            <input type="submit" class="modern-button primary" value="Spara kategori" />
+            <button type="button" class="modern-button secondary" onclick="window.history.back();">Avbryt</button>
         </div>
     </form>
 </div>

@@ -4,6 +4,7 @@
     ViewData["Title"] = "Skapa grupp";
 }
 
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
 <div class="page-wrapper mainscreen" id="pagewrapper">
     <form class="dayfood-form" id="theForm" method="post">
         <input type="hidden" name="groupId" value="@Model.Group.Id" />
@@ -32,7 +33,7 @@
         </div>
         <div class="list-wrapper not-date-based">
             <span>Transaktionsmönster</span>
-            <button type="button" class="sectionButton" onclick="newPattern()">Nytt mönster</button>
+            <button type="button" class="modern-button secondary new wide-button no-margin" onclick="newPattern()">Nytt mönster</button>
             <div class="list-wrapper-inner">
                 @foreach (var pattern in Model.Group.Patterns)
                 {
@@ -50,12 +51,12 @@
         </div>
 
         <div class="button-wrapper">
-            <input type="submit" value="Spara" />
+            <input class="modern-button primary" type="submit" value="Spara" />
             @if (!Model.IsNew)
             {
-                <button type="button" onclick="deleteGroup()">Ta bort</button>
+                <button class="modern-button delete" type="button" onclick="deleteGroup()">Ta bort</button>
             }
-            <button type="button" onclick="window.history.back();">Avbryt</button>
+            <button class="modern-button secondary" type="button" onclick="window.history.back();">Avbryt</button>
         </div>
     </form>
 </div>

@@ -1,12 +1,5 @@
-﻿.wiki-container {
-	max-width: 900px;
-	height: calc(100vh - 87px);
-	border: 2px solid black;
-	overflow: auto;
-	width: 95vw;
-	top: 85px;
-	position: absolute;
-	padding: 3px;
+﻿body {
+	margin: 0 !important;
 }
 
 .wiki-container h1, h2, h3 {
@@ -16,4 +9,260 @@
 .wiki-container a {
 	color: blue !important;
 	text-decoration: underline !important;
+}
+
+.page-wrapper {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	overflow: hidden;
+	width: 100%;
+	max-width: 900px;
+	min-height: 0;
+	margin: 0 auto !important;
+	padding: 8px !important;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	color: #292b35;
+}
+
+	.page-wrapper .wiki-container {
+		flex: 1 1 auto;
+		min-width: 0;
+		min-height: 0;
+		overflow-y: auto;
+		overflow-x: hidden;
+		-webkit-overflow-scrolling: touch;
+		margin-top: 3px;
+		padding: 12px;
+		overflow-y: auto;
+		overflow-x: hidden;
+		background: white;
+		border: 1px solid #e3e4ea;
+		border-radius: 14px;
+		box-shadow: 0 2px 8px rgba(20, 22, 40, 0.045);
+	}
+
+
+		.page-wrapper .wiki-container img {
+			max-width: 100%;
+			height: auto;
+		}
+
+		.page-wrapper .wiki-container table {
+			max-width: 100%;
+		}
+
+		.page-wrapper .wiki-container pre {
+			max-width: 100%;
+			overflow-x: auto;
+		}
+
+	.page-wrapper .wiki-container {
+		overflow-wrap: anywhere;
+	}
+
+
+/* =========================
+   CONTROLS
+   ========================= */
+
+.wiki-game-controls {
+	flex: 0 0 auto;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	min-width: 0;
+	margin: 0 0 8px;
+	padding: 4px 0;
+	box-sizing: border-box;
+}
+
+.wiki-game-controls > button:first-child {
+	justify-self: start;
+	min-height: 36px;
+	padding: 7px 12px;
+	margin: 0 !important;
+	border-radius: 10px;
+	font-size: 12px;
+	font-weight: 650;
+}
+
+	.wiki-game-controls .step-counter {
+		grid-column: 1 / -1;
+		grid-row: 1;
+		justify-self: center;
+		margin: 0 !important;
+		padding: 5px 9px;
+		background: #f0efff;
+		color: #6865d5;
+		border: 1px solid #dfddff;
+		border-radius: 9px;
+		font-size: 11px;
+		font-weight: 750;
+		white-space: nowrap;
+	}
+
+
+
+.wiki-game-controls > .recipe-button {
+	justify-self: end;
+	width: 34px;
+	height: 34px;
+	min-width: 34px;
+	min-height: 34px;
+	margin: 0 !important;
+	padding: 0 !important;
+	box-sizing: border-box;
+	border: 1px solid #d9d8e5;
+	border-radius: 10px;
+	background: #f4f3f8;
+	color: #646672;
+	font-size: 14px;
+	font-weight: 750;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.wiki-game-controls #back-button,
+.wiki-game-controls #saved-links-button {
+	grid-row: 2;
+	min-height: 34px;
+	margin: 0 !important;
+	padding: 6px 10px;
+	border-radius: 9px;
+	font-size: 11px;
+	font-weight: 650;
+}
+
+
+.wiki-game-controls #back-button {
+	justify-self: start;
+}
+
+.wiki-game-controls #saved-links-button {
+	grid-column: 3;
+	justify-self: end;
+}
+
+.wiki-game-controls #back-button {
+	grid-column: 1;
+}
+
+	.wiki-game-controls > button:first-child {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.wiki-game-controls > .recipe-button {
+		grid-column: 3;
+		grid-row: 1;
+	}
+
+
+@media (max-width: 420px) {
+
+	.wiki-game-controls {
+		gap: 5px;
+	}
+
+		.wiki-game-controls > button:first-child {
+			padding: 6px 9px;
+			font-size: 11px;
+		}
+
+		.wiki-game-controls .step-counter {
+			padding: 5px 7px;
+			font-size: 10px;
+		}
+
+		.wiki-game-controls > .recipe-button {
+			width: 32px;
+			height: 32px;
+			min-width: 32px;
+			min-height: 32px;
+		}
+
+		.wiki-game-controls #back-button,
+		.wiki-game-controls #saved-links-button {
+			font-size: 10px;
+			padding: 5px 8px;
+		}
+}
+
+
+
+@media (min-width: 768px) {
+
+	.wiki-game-controls {
+		gap: 10px;
+		margin-bottom: 12px;
+	}
+
+		.wiki-game-controls > button:first-child,
+		.wiki-game-controls #back-button,
+		.wiki-game-controls #saved-links-button {
+			min-height: 40px;
+			padding: 8px 13px;
+			font-size: 12px;
+		}
+
+		.wiki-game-controls .step-counter {
+			padding: 7px 12px;
+			font-size: 12px;
+		}
+
+		.wiki-game-controls > .recipe-button {
+			width: 38px;
+			height: 38px;
+			min-width: 38px;
+			min-height: 38px;
+			font-size: 15px;
+		}
+}
+
+		.page-wrapper .wiki-container a {
+			color: #5652c9;
+			text-decoration: underline;
+			text-decoration-thickness: 1px;
+			text-underline-offset: 2px;
+		}
+
+
+/* =========================
+   SMALL MOBILE
+   ========================= */
+
+@media (max-width: 600px) {
+
+	.page-wrapper {
+		padding: 6px !important;
+	}
+
+		.page-wrapper .wiki-container {
+			padding: 9px;
+			border-radius: 12px;
+		}
+}
+
+
+@media (min-width: 768px) {
+
+	.page-wrapper {
+		max-width: 90vw;
+		padding: 16px !important;
+	}
+
+		.page-wrapper .wiki-container {
+			padding: 18px;
+			border-radius: 16px;
+		}
+
+			.page-wrapper .wiki-container a {
+				text-decoration-thickness: 1.5px;
+			}
 }

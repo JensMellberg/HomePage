@@ -3,17 +3,19 @@
 @{
     ViewData["Title"] = "Ordmix";
 }
-<div class="page-wrapper" style="height: 100vh;">
-    
+
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/game-scores.css" asp-append-version="true" />
+<div class="page-wrapper">
     <div style="display: flex; flex-direction: column; gap: 8px">
-        <a href="CurrentWordMix">Dagens ordmix</a>
+        <a class="modern-button primary" href="CurrentWordMix">Dagens ordmix</a>
         <div style="position: relative; width: fit-content;">
-            <a href="AddWords">Lägg till ord</a>
+            <a class="modern-button secondary" href="AddWords">Lägg till ord</a>
             @if (Model.WaitingForApproval > 0) {
                 <span class="approval-icon">@Model.WaitingForApproval</span>
             }
         </div>
-        <a href="WordMixLeaderboard">Topplista</a>
+        <a class="modern-button primary" href="WordMixLeaderboard">Topplista</a>
     </div>
 
     <div class="word-mix-top-bar">

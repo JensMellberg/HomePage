@@ -11,6 +11,8 @@ namespace HomePage.Pages.WikiGame
         public int Score { get; set; }
 
         public List<string> PathTaken { get; set; }
+        
+        public bool HasFinished { get; set; }
 
         public IActionResult OnGet(DateTime date, string user)
         {
@@ -21,6 +23,7 @@ namespace HomePage.Pages.WikiGame
                 return new RedirectToPageResult("/AccessDenied");
             }
 
+            HasFinished = result.HasFinished;
             PersonClass = result.UserName == Person.Jens.UserName || result.UserName == Person.Anna.UserName ? result.UserName.ToLower() : "unknown";
             Score = result.Steps;
             PathTaken = result.PathTaken.Select(x => x.Replace("_", " ")).ToList();

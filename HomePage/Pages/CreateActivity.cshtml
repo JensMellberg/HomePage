@@ -38,11 +38,11 @@
         </div>
 
         <div class="button-wrapper">
-            <input type="submit" value="Spara" />
+            <input class="modern-button primary" type="submit" value="Spara" />
             @if (!Model.IsNew) {
-                <button type="button" onclick="deleteActivity()">Ta bort</button>
+                <button class="modern-button delete" type="button" onclick="deleteActivity()">Ta bort</button>
             }
-            <button type="button" onclick="window.history.back();">Avbryt</button>
+            <button class="modern-button secondary" type="button" onclick="window.history.back();">Avbryt</button>
         </div>
     </form>
 </div>

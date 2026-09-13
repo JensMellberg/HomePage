@@ -1,6 +1,6 @@
 ﻿class Alert {
 	static openAlert(message) {
-		const okButton = HtmlUtils.createElement('button', 'sectionButton');
+		const okButton = HtmlUtils.createElement('button', 'modern-button primary');
 		okButton.innerText = 'Ok';
 		$(okButton).click(() => Popup.closePopup());
 		Alert.createAlertBox(message, null, [okButton]);
@@ -17,7 +17,7 @@
 	static openDialogInternal(message, element, buttons) {
 		const buttonElements = [];
 		for (const buttonData of buttons) {
-			const button = HtmlUtils.createElement('button', 'sectionButton');
+			const button = HtmlUtils.createElement('button', 'modern-button secondary');
 			button.innerText = buttonData.text;
 			$(button).click(() => buttonData.action());
 			buttonElements.push(button)

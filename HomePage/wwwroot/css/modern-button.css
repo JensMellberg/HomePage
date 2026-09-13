@@ -1,0 +1,49 @@
+﻿.modern-button {
+	min-height: 36px;
+	padding: 0 12px;
+	border-radius: 11px;
+	font-size: 13px;
+	font-weight: 600;
+	gap: 5px;
+	display: inline-flex;
+	align-items: center;
+	max-width: fit-content;
+	text-decoration: none;
+}
+
+.modern-button.new::before {
+	content: "+";
+	font-size: 20px;
+	font-weight: 400;
+	margin-bottom: 4px;
+}
+
+.modern-button.edit::before {
+	content: "✎";
+	font-size: 20px;
+	font-weight: 400;
+	margin-bottom: 4px;
+}
+
+.modern-button.no-margin::before {
+	margin-bottom: 0;
+}
+
+.modern-button.secondary {
+	background: #f3f3f7;
+	color: #555762;
+	border: 1px solid #e3e3e8;
+}
+
+.modern-button.primary {
+	background: #5b5ce2;
+	color: white;
+	text-decoration: none;
+	box-shadow: 0 3px 8px rgba(91, 92, 226, 0.2);
+}
+
+.modern-button.delete {
+	background: #fff0f1;
+	color: #c6535d;
+	border: 1px solid #f1cdd0;
+}

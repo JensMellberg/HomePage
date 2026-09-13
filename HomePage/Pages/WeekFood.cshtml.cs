@@ -167,10 +167,10 @@ namespace HomePage.Pages
             {
                 if (IsBad)
                 {
-                    return Goal < Completed ? "color: red;" : "color: green;";
+                    return Goal < Completed ? "color: #dc5a67;" : "color: #3ca878;";
                 }
 
-                return Goal <= Completed ? "color: green;" : "color: red;";
+                return Goal <= Completed ? "color: #3ca878;" : "color: #dc5a67;";
             }
         }
     }

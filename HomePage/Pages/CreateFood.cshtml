@@ -4,6 +4,7 @@
     ViewData["Title"] = "Skapa maträtt";
 }
 
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
 <div class="page-wrapper mainscreen">
     <form class="dayfood-form" method="post" id="theForm">
         <input type="hidden" name="foodId" value="@Model.Food.Id" />
@@ -31,10 +32,13 @@
             <input type="checkbox" name="isSideDish" checked="@Model.Food.IsSideDish" />
         </div>
 
-        <div class="input-wrapper">
+        <div class="input-wrapper category-input">
             <span>Kategorier</span>
             <input id="categoryids" type="hidden" name="categories" value="@string.Join(',', Model.Food.Categories.Select(x => x.Key))" />
-            <div onclick="showCategoryPicker('@Model.Food.Id')" class="category-shower">@string.Join(", ", Model.Food.Categories.Select(xa => xa.Name))</div>
+            <button type="button" onclick="showCategoryPicker('@Model.Food.Id')" class="category-shower">
+                <span class="category-shower-text"> @string.Join(", ", Model.Food.Categories.Select(xa => xa.Name))</span>
+                <span class="category-shower-arrow">›</span>
+            </button>
         </div>
 
         <div class="input-wrapper">
@@ -43,12 +47,12 @@
         </div>
         
         <div class="button-wrapper">
-            <input type="submit" value="Spara mat" />
+            <input type="submit" class="modern-button primary" value="Spara mat" />
             @if (!Model.IsNew) {
-                <button type="button" onclick="deleteFood()">Ta bort</button>
+                <button type="button" onclick="deleteFood()" class="modern-button delete">Ta bort</button>
             }
-            <button type="button" onclick="window.history.back();">Avbryt</button>
-            <button type="button" onclick="showIngredientPicker()">Ingredienser</button>
+            <button type="button" onclick="window.history.back();" class="modern-button secondary">Avbryt</button>
+            <button type="button" onclick="showIngredientPicker()" class="modern-button secondary">Ingredienser</button>
         </div>
     </form>
 </div>
@@ -92,7 +96,7 @@
         let allowCreateNew = '@Html.Raw(Model.AllowCreateNewIngredient)' === 'True'
         let createNewCallback = !allowCreateNew ? undefined : x => createNewIngredient(x)
         const categories = '@Html.Raw(string.Join(',', IngredientCategory.Categories.OrderBy(x => x)))'.split(',')
-        IngredientPicker.createPicker(categories, possibleIngredients, unitTypes, decodedIngredients, x => updateIngredients(x), x => createNewCallback(x))
+        IngredientPicker.createPicker(categories, possibleIngredients, unitTypes, decodedIngredients, x => updateIngredients(x), createNewCallback)
     }
 
     function updateIngredients(ingredients) {

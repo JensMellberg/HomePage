@@ -40,6 +40,8 @@ namespace HomePage.Pages
 
         public StatisticType CurrentType { get; set; }
 
+        public string GridClass { get; set; }
+
         public string FromDate { get; set; }
 
         public string ToDate { get; set; }
@@ -65,6 +67,7 @@ namespace HomePage.Pages
                 .Where(x => x.Date >= from && x.Date <= to)
                 .ToList();
 
+            GridClass = "statistics-grid";
             if (CurrentType == StatisticType.Amount)
             {
                 var groupPairs = relevantFoods.GroupBy(x => x.MainFood.Name).Select(x => (x.Key, x.Count())).OrderByDescending(x => x.Item2);
@@ -75,6 +78,7 @@ namespace HomePage.Pages
             }
             else if (CurrentType == StatisticType.EatenPerDay)
             {
+                GridClass = "per-day-grid";
                 var foodRankings = dbContext.FoodRanking.ToList();
                 GridData = relevantFoods.OrderByDescending(x => x.Date).Select(x => (GridDataCell[])[
                     new GridDataCell { Text = DateHelper.ToNumberedDateString(x.Date) },
@@ -90,6 +94,7 @@ namespace HomePage.Pages
             }
             else if (CurrentType == StatisticType.Category)
             {
+                GridClass = "category-grid";
                 var allCategories = dbContext.Category.ToList();
                 var categoriesForDayFood = new Dictionary<Guid, List<Category>>();
                 foreach (var dayFood in relevantFoods)
@@ -119,6 +124,7 @@ namespace HomePage.Pages
             }
             else if (CurrentType == StatisticType.RankingPerCategory)
             {
+                GridClass = "ingredient-grid";
                 var allCategories = dbContext.Category.ToDictionary(x => x.Key, x => x);
                 var categoryRankings = allCategories.ToDictionary(x => x.Key, x => new List<FoodRanking>());
                 var rankings = dbContext.FoodRanking.Where(x => x.Date >= from && x.Date <= to).ToList();

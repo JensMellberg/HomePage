@@ -4,19 +4,23 @@
     ViewData["Title"] = "Alla kategorier";
 }
 
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+
 <div class="page-wrapper">
-    <a href="Category">Ny kategori</a>
-    <div class="food-grid">
-        @foreach (var category in Model.AllCategories)
-        {
-            <div class="food-row">
-                <div class="food-grid-cell">
-                    <a href="Category?categoryId=@category.Key">
-                        @category.Name
-                    </a>
+    <a href="Category" class="modern-button primary center-button new">Ny kategori</a>
+    <div class="food-grid-wrapper">
+        <div class="food-grid">
+            @foreach (var category in Model.AllCategories)
+            {
+                <div class="food-row">
+                    <div class="food-grid-cell">
+                        <a href="Category?categoryId=@category.Key">
+                            @category.Name
+                        </a>
+                    </div>
                 </div>
-            </div>
-        }
+            }
+        </div>
     </div>
 </div>
 

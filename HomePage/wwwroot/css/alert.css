@@ -1,0 +1,139 @@
+﻿.popupOverlay {
+	position: fixed;
+	inset: 0;
+	z-index: 10000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 14px;
+	box-sizing: border-box;
+	background: rgba(16, 18, 30, 0.62);
+	backdrop-filter: blur(5px);
+	-webkit-backdrop-filter: blur(5px);
+	animation: popupOverlayIn 0.16s ease-out;
+}
+
+.alertBox,
+.popupContent {
+	background: #4b5068;
+	color: #f7f7fb;
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	border-radius: 20px;
+	box-shadow: 0 24px 60px rgba(20, 22, 35, 0.25), 0 5px 18px rgba(20, 22, 35, 0.15);
+	overflow: hidden;
+	min-width: 40vw;
+}
+
+.alertBox::before {
+	content: "";
+	display: block;
+	height: 4px;
+	background: linear-gradient( 90deg, #8d8bea, #b083e5, #df88ae );
+}
+
+.alertMessage {
+	display: block;
+	padding: 22px 20px 18px;
+	color: #f5f5fa;
+	font-size: 15px;
+	line-height: 1.5;
+	font-weight: 550;
+	text-align: center;
+	overflow-wrap: anywhere;
+}
+
+.alertButtons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 13px 16px 16px;
+	background: rgba(255, 255, 255, 0.06);
+	border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.alertButtons .modern-button {
+	min-height: 39px;
+	padding: 7px 16px;
+}
+
+.popupContent {
+	padding: 18px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.alertBox > *,
+.popupContent > * {
+	min-width: 0;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.popupOverlay .food-grid-wrapper {
+	width: min(100%, 700px);
+	max-height: 80vh;
+	margin: 0 !important;
+	padding: 0;
+	box-sizing: border-box;
+	overflow-y: auto;
+	overflow-x: hidden;
+	background: transparent;
+	scrollbar-width: thin;
+	border-radius: 14px;
+}
+
+.popupOverlay .food-grid {
+	width: 100%;
+	min-width: 0;
+	margin: 0 !important;
+	background: #ffffff;
+	border: 1px solid #e2e3e8;
+	border-radius: 14px;
+	box-shadow: 0 4px 14px rgba(20, 22, 40, 0.08);
+}
+
+@keyframes popupOverlayIn {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes popupBoxIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px) scale(0.97);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@media (max-width: 420px) {
+	.popupOverlay {
+		padding: 9px;
+	}
+
+	.alertBox,
+	.popupContent {
+		max-height: calc(100dvh - 18px);
+		border-radius: 17px;
+	}
+
+	.alertMessage {
+		padding: 19px 16px 16px;
+	}
+
+	.alertButtons {
+		padding: 10px 12px 12px;
+	}
+
+	.alertButtons .modern-button {
+		flex: 1 1 auto;
+	}
+}

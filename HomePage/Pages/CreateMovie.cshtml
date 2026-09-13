@@ -4,13 +4,14 @@
     ViewData["Title"] = "Skapa film";
 }
 
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
 <div class="page-wrapper mainscreen">
     <form class="dayfood-form" method="post">
         <input type="hidden" name="id" value="@Model.Movie.Id" />
         <div class="input-wrapper">
             <span>Sök</span>
             <input type="text" id="searchtext"/>
-            <button type="button" class="sectionButton" onclick="search()">Sök</button>
+            <button type="button" class="modern-button secondary" onclick="search()">Sök</button>
         </div>
         <div class="input-wrapper">
             <span>Namn</span>
@@ -26,8 +27,8 @@
         </div>
 
         <div class="button-wrapper">
-            <input type="submit" value="Spara" />
-            <button type="button" onclick="window.location.href = '/Movies'">Avbryt</button>
+            <input type="submit" class="modern-button primary" value="Spara" />
+            <button type="button" class="modern-button secondary" onclick="window.location.href = '/Movies'">Avbryt</button>
         </div>
     </form>
 </div>

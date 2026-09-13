@@ -4,10 +4,11 @@
     ViewData["Title"] = "Skafferi";
 }
 
-<button type="button" onclick="window.location.href = 'SuggestFood'" style="position: absolute; top: 5px; right: 5px;">Föreslå mat</button>
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<button class="modern-button secondary" type="button" onclick="window.location.href = 'SuggestFood'" style="position: absolute; top: 5px; right: 5px;">Föreslå mat</button>
 <div class="page-wrapper" style="gap: 12px">
-    <a href="Ingredients">Ingredienser</a>
-    <a href="CreateFoodStorage">Lägg till produkt</a>
+    <a class="modern-button secondary" href="Ingredients">Ingredienser</a>
+    <a class="modern-button secondary" href="CreateFoodStorage">Lägg till produkt</a>
         @foreach (var group in Model.CurrentIngredients.GroupBy(x => x.Ingredient.CategoryId).OrderBy(x => x.First().SortOrder))
         {
             <div class="spending-group" style="background-color:#8bf5eb">

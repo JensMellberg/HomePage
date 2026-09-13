@@ -6,11 +6,11 @@
 
 <div class="page-wrapper" style="gap: 12px; margin-top: 12px">
     <input type="text" id="new-word" />
-    <button type="button" onclick="addWord()">Lägg till</button>
+    <button class="modern-button secondary new" type="button" onclick="addWord()">Lägg till</button>
     <div class="extra-word-outer">
     @foreach (var word in Model.AllWords) {
         <div class="extra-word-wrapper" word-key="@word.model.Word">
-             <button type="button" onclick="deleteWord(this)" style="visibility: @Model.VisibilityText(word.canDelete)">X</button>
+             <button class="modern-button secondary" type="button" onclick="deleteWord(this)" style="visibility: @Model.VisibilityText(word.canDelete)">X</button>
              <span>@word.model.Word</span>
              @if (word.model.JensApproved) {
                 <div class="profile-photo jens"></div>
@@ -21,7 +21,7 @@
             }
             @if (word.canApprove)
             {
-                <button type="button" onclick="approve(this)">Godkänn</button>
+                    <button class="modern-button secondary" type="button" onclick="approve(this)">Godkänn</button>
             }
         </div>
     }

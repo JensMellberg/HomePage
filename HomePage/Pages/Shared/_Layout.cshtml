@@ -4,24 +4,27 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - HomePage</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/alert.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/recipe-button.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/ingredient-picker.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/input-form.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modern-button.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/HomePage.styles.css" asp-append-version="true" />
 </head>
-<body style="background-color: #d4f7f7;">
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
+<body style="background: radial-gradient(circle at 20% 10%, rgba(255, 255, 255, .4), transparent 30%), #d6f5f4;">
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/Popup.js"></script>
     <script src="~/js/Alert.js"></script>
     <script src="~/js/HtmlUtils.js"></script>
 
+    <div class="container">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

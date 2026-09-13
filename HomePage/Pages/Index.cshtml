@@ -4,115 +4,174 @@
     ViewData["Title"] = "Idag";
 }
 
-<div class="header-link-wrapper">
-    <a href="/WeekFood?@Model.FixWeekQs">Veckans mat</a>
-    <div class="divider"></div>
-    <a href="/AllFoods">Maträtter</a>
-    <div class="divider"></div>
-    <a href="/Calendar?@Model.FixWeekQs">Kalender</a>
-    <div class="divider"></div>
-    <div class="more-button closed" onclick="if (this.classList.contains('closed')) this.classList.remove('closed'); else this.classList.add('closed');">
-        ...mer
-        <div class="more-button-inner">
-            <a href="/AllCategories">Kategorier</a>
-            <div class="divider"></div>
-            <a href="/Statistics">Statistik</a>
-            <div class="divider"></div>
-            <a href="/ToDo">Att göra</a>
-            <div class="divider"></div>
-            <a href="/Spending">Spenderande</a>
-            <div class="divider"></div>
-            <a href="/Movies">Filmer man borde ha sett</a>
-            <div class="divider"></div>
-            <a href="/Pictures">Bilder</a>
-            <div class="divider"></div>
-            <a href="/WordMixStats">Ordmix</a>
-            <div class="divider"></div>
-            <a href="/WikiGame/Results">Wikipedia race</a>
-            <div class="divider"></div>
-            <a href="/FoodStorage">Skafferi</a>
-            <div class="divider"></div>
-            @if (Model.IsLoggedIn) {
-                <a href="/Logout">Logga ut (@Model.LoggedInPerson!.Name)</a>
-            } else {
-                <a href="/Login">Logga in</a>
-            }
-        </div>
-    </div>
-</div>
-
 <div class="page-wrapper mainscreen homepage @Model.WrapperClass">
     <img src="@Model.ImageUrl" class="background" />
-    <div class="theme-day-wrapper">
-        @if (!string.IsNullOrEmpty(Model.RedDay?.DayName))
-        {
-            <span class="red-day-text">@Model.RedDay.DayName</span>
-        }
-        @foreach(var themeDay in Model.ThemeDays) {
-            <span class="theme-day-text">@themeDay.DayName</span>
-        }
-    </div>
-    <div class="theme-day-wrapper clock-wrapper">
-        <span id="clock"></span>
-    </div>
-    <div class="theme-day-wrapper calendar-events">
-        @foreach (var activity in Model.Activities)
-        {
-            <span class="calendar-event-text" style="color: @Person.HtmlTextColorFromPerson(activity.Person)">@activity.ReplacedText(DateTime.Now.Year)</span>
-        }
-    </div>
 
-    @if (Model.TodayFood != null) {
-        <div class="input-wrapper">
-            <span style="font-size: 18px">Mat: @Model.TodayFood.CombinedName</span>
-            @if (!string.IsNullOrEmpty(Model.TodayFood.MainFood.RecipeUrl))
+    <div class="homepage-content">
+        <div class="header-link-wrapper">
+            <a href="/WeekFood?@Model.FixWeekQs">Veckans mat</a>
+            <div class="divider"></div>
+            <a href="/AllFoods">Maträtter</a>
+            <div class="divider"></div>
+            <a href="/Calendar?@Model.FixWeekQs">Kalender</a>
+            <div class="divider"></div>
+            <div class="more-button closed" onclick="if (this.classList.contains('closed')) this.classList.remove('closed'); else this.classList.add('closed');">
+                ...mer
+                <div class="more-button-inner">
+                    <a href="/AllCategories">Kategorier</a>
+                    <div class="divider"></div>
+                    <a href="/Statistics">Statistik</a>
+                    <div class="divider"></div>
+                    <a href="/ToDo">Att göra</a>
+                    <div class="divider"></div>
+                    <a href="/Spending">Spenderande</a>
+                    <div class="divider"></div>
+                    <a href="/Movies">Filmer man borde ha sett</a>
+                    <div class="divider"></div>
+                    <a href="/Pictures">Bilder</a>
+                    <div class="divider"></div>
+                    <a href="/WordMixStats">Ordmix</a>
+                    <div class="divider"></div>
+                    <a href="/WikiGame/Results">Wikipedia race</a>
+                    <div class="divider"></div>
+                    <a href="/FoodStorage">Skafferi</a>
+                    <div class="divider"></div>
+                    @if (Model.IsLoggedIn)
+                    {
+                        <a href="/Logout">Logga ut (@Model.LoggedInPerson!.Name)</a>
+                    }
+                    else
+                    {
+                        <a href="/Login">Logga in</a>
+                    }
+                </div>
+            </div>
+        </div>
+
+    <div class="special-days">
+        <div class="special-days-inner">
+            @if (!string.IsNullOrEmpty(Model.RedDay?.DayName))
             {
-                <div class="recipelinkplaceholder" linkurl="@Model.TodayFood.MainFood.RecipeUrl"></div>
+                <span class="special-day holiday">@Model.RedDay.DayName</span>
             }
-            @if (!string.IsNullOrEmpty(Model.TodayFood.MainFood.Notes))
+
+            @foreach (var themeDay in Model.ThemeDays)
             {
-                <div class="notesplaceholder" notes="@Model.TodayFood.MainFood.Notes"></div>
-            }
-            @if (Model.TodayFood.MainFood?.NeedsPreparation == true || Model.TodayFood.SideDishes.Any(x => x.NeedsPreparation))
-            {
-                <span class="recipe-button">⏱️</span>
+                <span class="special-day">
+                    @themeDay.DayName
+                </span>
             }
         </div>
-    }
+
+        <div class="special-days-inner">
+            @foreach (var activity in Model.Activities)
+            {
+                <span class="special-day activity"
+                      style="color: @Person.HtmlTextColorFromPerson(activity.Person)">
+                    @activity.ReplacedText(DateTime.Now.Year)
+                </span>
+            }
+        </div>
+    </div>
+
+    <div class="photo-card">
+        <div class="date">
+            <div class="day">
+                @Model.Day
+            </div>
+
+            <div class="month">
+                @Model.Month
+            </div>
+
+            <div class="weekday">
+                @Model.DayOfWeek
+            </div>
+        </div>
+
+        <div class="clock">
+            <span id="clock"></span>
+        </div>
+
+        @if (Model.TodayFood != null)
+        {
+            <div class="food">
+
+                <div class="food-label">
+                    MAT
+                </div>
+
+                <div class="food-name">
+                    @Model.TodayFood.CombinedName
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.TodayFood.MainFood.RecipeUrl))
+                {
+                    <div class="recipelinkplaceholder"
+                         linkurl="@Model.TodayFood.MainFood.RecipeUrl">
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.TodayFood.MainFood.Notes))
+                {
+                    <div class="notesplaceholder"
+                         notes="@Model.TodayFood.MainFood.Notes">
+                    </div>
+                }
+
+                @if (Model.TodayFood.MainFood?.NeedsPreparation == true ||
+                   Model.TodayFood.SideDishes.Any(x => x.NeedsPreparation))
+                    {
+                        <span class="recipe-button">⏱️</span>
+                    }
+
+            </div>
+        }
+
+        <div class="chore-bar">
+            @if (Model.JensIcons.Count > 0)
+            {
+                <div class="person-chores">
+
+                    <div class="profile-photo jens"></div>
+
+                    <div class="chore-icons">
+                        @foreach (var icon in Model.JensIcons)
+                        {
+                            @Html.Raw(icon.Html)
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (Model.AnnaIcons.Count > 0)
+            {
+                <div class="person-chores">
+                    <div class="profile-photo anna"></div>
+                    <div class="chore-icons">
+                        @foreach (var icon in Model.AnnaIcons)
+                        {
+                            @Html.Raw(icon.Html)
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <button type="button" class="random-button" onclick="randomizeFood()">
+            Slumpa mat
+        </button>
+    </div>
 
     <input type="hidden" id="datekey" />
     <input type="hidden" id="freeDays" value="@Model.NoFoodDaysList"/>
     @if (!string.IsNullOrEmpty(Model.AnniverseryString)) {
-        <div class="extra-info-wrapper">
+        <div class="food" style="bottom: 235px;">
             <span class="heart">❤️</span>
             <span>@Model.AnniverseryString</span>
         </div>
     }
-    <div class="date-wrapper">
-        <span class="day-text">@Model.Day</span>
-        <span class="month-text">@Model.Month</span>
-        <span class="day-of-week">@Model.DayOfWeek</span>
-    </div>
-    @if (Model.JensIcons.Count > 0) {
-        <div class="extra-info-wrapper width">
-        <div class="profile-photo jens"></div>
-        @foreach (var icon in Model.JensIcons)
-        {
-            @Html.Raw(icon.Html)
-        }
-        </div>
-    }
-    @if (Model.AnnaIcons.Count > 0)
-    {
-        <div class="extra-info-wrapper width">
-        <div class="profile-photo anna"></div>
-        @foreach (var icon in Model.AnnaIcons)
-        {
-            @Html.Raw(icon.Html)
-        }
-        </div>
-    }
-    <button type="button" class="styled-button" onclick="randomizeFood()">Slumpa mat</button>
+  
     @if (string.IsNullOrEmpty(Model.ImageTaken)) {
         <div class="image-taken-text hidden">
             <span></span>
@@ -123,15 +182,17 @@
         </div>
     }
 </div>
+</div>
 
 <script src="~/js/Firework.js" asp-append-version="true"></script>
+<link rel="stylesheet" href="~/css/home-screen.css" asp-append-version="true" />
 <script src="~/js/JsonResultUnpacker.js" asp-append-version="true"></script>
 <script src="~/js/Streak.js" asp-append-version="true"></script>
 <script>
     var lastUpdated = new Date()
     var currentDayNbr = lastUpdated.getDate()
     var crntHourNbr = lastUpdated.getHours() % 24
-    document.body.style.backgroundColor = 'rgb(20 12 69)'
+    document.body.style.backgroundColor = '#101114'
     setTimeout(() => updateImage(), @Model.MilliSecondsUntilNextPicture)
     updateClock()
     for (const empty of document.querySelectorAll('.theme-day-wrapper')) {

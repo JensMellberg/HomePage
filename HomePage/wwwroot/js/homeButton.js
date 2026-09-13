@@ -2,7 +2,7 @@
 useHomeButton();
 function useHomeButton() {
 	const button = document.createElement('button');
-	button.className = 'home-button'
+	button.className = 'home-button modern-button secondary'
 	button.textContent = 'Hem'
 	button.onclick = () => window.location = '/index';
 	const page = document.querySelectorAll('.page-wrapper, .calendar-wrapper')[0];

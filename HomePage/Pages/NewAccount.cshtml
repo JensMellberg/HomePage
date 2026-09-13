@@ -4,6 +4,7 @@
     ViewData["Title"] = "Skapa konto";
 }
 
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
 <div class="page-wrapper mainscreen">
     <div class="dayfood-form" method="post">
         <span>Skapa konto</span>
@@ -25,8 +26,8 @@
         </div>
 
         <div class="button-wrapper">
-            <button type="button" onclick="signUp();">Skapa konto</button>
-            <button type="button" onclick="window.history.back();">Avbryt</button>
+            <button class="modern-button primary" type="button" onclick="signUp();">Skapa konto</button>
+            <button class="modern-button secondary" type="button" onclick="window.history.back();">Avbryt</button>
         </div>
     </div>
 </div>

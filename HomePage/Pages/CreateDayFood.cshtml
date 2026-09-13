@@ -4,6 +4,7 @@
     ViewData["Title"] = "Skapa mat";
 }
 
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
 <div class="page-wrapper mainscreen">
     <input type="hidden" id="datekey" value="@Model.DateQs" />
     <input type="hidden" id="datekeyFoW" value="@Model.DateQsFirstOfWeek" />
@@ -13,10 +14,10 @@
         <input type="hidden" name="delete" id="deleteHidden" value="" />
         <div class="input-wrapper">
             <input type="text" value="@Model.CurrentFilter" placeholder="filtrera..." onchange="updateTextFilter(this.value)" />
-            <button type="button">Sök</button>
+            <button class="modern-button secondary wide-button" type="button">Sök</button>
         </div>
         <div class="input-wrapper">
-            <select name="foodId" style="max-width: 80vw" id="foodSelector">
+            <select name="foodId" id="foodSelector">
                 @foreach (var food in Model.ExistingFood) {
                     if (food.Id == Model.FoodIdFromQueryString || (Model.FoodIdFromQueryString == Guid.Empty && Model.DayFood?.MainFoodId == food.Id)) {
                         <option value="@food.Id" selected> @food.Name</option>
@@ -25,29 +26,31 @@
                     }
                 }
             </select>
-            <a href="CreateFood?date=@Model.DateKey">Ny maträtt</a>
         </div>
-        <div class="input-wrapper">
-            <a href="#" onclick="editFood()">Ändra mat</a>
+        <div class="button-section-wrapper">
+            <a class="modern-button secondary new" href="CreateFood?date=@Model.DateKey">Ny maträtt</a>
+            <a class="modern-button secondary edit" href="#" onclick="editFood()">Ändra mat</a>
         </div>
+        <div class="side-dish-section">
         <span>Tillbehör</span>
-        <div id="existingSideDishes">
-            @foreach (var sideDishId in Model.DayFood.SideDishes.Select(x => x.Id)) {
-                <div class="input-wrapper">
-                    <select style="max-width: 80vw" sideDishId="@sideDishId" class="sideDishSelect" onchange="updateSideDishHidden()">
-                    </select>
-                    <button type="button" class="recipe-button" onclick="deleteSideDish(this)">X</button>
-                </div>
-            }
-        </div>
-        <div class="input-wrapper">
-            <select style="max-width: 80vw" sideDishId="" id="newSideDish" class="sideDishSelect" onchange="newSideDishOnChange()">
-                <option value=""></option>
-                @foreach (var food in Model.SideDishes)
-                {
-                    <option value="@food.Id"> @food.Name</option>
+            <div id="existingSideDishes">
+                @foreach (var sideDishId in Model.DayFood.SideDishes.Select(x => x.Id)) {
+                    <div class="input-wrapper">
+                        <select sideDishId="@sideDishId" class="sideDishSelect" onchange="updateSideDishHidden()">
+                        </select>
+                        <button type="button" class="recipe-button" onclick="deleteSideDish(this)">X</button>
+                    </div>
                 }
-            </select>
+            </div>
+            <div class="input-wrapper">
+                <select sideDishId="" id="newSideDish" class="sideDishSelect" onchange="newSideDishOnChange()">
+                    <option value=""></option>
+                    @foreach (var food in Model.SideDishes)
+                    {
+                        <option value="@food.Id"> @food.Name</option>
+                    }
+                </select>
+            </div>
         </div>
         <div class="input-wrapper">
             <span>Vegetarisk</span>
@@ -59,12 +62,12 @@
         </div>
 
         <div class="button-wrapper">
-            <input type="submit" value="Spara mat" />
+            <input class="modern-button primary" type="submit" value="Spara mat" />
             @if (Model.CanDelete)
             {
-                <button type="button" onclick="deleteFood()">Ta bort</button>
+                <button class="modern-button delete" type="button" onclick="deleteFood()">Ta bort</button>
             }
-            <button type="button" onclick="window.location.href = '/WeekFood?' + $('#datekeyFoW').val()">Avbryt</button>
+            <button class="modern-button secondary" type="button" onclick="window.location.href = '/WeekFood?' + $('#datekeyFoW').val()">Avbryt</button>
         </div>
     </form>
 </div>
@@ -110,7 +113,6 @@
     }
 
     function deleteSideDish(e) {
-        debugger
         e.parentElement.remove()
         updateSideDishHidden()
     }

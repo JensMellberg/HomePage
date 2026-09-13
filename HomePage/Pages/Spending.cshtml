@@ -4,11 +4,14 @@
     ViewData["Title"] = "Spenderande";
 }
 
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/spending.css" asp-append-version="true" />
 <div class="page-wrapper" style="gap: 12px">
     <input type="hidden" id="groupjsonholder" value="@Model.GroupOptionsJson"/>
     <input type="hidden" id="chosenMonth" value="@Model.ChosenMonth" />
+    <span class="spending-total">Totalt: @Model.Total</span>
     <div class="filters-wrapper" style="margin-top: 8px;">
-        <div class="input-wrapper">
+        <div class="modern-input-wrapper">
             <span>Månad:</span>
             <select onchange="updateFilters()" id="month">
                 @foreach (var monthPair in Model.MonthsToChoose)
@@ -25,23 +28,24 @@
             </select>
         </div>
     </div>
-    <span class="spending-total">Totalt: @Model.Total</span>
-    <button class="sectionButton" onclick="newGroup()">Ny grupp</button>
-    @foreach (var group in Model.SpendingGroups) {
-        <div class="spending-group" onclick="editGroup('@group.Id')" style="background-color: @group.Color">
-            <div class="spending-group-header">
-                <span class="spending-group-title">@group.Name: @group.Total </span>
-            </div>
-            
-            @foreach (var item in group.Entries.OrderByDescending(x => x.TransactionDate)) {
-                <div class="spending-entry-wrapper" onclick="setItemGroup(event, '@item.Id')">
-                    <span class="spending-group-entry place-entry">@item.Place</span>
-                    <span class="spending-group-entry date-entry">@item.TransactionDate.ToString("dd-MM-yyyy")</span>
-                    <span class="spending-group-entry amount-entry">@item.Amount</span>
+    <button class="modern-button secondary new center-button no-margin" onclick="newGroup()">Ny grupp</button>
+    <div class="spending-group-wrapper">
+        @foreach (var group in Model.SpendingGroups) {
+            <div class="spending-group" onclick="editGroup('@group.Id')" style="background-color: @group.Color">
+                <div class="spending-group-header">
+                    <span class="spending-group-title">@group.Name: @group.Total </span>
                 </div>
-            }
-        </div>
-    }
+            
+                @foreach (var item in group.Entries.OrderByDescending(x => x.TransactionDate)) {
+                    <div class="spending-entry-wrapper" onclick="setItemGroup(event, '@item.Id')">
+                        <span class="spending-group-entry place-entry">@item.Place</span>
+                        <span class="spending-group-entry date-entry">@item.TransactionDate.ToString("dd-MM-yyyy")</span>
+                        <span class="spending-group-entry amount-entry">@item.Amount</span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
 </div>
 
 <script src="~/js/homeButton.js" asp-append-version="true"></script>

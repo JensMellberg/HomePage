@@ -6,7 +6,7 @@
 		for (const category of categories) {
 			const localId = category.id;
 			const localName = category.name;
-			const elem = HtmlUtils.addElement('div', 'category', wrapperInner);
+			const elem = HtmlUtils.addElement('div', 'category-element', wrapperInner);
 			if (category.isSelected) {
 				elem.classList.add('selected');
 				allPicked.push({ id: localId, name: localName });
@@ -25,7 +25,7 @@
 			})
 		}
 
-		const okButton = HtmlUtils.addElement('button', 'sectionButton', wrapper);
+		const okButton = HtmlUtils.addElement('button', 'modern-button primary', wrapper);
 		okButton.type = 'button'
 		okButton.innerText = 'Klar';
 		$(okButton).click(() => {

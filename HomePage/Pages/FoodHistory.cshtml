@@ -4,11 +4,12 @@
     ViewData["Title"] = "Mathistorik";
 }
 
-<div class="page-wrapper">
-    <div style="display: flex; flex-direction: column; gap: 12px;">
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<div class="page-wrapper food-info-page">
+    <div class="food-information-wrapper">
         <span style="font-size: 24px">@Model.Food.Name</span>
         @if (Model.Food.RecipeUrl != null) {
-            <a href="@Model.Food.RecipeUrl">Länk till recept</a>
+            <a class="modern-button secondary" href="@Model.Food.RecipeUrl">Länk till recept</a>
         }
         @if (Model.Food.Notes != null)
         {
@@ -28,24 +29,24 @@
             </div>
         </div>
     </div>
-    <div style="width: 103%; overflow-x: auto;">
-        <div class="food-grid">
+    <div class="food-grid-wrapper">
+        <div class="food-grid food-history-grid">
             @foreach (var row in Model.HistoryList)
             {
                 <div class="food-row">
                     <span class="food-grid-cell">@DateHelper.ToNumberedDateString(row.dayFood.Date)</span>
                     <span class="food-grid-cell">@row.dayFood.CombinedName</span>
-                    <span class="food-grid-cell">@row.jensRanking</span>
+                    <span class="food-grid-cell ranking">@row.jensRanking</span>
                     @if (!string.IsNullOrEmpty(row.jensNote)) {
-                        <span class="food-grid-cell">
-                            <span style="background: white">@row.jensNote</span>
+                        <span class="food-grid-cell note">
+                            <span>@row.jensNote</span>
                         </span>
                     }
-                    <span class="food-grid-cell">@row.annaRanking</span>
+                    <span class="food-grid-cell ranking">@row.annaRanking</span>
                     @if (!string.IsNullOrEmpty(row.annaNote))
                     {
-                        <span class="food-grid-cell">
-                            <span style="background: white">@row.annaNote</span>
+                        <span class="food-grid-cell note">
+                            <span>@row.annaNote</span>
                         </span>
                     }
                 </div>

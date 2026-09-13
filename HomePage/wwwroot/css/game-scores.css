@@ -1,0 +1,480 @@
+﻿.page-wrapper {
+	width: 100%;
+	max-width: 90vw;
+	height: 100%;
+	margin: 0 auto !important;
+	padding: 10px !important;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	color: #292b35;
+}
+
+.wiki-game-intro {
+	flex: 0 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin: 0 0 10px;
+}
+
+.wiki-game-intro > a {
+	align-self: center;
+	color: #6764d8;
+	text-decoration: none;
+	font-size: 13px;
+	font-weight: 650;
+}
+
+.wiki-game-intro > a:active {
+	transform: scale(.98);
+}
+
+.wiki-game-intro > div {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	min-height: 48px;
+	padding: 9px 10px;
+	box-sizing: border-box;
+	background: #f3f3f7;
+	border: 1px solid #e2e3e8;
+	border-radius: 11px;
+}
+
+.wiki-game-intro > div > span {
+	flex: 1;
+	min-width: 0;
+	color: #555762;
+	font-size: 12px;
+	line-height: 1.35;
+}
+
+.wiki-game-intro .recipe-button {
+	flex: 0 0 28px;
+	width: 28px;
+	height: 28px;
+	margin: 0;
+}
+
+.page-wrapper .word-mix-top-bar {
+	flex: 0 0 auto;
+	display: flex;
+	justify-content: center !important;
+	width: 100%;
+	margin: 0 0 10px;
+	padding: 0;
+}
+
+.page-wrapper .word-mix-other-current {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 5px;
+	width: 100%;
+	padding: 7px 8px;
+	box-sizing: border-box;
+	background: #eeedff;
+	border: 1px solid #dbd9ff;
+	border-radius: 11px;
+}
+
+.page-wrapper .word-mix-top-bar .word-mix-other-current a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 34px;
+	padding: 6px 12px;
+	background: #ffffff;
+	color: #5d59c9;
+	border: 2px solid #7774e8;
+	border-radius: 9px;
+	box-shadow: 0 2px 6px rgba(91, 88, 210, 0.16);
+	font-size: 11px;
+	font-weight: 750;
+	text-decoration: none;
+}
+
+.page-wrapper .word-mix-top-bar .word-mix-other-current a::after {
+	content: "›";
+	margin-left: 6px;
+	font-size: 17px;
+	line-height: 14px;
+	color: #7774e8;
+	margin-bottom: 3px;
+}
+
+.page-wrapper .word-mix-top-bar .word-mix-other-current a:active {
+	transform: scale(0.96);
+	background: #f0efff;
+}
+
+.page-wrapper .word-mix-top-bar .word-mix-other-current span {
+	display: inline-flex;
+	align-items: center;
+	min-height: 32px;
+	padding: 5px 10px;
+	background: rgba(255,255,255,.35);
+	border: 1px solid rgba(255,255,255,.3);
+	border-radius: 8px;
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.page-wrapper .word-mix-history-outer {
+	flex: 1 1 auto;
+	min-height: 0;
+	min-width: 0;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 2px 2px 10px;
+	box-sizing: border-box;
+	scrollbar-width: thin;
+}
+
+.page-wrapper .word-mix-history-wrapper {
+	flex: 0 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	width: 100%;
+	margin: 0 !important;
+	padding: 9px;
+	box-sizing: border-box;
+	background: white;
+	border: 1px solid #e5e5ea;
+	border-radius: 12px;
+	box-shadow: 0 2px 7px rgba(20,20,40,.035);
+}
+
+.page-wrapper .word-mix-history-wrapper .word-mix-other-current a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 28px;
+	padding: 4px 9px;
+	box-sizing: border-box;
+	background: #f4f3fa;
+	color: #666878;
+	border: 1px solid #e5e3ee;
+	border-radius: 10px;
+	font-size: 10px;
+	font-weight: 650;
+	line-height: 1.2;
+	text-decoration: none;
+}
+
+.wikigame-score-date {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 8px;
+	align-items: center;
+	width: 100%;
+}
+
+.wikigame-score-date > span:first-child {
+	flex: 0 0 auto;
+	padding: 4px 7px;
+	background: #f0efff;
+	color: #6865d5;
+	border-radius: 7px;
+	font-size: 10px;
+	font-weight: 750;
+	white-space: nowrap;
+}
+
+.wikigame-score-date > span:last-child {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: #3b3d47;
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.page-wrapper .word-mix-history-wrapper .word-mix-other-current {
+	justify-content: flex-start;
+	padding: 0;
+	background: transparent;
+	border: none;
+}
+
+.page-wrapper .word-mix-history-wrapper .word-mix-other-current a {
+	min-height: 27px;
+	background: #f7f7f9;
+	color: #666976;
+	border: 1px solid #e7e7ec;
+	font-size: 10px;
+}
+
+.page-wrapper .unfinished-score {
+	background: #f3f3f5 !important;
+	border-color: #e5e5e9 !important;
+	color: #999ba4 !important;
+}
+
+@media (max-width: 380px) {
+
+	.page-wrapper {
+		padding: 7px !important;
+	}
+
+	.wiki-game-intro > div {
+		padding: 8px;
+		min-height: 44px;
+	}
+
+		.wiki-game-intro > div > span {
+			font-size: 11px;
+		}
+
+	.page-wrapper .word-mix-history-wrapper {
+		padding: 8px;
+	}
+
+	.wikigame-score-date > span:last-child {
+		font-size: 12px;
+	}
+}
+
+@media (min-width: 768px) {
+
+	.page-wrapper {
+		max-width: 760px;
+		padding: 18px !important;
+	}
+
+	.wiki-game-intro {
+		gap: 9px;
+		margin-bottom: 14px;
+	}
+
+	.wiki-game-intro > a {
+		font-size: 15px;
+	}
+
+	.wiki-game-intro > div {
+		min-height: 58px;
+		padding: 12px 14px;
+		border-radius: 13px;
+	}
+
+	.wiki-game-intro > div > span {
+		font-size: 14px;
+		line-height: 1.4;
+	}
+
+	.wiki-game-intro .recipe-button {
+		flex-basis: 34px;
+		width: 34px;
+		height: 34px;
+		font-size: 15px;
+	}
+
+	.page-wrapper .word-mix-top-bar {
+		margin-bottom: 14px;
+	}
+
+	.page-wrapper .word-mix-top-bar .word-mix-other-current {
+		gap: 8px;
+		padding: 9px 10px;
+		border-radius: 13px;
+	}
+
+	.page-wrapper .word-mix-top-bar .word-mix-other-current a,
+	.page-wrapper .word-mix-top-bar .word-mix-other-current span {
+		min-height: 40px;
+		padding: 7px 13px;
+		border-radius: 10px;
+		font-size: 17px;
+	}
+
+	.page-wrapper .word-mix-history-outer {
+		gap: 11px;
+		padding: 2px 3px 14px;
+	}
+
+	.page-wrapper .word-mix-history-wrapper {
+		gap: 8px;
+		padding: 13px;
+		border-radius: 14px;
+	}
+
+	.wikigame-score-date {
+		gap: 10px;
+	}
+
+	.wikigame-score-date > span:first-child {
+		padding: 5px 9px;
+		border-radius: 8px;
+		font-size: 15px;
+	}
+
+	.wikigame-score-date > span:last-child {
+		font-size: 18px;
+	}
+
+	.page-wrapper .word-mix-history-wrapper .word-mix-other-current {
+		gap: 6px;
+	}
+
+	.page-wrapper .word-mix-history-wrapper .word-mix-other-current a {
+		min-height: 32px;
+		padding: 5px 10px;
+		border-radius: 10px;
+		font-size: 15px;
+	}
+}
+
+
+.game-result-page {
+	width: 100%;
+	max-width: 700px;
+	margin: 0 auto !important;
+	padding: 10px !important;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-height: 100%;
+}
+
+.game-result-page .game-score-result-wrapper {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 100%;
+	margin: 2px 0 14px !important;
+}
+
+.game-result-page .game-score-result {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	min-height: 64px;
+}
+
+.game-result-page .game-score-result > span {
+	color: #292b35;
+	font-size: 28px;
+	font-weight: 800;
+	line-height: 1;
+}
+
+.game-result-page .game-score-result-wrapper > .modern-button {
+	min-height: 36px;
+	margin: 8px 0 0 !important;
+	padding: 6px 14px;
+	border-radius: 9px;
+	font-size: 12px;
+	font-weight: 650;
+}
+
+.game-result-page .path-wrapper {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	max-width: 620px;
+	margin: 0 !important;
+	padding: 14px;
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 1px solid #e3e4ea;
+	border-radius: 14px;
+	box-shadow: 0 3px 10px rgba(20, 22, 40, 0.045);
+	line-height: 1.2;
+}
+
+.game-result-page .path-item {
+	display: inline-flex;
+	align-items: center;
+	min-height: 28px;
+	padding: 4px 8px;
+	box-sizing: border-box;
+	border-radius: 7px;
+	background: #f4f4f7;
+	color: #656773;
+	font-size: 11px;
+	font-weight: 600;
+	overflow-wrap: anywhere;
+	text-align: center;
+}
+
+.game-result-page .path-item.current {
+	background: #eeedff;
+	color: #6562d3;
+	border: 1px solid #dbd9ff;
+	font-weight: 750;
+}
+
+.path-item.finished {
+	background: #eaf7f0;
+	color: #36845d;
+	border: 1px solid #cbe8d7;
+	font-weight: 700;
+}
+
+@media (max-width: 420px) {
+
+	.game-result-page {
+		padding: 8px !important;
+	}
+
+	.game-result-page .game-score-result {
+		gap: 9px;
+	}
+
+	.game-result-page .game-score-result > span {
+		font-size: 24px;
+	}
+
+	.game-result-page .path-wrapper {
+		gap: 4px;
+		padding: 10px;
+		border-radius: 12px;
+	}
+
+	.game-result-page .path-item {
+		min-height: 26px;
+		padding: 4px 6px;
+		font-size: 10px;
+	}
+}
+
+@media (min-width: 768px) {
+	.game-result-page {
+		max-width: 760px;
+		padding: 16px !important;
+	}
+
+	.game-result-page .game-score-result > span {
+		font-size: 32px;
+	}
+
+	.game-result-page .game-score-result-wrapper > .modern-button {
+		min-height: 40px;
+		padding: 8px 16px;
+		font-size: 13px;
+	}
+
+	.game-result-page .path-wrapper {
+		padding: 16px;
+		gap: 7px;
+		border-radius: 16px;
+	}
+
+	.game-result-page .path-item {
+		min-height: 32px;
+		padding: 5px 9px;
+		font-size: 12px;
+	}
+}

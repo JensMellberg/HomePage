@@ -44,7 +44,8 @@ namespace HomePage.Pages
                 DayModels.Add(new CalendarDayModel {
                     DayText = DateHelper.WeekNumberToString[(int)crntDate.DayOfWeek] + " " + crntDate.Day + "/" + crntDate.Month,
                     Activities = activities.OrderByDescending(x => x.DurationInDays),
-                    Day = crntDate
+                    Day = crntDate,
+                    ZIndex = 200 - i
                 });
             }
 
@@ -61,5 +62,7 @@ namespace HomePage.Pages
         public DateTime Day { get; set; }
 
         public IEnumerable<CalendarActivity> Activities { get; set; }
+
+        public int ZIndex { get; set; }
     }
 }

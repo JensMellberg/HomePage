@@ -4,14 +4,16 @@
     ViewData["Title"] = "Skapa skafferiprodukt";
 }
 
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/ingredient-form.css" asp-append-version="true" />
 <div class="page-wrapper mainscreen">
     <form class="dayfood-form" method="post">
-        <div id="wrapper" class="input-wrapper">
+        <div id="wrapper" class="ingredient-form-wrapper">
         </div>
         
         <div class="button-wrapper">
-            <input type="submit" value="Spara" />
-            <button type="button" onclick="window.location.href = '/FoodStorage';">Avbryt</button>
+            <input class="modern-button primary" type="submit" value="Spara" />
+            <button class="modern-button secondary" type="button" onclick="window.location.href = '/FoodStorage';">Avbryt</button>
         </div>
     </form>
 </div>
@@ -28,10 +30,18 @@
     var instance = IngredientInstance.create(categories, possibleIngredients, unitTypes, ingredientId, amount, unit, category)
     var elements = instance.createElements(true)
     var wrapper = document.getElementById('wrapper')
-    wrapper.appendChild(elements.searchBox)
-    wrapper.appendChild(elements.categoryDropdown)
-    wrapper.appendChild(elements.dropdown)
-    wrapper.appendChild(elements.amountBox)
-    wrapper.appendChild(elements.unitDropdown)
- 
+
+    if (!ingredientId) {
+        const selector = HtmlUtils.addElement('div', 'ingredient-selector', wrapper);
+        selector.appendChild(elements.searchWrapper)
+        selector.appendChild(elements.searchResultsWrapper)
+        selector.appendChild(elements.chooseCategoryButton)
+        selector.appendChild(elements.categoryPicker)
+        selector.appendChild(elements.ingredientListFromCategory)
+    }
+
+    wrapper.appendChild(elements.selectedInformationWrapper)
+    wrapper.appendChild(elements.ingredientAmountRow)
+    wrapper.appendChild(elements.categoryHidden)
+    wrapper.appendChild(elements.idHidden)
 </script>

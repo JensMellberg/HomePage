@@ -4,8 +4,9 @@
     ViewData["Title"] = "Bilder";
 }
 
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
 <div class="page-wrapper">
-    <a href="/NewPicture">Lägg till bilder</a>
+    <a class="modern-button new center-button primary" href="/NewPicture">Lägg till bilder</a>
     <span style="position: absolute; right: 15px; top: 5px;">@Model.TotalFileSize</span>
     <div class="pictures-wrapper">
         @foreach (var url in Model.AllPictures) {

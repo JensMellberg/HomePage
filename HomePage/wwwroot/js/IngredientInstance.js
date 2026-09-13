@@ -4,7 +4,7 @@
 		var instance = new IngredientInstance()
 		instance.unitTypes = unitTypes
 		instance.possibleIngredients = possibleIngredients
-		instance.ingredientId = ingredientId || possibleIngredients[0].id
+		instance.ingredientId = ingredientId
 		instance.amount = amount || 1
 		instance.unit = unit
 		instance.categories = categories
@@ -23,61 +23,99 @@
 	}
 
 	createElements(includeName) {
-		const categoryDropdown = document.createElement('select')
-		categoryDropdown.style.maxWidth = '60px'
-		for (const category of this.categories) {
-			const option = document.createElement('option');
-			option.value = category;
-			option.textContent = category;
-
-			if (category === this.category) {
-				option.selected = true;
-			}
-
-			categoryDropdown.appendChild(option);
-		}
-
-		const dropdown = document.createElement('select')
-		let initialUnitType = 'Antal'
-
-		const updateDropdownOptions = (cat, selectedId = null) => {
-			dropdown.innerHTML = ''
-			for (const ingredient of this.possibleIngredients.filter(x => x.category === cat)) {
-				const option = document.createElement('option');
-				option.value = ingredient.id;
-				option.textContent = ingredient.name;
-
-				if (ingredient.id === selectedId) {
-					option.selected = true;
-					initialUnitType = ingredient.unit
-				}
-
-				dropdown.appendChild(option);
-			}
-
-			dropdown.dispatchEvent(new Event('change'));
-		}
-
-		categoryDropdown.onchange = () => {
-			const selected = categoryDropdown.value
-			updateDropdownOptions(selected)
-		}
-
-		updateDropdownOptions(this.category, this.ingredientId)
-
 		if (this.amount.replaceAll) {
 			this.amount = this.amount.replaceAll(',', '.')
 		}
 
-		const amountBox = document.createElement('input')
-		amountBox.required = true
-		amountBox.type = 'number'
-		amountBox.step = 'any'
-		amountBox.value = this.amount.toString()
-		amountBox.style.maxWidth = '40px'
+		const idHidden = HtmlUtils.createElement('input', '')
+		idHidden.type = 'hidden'
+		idHidden.value = this.ingredientId
+		this.idHidden = idHidden
 
-		const unitDropdown = document.createElement('select')
+		const categoryHidden = HtmlUtils.createElement('input', '')
+		categoryHidden.type = 'hidden'
+		categoryHidden.value = this.category
+		this.categoryHidden = categoryHidden
 
+		const searchWrapper = HtmlUtils.createElement('div', 'ingredient-search-wrapper')
+		const searchIcon = HtmlUtils.addElement('span', 'ingredient-search-icon', searchWrapper)
+		searchIcon.innerText = '⌕'
+		const searchInput = HtmlUtils.addElement('input', 'ingredient-search', searchWrapper)
+		searchInput.type = 'text'
+		searchInput.placeholder = 'Sök ingrediens..'
+
+		const searchResultsWrapper = HtmlUtils.createElement('div', 'ingredient-search-results')
+		
+		const chooseCategoryButton = HtmlUtils.createElement('button', 'ingredient-category-button')
+		chooseCategoryButton.type = 'button'
+		const chooseCategoryText = HtmlUtils.addElement('span', '', chooseCategoryButton)
+		chooseCategoryText.innerText = 'Välj kategori'
+		const chooseCategoryArrow = HtmlUtils.addElement('span', 'ingredient-arrow', chooseCategoryButton)
+		chooseCategoryArrow.innerText = '›'
+		chooseCategoryButton.onclick = (e) => {
+			$(ingredientListFromCategory).hide()
+			$(categoryPicker).show()
+			e.stopPropagation()
+			$(document).one('click', () => {
+				$(categoryPicker).hide()
+				$(ingredientListFromCategory).hide()
+			})
+		}
+
+		const ingredientListFromCategory = HtmlUtils.createElement('div', 'ingredient-list')
+		$(ingredientListFromCategory).hide()
+
+		const showIngredientListFromCategory = (categoryToShow) => {
+			$(ingredientListFromCategory).show()
+			$(ingredientListFromCategory).html('')
+			for (const crntIngredient of this.possibleIngredients.filter(x => x.category === categoryToShow)) {
+				const ingredientButton = HtmlUtils.addElement('button', 'ingredient-option', ingredientListFromCategory);
+				ingredientButton.type = 'button'
+				ingredientButton.innerText = crntIngredient.name
+				ingredientButton.onclick = () => {
+					updateIngredient(crntIngredient)
+					$(categoryPicker).hide()
+					$(ingredientListFromCategory).hide()
+				}
+			}
+		}
+
+		const categoryPicker = HtmlUtils.createElement('div', 'ingredient-category-picker')
+		$(categoryPicker).hide()
+		for (const crntCategory of this.categories) {
+			const categoryButton = HtmlUtils.addElement('button', 'ingredient-category-option', categoryPicker)
+			categoryButton.type = 'button'
+			categoryButton.innerText = crntCategory
+			categoryButton.onclick = (e) => {
+				$(categoryPicker).hide()
+				$(ingredientListFromCategory).hide()
+				showIngredientListFromCategory(crntCategory)
+				e.stopPropagation()
+			}
+		}
+
+		const selectedInformationWrapper = HtmlUtils.createElement('div', 'ingredient-selected')
+		$(selectedInformationWrapper).hide()
+		const selectedIngredientName = HtmlUtils.addElement('div', 'ingredient-selected-name', selectedInformationWrapper)
+		const selectedIngredientCategory = HtmlUtils.addElement('div', 'ingredient-category-badge', selectedInformationWrapper)
+
+		const ingredientAmountRow = HtmlUtils.createElement('div', 'ingredient-amount-row')
+		$(ingredientAmountRow).hide()
+		const ingredientField = HtmlUtils.addElement('div', 'ingredient-field', ingredientAmountRow)
+		const amountInfo = HtmlUtils.addElement('span', '', ingredientField)
+		amountInfo.innerText = 'Mängd'
+
+		const amountInput = HtmlUtils.addElement('input', '', ingredientField)
+		amountInput.type = 'number'
+		amountInput.step = 'any'
+		this.amountInput = amountInput
+
+		const ingredientFieldUnit = HtmlUtils.addElement('div', 'ingredient-field', ingredientAmountRow)
+		const unitInfo = HtmlUtils.addElement('span', '', ingredientFieldUnit)
+		unitInfo.innerText = 'Enhet'
+
+		const unitDropdown = HtmlUtils.addElement('select', '', ingredientFieldUnit)
+		this.unitDropdown = unitDropdown
 		const updateUnitDropdown = (unitType, selectedUnit = null) => {
 			unitDropdown.innerHTML = ''
 			for (const type of (this.unitTypes?.[unitType] || [])) {
@@ -92,46 +130,75 @@
 			}
 		}
 
-		updateUnitDropdown(initialUnitType, this.unit)
-
-		dropdown.onchange = () => {
-			const selected = this.possibleIngredients.find(x => x.id == dropdown.value)
-			updateUnitDropdown(selected.unit, selected.standardUnit)
-			amountBox.value = selected.standardAmount.replaceAll(',', '.')
+		const updateIngredient = (ingredientToUse) => {
+			this.idHidden.value = ingredientToUse.id
+			this.categoryHidden.value = ingredientToUse.category
+			selectedIngredientName.innerText = ingredientToUse.name
+			selectedIngredientCategory.innerText = ingredientToUse.category
+			updateUnitDropdown(ingredientToUse.unit, ingredientToUse.standardUnit)
+			amountInput.value = ingredientToUse.standardAmount.replaceAll(',', '.')
+			$(selectedInformationWrapper).show()
+			$(ingredientAmountRow).show()
+			amountInput.focus()
 		}
 
-		if (includeName) {
-			dropdown.name = 'ingredientId'
-			amountBox.name = 'amount'
-			unitDropdown.name = 'unit'
-		}
+		searchInput.oninput = () => {
+			const searchString = searchInput.value.toLowerCase()
+			if (!searchString) {
+				$(searchResultsWrapper).toggleClass('visible', false)
+				return
+			}
 
-		const searchBox = document.createElement('input')
-		searchBox.type = 'text'
-		searchBox.placeholder = 'Sök..'
-		searchBox.style.maxWidth = '60px'
-		searchBox.onchange = () => {
-			const firstHit = this.possibleIngredients.find(
-				x => x.name.toLowerCase().includes(searchBox.value.toLowerCase())
+			const hits = this.possibleIngredients.filter(
+				x => x.name.toLowerCase().includes(searchString)
 			);
 
-			if (firstHit) {
-				categoryDropdown.value = firstHit.category
-				updateDropdownOptions(firstHit.category, firstHit.id)
+			if (hits && hits.length === 1) {
+				updateIngredient(hits[0])
+			} else if (hits && hits.length > 0) {
+				$(searchResultsWrapper).toggleClass('visible', true)
+				$(searchResultsWrapper).html('')
+				for (const result of hits) {
+					const resultButton = HtmlUtils.addElement('button', 'ingredient-search-result', searchResultsWrapper)
+					resultButton.type = 'button'
+					const resultButtonText = HtmlUtils.addElement('span', 'ingredient-search-result-name', resultButton)
+					resultButtonText.innerText = result.name
+					const resultButtonCategory = HtmlUtils.addElement('span', 'ingredient-search-result-category', resultButton)
+					resultButtonCategory.innerText = result.category
+					resultButton.onclick = () => {
+						updateIngredient(result)
+						$(searchResultsWrapper).toggleClass('visible', false)
+					}
+				}
 			}
 		}
 
-		this.dropdown = dropdown
-		this.amountBox = amountBox
-		this.unitDropdown = unitDropdown
-		this.categoryDropdown = categoryDropdown
-		const deleteButton = document.createElement('button')
-		deleteButton.type = 'button'
-		deleteButton.innerText = 'X'
-		return { categoryDropdown, dropdown, amountBox, unitDropdown, searchBox, deleteButton }
+		if (this.ingredientId) {
+			updateIngredient(this.possibleIngredients.filter(x => x.id == this.ingredientId)[0])
+			unitDropdown.value = this.unit
+			amountInput.value = this.amount
+		}
+
+		if (includeName) {
+			idHidden.name = 'ingredientId'
+			amountInput.name = 'amount'
+			unitDropdown.name = 'unit'
+		}
+
+		return {
+			searchWrapper,
+			chooseCategoryButton,
+			selectedInformationWrapper,
+			ingredientAmountRow,
+			searchResultsWrapper,
+			idHidden,
+			categoryHidden,
+			categoryPicker,
+			ingredientListFromCategory
+		}
 	}
 
 	getIngredient() {
-		return { id: this.dropdown.value, amount: this.amountBox.value.replace(',', '.'), unit: this.unitDropdown.value, category: this.categoryDropdown.value  }
+		return { id: this.idHidden.value, amount: this.amountInput.value.replace(',', '.'), unit: this.unitDropdown.value, category: this.categoryHidden.value  }
 	}
 }
