@@ -62,7 +62,8 @@
                     }
                 </div>
                 @foreach (var ranking in Model.FoodRankings[DateHelper.ToKey(dayFood.Date)]) {
-                    if (Model.IsInFuture(ranking.Date)) {
+                    if (Model.IsInFuture(ranking.Date) || dayFood.MainFoodId == Guid.Empty)
+                        {
                         <span class="food-grid-cell small-cell"> </span>
                     }
                     else {
@@ -80,6 +81,8 @@
 <link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/weekfood.css" asp-append-version="true" />
 <script>
+    var foodRankings = @Json.Serialize(Model.FoodRankings);
+
     function showShoppingList() {
         const wrapper = document.createElement('div')
         wrapper.className = 'dates-wrapper'
@@ -109,13 +112,15 @@
              return
          }
 
-        const ranker = StarRanker.create((r, n) => submitRanking(date, person, r, n))
-        Alert.openDialogWithElement(ranker, [
-            {text: 'Avbryt', action: () => {Popup.closePopup();}}
-        ])
+        const prevRanking = foodRankings[date].filter(x => x.person === person)[0]
+        StarRanker.create((r, n) => submitRanking(date, person, r, n), undefined, undefined, prevRanking.note, prevRanking.ranking)
     }
 
     function submitRanking(date, person, ranking, note) {
+        if (!ranking) {
+            return
+        }
+
          $.ajax({
             type: "POST",
             url: "/WeekFood",

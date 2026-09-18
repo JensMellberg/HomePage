@@ -5,10 +5,14 @@
 }
 
 <link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/spending.css" asp-append-version="true" />
 <button class="modern-button secondary" type="button" onclick="window.location.href = 'SuggestFood'" style="position: absolute; top: 5px; right: 5px;">Föreslå mat</button>
 <div class="page-wrapper" style="gap: 12px">
-    <a class="modern-button secondary" href="Ingredients">Ingredienser</a>
-    <a class="modern-button secondary" href="CreateFoodStorage">Lägg till produkt</a>
+    <div class="button-section-wrapper" style="margin-top: 40px; margin-bottom: 0">
+        <a class="modern-button secondary" href="Ingredients">Ingredienser</a>
+        <a class="modern-button secondary" href="CreateFoodStorage">Lägg till produkt</a>
+    </div>
+    <div class="spending-group-wrapper">
         @foreach (var group in Model.CurrentIngredients.GroupBy(x => x.Ingredient.CategoryId).OrderBy(x => x.First().SortOrder))
         {
             <div class="spending-group" style="background-color:#8bf5eb">
@@ -18,13 +22,14 @@
 
                 @foreach (var item in group.OrderBy(x => x.Ingredient.Name))
                 {
-                    <div class="spending-entry-wrapper" style="border: none; gap: 8px;">
+                    <div class="spending-entry-wrapper" style="display: flex">
                         <a href="CreateFoodStorage?id=@item.IngredientId" class="spending-group-entry">@item.Ingredient.Name @item.GetStaticDisplayString()</a>
-                        <button type="button" onclick="deleteIngredient('@item.IngredientId', this)">X</button>
+                        <button class="recipe-button" type="button" onclick="deleteIngredient('@item.IngredientId', this)">X</button>
                     </div>
                 }
             </div>
         }
+    </div>
 </div>
 
 <script src="~/js/homeButton.js" asp-append-version="true"></script>

@@ -94,6 +94,11 @@
 	transition: transform 0.15s ease, filter 0.15s ease;
 }
 
+.movie-page .food-grid {
+	padding: 4px;
+	padding-right: 10px;
+}
+
 .movie-page .movie-poster:active {
 	transform: scale(0.96);
 	filter: brightness(0.9);

@@ -29,6 +29,8 @@ namespace HomePage.Pages
 
         public string ShopListTo { get; set; }
 
+        public Dictionary<string, string> RankingCommentsPerDay { get; set; }
+
         public IActionResult OnGet(int year, int month, int day)
         {
             var dayFoods = dayFoodRepository.GetPopulatedDayFood();

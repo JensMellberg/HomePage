@@ -64,7 +64,7 @@
                        
                         @foreach (var ranking in movie.GetRankingsWithDefaults())
                         {
-                            <span onclick="makeRanking('@movie.Id', '@ranking.Person')"> @movie.RankingText(ranking, s => Model.DisplayNameByUsername[s])</span>
+                            <span onclick="makeRanking('@movie.Id', '@ranking.Person', @ranking.Ranking)"> @movie.RankingText(ranking, s => Model.DisplayNameByUsername[s])</span>
                         }
                     </div>
                 </div>
@@ -141,7 +141,7 @@
        Alert.openDialog('Jag föreslår ' + randomMovie + '!', buttons)
     }
 
-     function makeRanking(movie, person) {
+     function makeRanking(movie, person, ranking) {
          const loggedInPerson = $('#loggedInPerson').val()
          if (!loggedInPerson) {
              window.location.href = 'Login'
@@ -152,13 +152,14 @@
              return
          }
 
-        const ranker = StarRanker.create((r, n) => submitRanking(movie, person, r), 5, true)
-        Alert.openDialogWithElement(ranker, [
-            {text: 'Avbryt', action: () => {Popup.closePopup();}}
-        ])
+        StarRanker.create((r, n) => submitRanking(movie, person, r), 5, true, undefined, ranking)
     }
 
     function submitRanking(movie, person, ranking) {
+        if (!ranking) {
+            return
+        }
+
          $.ajax({
             type: "POST",
             url: "/Movies",

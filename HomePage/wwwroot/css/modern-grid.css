@@ -276,25 +276,54 @@ main[role="main"] {
 
 .star-wrapper-outer textarea {
 	width: calc(100% - 16px);
-	margin: 5px;
+	margin: 8px;
 	height: 80px;
+	box-sizing: border-box;
+	border: 1px solid #dedee8;
+	border-radius: 10px;
+	padding: 10px;
+	font: inherit;
+	resize: vertical;
+	background: #fafafd;
 }
 
 .star-wrapper {
 	display: flex;
-	gap: 18px;
+	gap: 8px;
 	flex-wrap: wrap;
 	max-width: 60vw;
-	margin: 10px;
+	margin: 14px 10px 12px;
 }
 
 .star {
-	font-size: 48px;
+	width: 48px;
+	height: 48px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 24px;
+	font-weight: 700;
 	cursor: pointer;
+	color: #5d6070;
+	background: #f1f1f6;
+	border: 2px solid transparent;
+	border-radius: 12px;
+	box-sizing: border-box;
+	transition: transform 0.12s ease, background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
 }
 
 .star:hover {
-	font-size: 52px;
+	transform: translateY(-2px);
+	background: #e7e7f2;
+	color: #44465a;
+}
+
+.star.selected {
+	color: #fff;
+	background: linear-gradient(135deg, #817cf0, #625dd4);
+	border-color: #5651c5;
+	box-shadow: 0 4px 10px rgba(98, 93, 212, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+	transform: translateY(-2px) scale(1.04);
 }
 
 .category-picker {
