@@ -47,3 +47,5 @@ HomePage/appsettings.json
 HomePage/appsettings.Development.json
 Deploy.ps1
 HomePage/Pictures/
+HomePage/Logotypes/
+HomePage/wwwroot/Logotypes/

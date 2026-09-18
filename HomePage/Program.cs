@@ -30,6 +30,8 @@ namespace HomePage
             builder.Services.AddTransient<SpendingGroupRepository>();
             builder.Services.AddTransient<ThemeDayRepository>();
             builder.Services.AddTransient<SignInRepository>();
+            builder.Services.AddTransient<LogotypeRepository>();
+            builder.Services.AddTransient<LogotypeResultRepository>();
             builder.Services.AddTransient<SettingsRepository>();
             builder.Services.AddTransient<DatabaseLogger>();
             builder.Services.AddTransient<ChoreRepository>();

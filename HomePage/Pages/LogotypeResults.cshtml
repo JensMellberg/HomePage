@@ -1,0 +1,61 @@
+﻿@page
+@model HomePage.Pages.LogotypeResultsModel
+@{
+    ViewData["Title"] = "Gissa logotyp";
+}
+
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/game-scores.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/logotype-game.css" asp-append-version="true" />
+<div class="page-wrapper wiki-game-page">
+    <div class="wiki-game-intro">
+        <a class="modern-button primary center-button" href="CurrentLogotype">Dagens logga</a>
+    </div>
+
+    <div class="word-mix-top-bar">
+        <div class="word-mix-other-current">
+            @if (Model.TodaysResult != null) {
+                foreach (var entry in Model.TodaysResult.Results.Where(x => x.IsCorrect).OrderBy(x => x.HintsUsed))
+                {
+                    <span>@Model.DisplayNames[entry.UserName]: (@entry.HintsUsed ledtrådar)</span>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="word-mix-history-outer">
+        @foreach (var dayResult in Model.PreviousResults)
+        {
+            <div class="word-mix-history-wrapper">
+                <div class="wikigame-score-date">
+                    <span>@dayResult.Date.Day @DateHelper.MonthNumberToString[dayResult.Date.Month]</span>
+                    <div class="logo-result-wrapper">
+                        <span>@dayResult.LogotypeMetadata.Answers.First()</span>
+                        <img class="logo-small" src="Logotypes/@dayResult.LogotypeMetadata.GetOriginalLogo"
+                            onclick="showBigLogo('@dayResult.LogotypeMetadata.GetOriginalLogo')" />
+                    </div>
+                    
+                </div>
+                <div class="word-mix-other-current">
+                    @foreach (var entry in dayResult.Results.Where(x => x.IsCorrect).OrderBy(x => x.HintsUsed))
+                    {
+                        <span>@Model.DisplayNames[entry.UserName]: (@entry.HintsUsed @(entry.HintsUsed == 1 ? "ledtråd" : "ledtrådar"))</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script src="~/js/homeButton.js" asp-append-version="true"></script>
+<script>
+    function showBigLogo(logoUrl) {
+        const wrapper = document.createElement('div');
+        const img = document.createElement('img')
+        img.src = 'Logotypes/' + logoUrl
+        img.className = 'logo-big'
+        wrapper.className = 'note-wrapper'
+        wrapper.appendChild(img)
+
+        Popup.putOnOverLay(wrapper, true, () => { Popup.closePopup(); })
+    }
+</script>

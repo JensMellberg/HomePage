@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using HomePage.LogoGame;
 using HomePage.Model;
 using HomePage.Spending;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,10 @@ namespace HomePage.Data
         }
 
         public DbSet<ToDoItem> ToDo { get; set; }
+
+        public DbSet<LogotypeResult> LogotypeResults { get; set; }
+
+        public DbSet<DayLogo> DayLogo { get; set; }
 
         public DbSet<CachedWikiGameLinks> CachedWikiGameLinks { get; set; }
 

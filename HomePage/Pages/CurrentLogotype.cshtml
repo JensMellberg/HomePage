@@ -1,0 +1,132 @@
+﻿@page
+@model HomePage.Pages.CurrentLogotypeModel
+@{
+    ViewData["Title"] = "Dagens logotyp";
+}
+
+@Html.AntiForgeryToken()
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/logotype-game.css" asp-append-version="true" />
+<div class="page-wrapper" style="margin-top: 0">
+    <div class="wiki-game-controls">
+        <button class="modern-button secondary" onclick="window.location.href = 'LogotypeResults'">Tillbaka</button>
+    </div>
+
+    <div class="logo-view" style="display: flex; flex-direction: column; align-items: center;">
+        <img class="logo-big" src="Logotypes/@Model.LogoUrl" />
+        <h1 style="visibility:hidden;" id="answerText"></h1>
+        <input type="text" id="answerBox" oninput="onInput()" class="quiz-input" />
+        <div class="hint-area">
+            <button type="button" id="hintButton" class="hint-button" onclick="showHintDialog()">
+                <span class="hint-icon">💡</span>
+                <span class="hint-button-text">Visa en bokstav</span>
+            </button>
+            <span id="hintCounter" class="hint-counter"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+    var isCompleted = @Json.Serialize(Model.Result.IsCorrect);
+    var answer = @Json.Serialize(Model.Result.Answer);
+    var correctAnswer = @Json.Serialize(Model.CorrectAnswer);
+    var maxHints = @Json.Serialize(Model.MaxHints);
+    var hintsUsed = @Json.Serialize(Model.Result.HintsUsed);
+    var lastInputTime = undefined
+    var guessTimeout;
+    let answerBox = document.getElementById('answerBox')
+    answerBox.value = answer
+    let letterHints = @Json.Serialize(Model.LetterHints);
+
+    let hintCounter = document.getElementById('hintCounter')
+    hintCounter.innerText = hintsUsed + '/' + maxHints
+
+    let hintButton = document.getElementById('hintButton')
+    if (isCompleted || hintsUsed >= maxHints) {
+        hintButton.disabled = true
+    }
+
+    if (isCompleted) {
+        answerBox.disabled = true
+
+        let answerText = document.getElementById('answerText')
+        answerText.style.visibility = null
+        answerText.innerText = correctAnswer
+    }
+
+    function onInput() {
+        if (isCompleted) {
+            return
+        }
+
+        if (answerBox.value.substring(0, letterHints.length) != letterHints) {
+            answerBox.value = letterHints
+            return
+        }
+
+        clearTimeout(guessTimeout);
+
+        guessTimeout = setTimeout(() => {
+            performGuess();
+        }, 300);
+    }
+
+    function showHintDialog() {
+        Alert.openDialog('Är du säker på att du vill använda en ledtråd? Det är lite pinsamt', [
+            { text: 'Ja :(', action: () => { Popup.closePopup(); showHint() }},
+            { text: 'Nä', action: () => { Popup.closePopup(); }}
+        ])
+    }
+
+    function showHint() {
+        let token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        $.ajax({
+            type: "POST",
+            data: {
+                useHint: true,
+                __RequestVerificationToken: token
+            },
+            url: "/CurrentLogotype",
+            success: (data) => {
+                if (data.lettersToShow) {
+                    hintsUsed++
+                    hintCounter.innerText = hintsUsed + '/' + maxHints
+                    answerBox.value = data.lettersToShow
+                    letterHints = data.lettersToShow
+
+                    if (hintsUsed >= maxHints) {
+                        hintButton.disabled = true
+                    }
+                } else {
+                    Alert.openAlert('Du har inga mer ledtrådar!')
+                }
+            }
+        });
+    }
+
+    function performGuess() {
+        let answer = document.getElementById('answerBox').value
+        let token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        $.ajax({
+            type: "POST",
+            data: {
+                answer: answer,
+                __RequestVerificationToken: token
+            },
+            url: "/CurrentLogotype",
+            success: (data) => {
+                if (data.isCorrect) {
+                    isCompleted = true
+                    answerBox.disabled = true
+                    hintButton.disabled = true
+                    let answerText = document.getElementById('answerText')
+                    answerText.style.visibility = null
+                    answerText.innerText = data.correctAnswer
+                    $('.logo-big').attr('src', 'Logotypes/' + data.url);
+                    
+                    Alert.openAlert('Rätt!')
+                }
+            }
+        });
+    }
+</script>
