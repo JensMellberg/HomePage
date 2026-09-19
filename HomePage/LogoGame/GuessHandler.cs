@@ -31,8 +31,8 @@ namespace HomePage.LogoGame
 
             int maxDistance = maxLength switch
             {
-                <= 5 => 1,
-                <= 9 => 2,
+                <= 7 => 1,
+                <= 12 => 2,
                 _ => 3
             };
 

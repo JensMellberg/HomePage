@@ -20,6 +20,8 @@
             }
         }
 
+        public static bool IsInPast(DateTime date) => DateNow > date.Date;
+
         public static string FormatDateForQueryString(DateTime date) => $"year={date.Year}&month={date.Month}&day={date.Day}";
 
         public static string ToKey(DateTime date) => $"{date.Year}-{date.Month}-{date.Day}";

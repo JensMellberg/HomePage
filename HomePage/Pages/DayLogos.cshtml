@@ -1,0 +1,46 @@
+﻿@page
+@model HomePage.Pages.DayLogosModel
+@{
+    ViewData["Title"] = "Dagsloggor";
+}
+
+<div class="page-wrapper">
+    <div class="week-food-header">
+        <a class="week-navigation" href="DayLogos?fromDate=@Model.PreviousWeek">← Föregående</a>
+        <a class="week-navigation" href="DayLogos?fromDate=@Model.NextWeek">Nästa →</a>
+    </div>
+
+    <div class="day-logos-wrapper">
+        @foreach (var dayLogoPair in Model.DayLogos) {
+            <div class="day-logo-wrapper">
+                <span>@dayLogoPair.date.ToReadable()</span>
+                @if (dayLogoPair.metadata != null) {
+                    @if (Model.MayChangeDay(dayLogoPair.date)) {
+                        <a href="ChooseDayLogo?date=@DateHelper.ToKey(dayLogoPair.date)">@dayLogoPair.metadata.Answers.First()</a>
+                    } 
+                    else {
+                        <span>@dayLogoPair.metadata.Answers.First()</span>
+                    }
+                    <img class="logo-small" src="Logotypes/@dayLogoPair.metadata.LogoUrl" />
+                    <img class="logo-small" src="Logotypes/@dayLogoPair.metadata.GetOriginalLogo" />
+                }
+                else {
+                    @if (Model.MayChangeDay(dayLogoPair.date))
+                    {
+                        <a href="ChooseDayLogo?date=@DateHelper.ToKey(dayLogoPair.date)">Ingen logga än</a>
+                    }
+                    else
+                    {
+                        <span>Ingen logga än</span>
+                    }
+                }
+            </div>
+        }
+    </div>
+
+</div>
+
+<script src="~/js/homeButton.js" asp-append-version="true"></script>
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/weekfood.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/logotype-game.css" asp-append-version="true" />

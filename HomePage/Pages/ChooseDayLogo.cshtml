@@ -1,0 +1,46 @@
+﻿@page
+@model HomePage.Pages.ChooseDayLogoModel
+@{
+    ViewData["Title"] = "Välj logga";
+}
+
+@Html.AntiForgeryToken()
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/logotype-game.css" asp-append-version="true" />
+<div class="page-wrapper">
+    <button class="modern-button secondary center-button" onclick="goBack()" type="button">Tillbaka</button>
+    <div class="logo-picker-wrapper">
+        @foreach (var logoMetadata in Model.AllLogos)
+        {
+            <img src="Logotypes/@logoMetadata.LogoUrl" class="logo-small" onclick="pickLogo('@logoMetadata.Id')" />
+        }
+    </div>
+</div>
+
+<script>
+    var date = @Json.Serialize(Model.Date)
+    var returnDate = @Json.Serialize(Model.ReturnDate)
+    function pickLogo(id) {
+        let token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        $.ajax({
+            type: "POST",
+            data: {
+                logoId: id,
+                date: date,
+                __RequestVerificationToken: token
+            },
+            url: "/ChooseDayLogo",
+            success: (data) => {
+                if (data.success) {
+                    goBack()
+                } else {
+                    Alert.openAlert('Något gick fel!')
+                }
+            }
+        });
+    }
+
+    function goBack() {
+        window.location.href = 'DayLogos?fromDate=' + returnDate
+    }
+</script>

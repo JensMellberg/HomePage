@@ -73,7 +73,7 @@ namespace HomePage.Repositories
             var hintsAllowed = dayMetadata.HintsAvailable;
             var answer = dayMetadata.Answers.First();
 
-            if (result.HintsUsed >= hintsAllowed)
+            if (result.HintsUsed >= hintsAllowed || result.IsCorrect)
             {
                 return null;
             }
@@ -93,6 +93,26 @@ namespace HomePage.Repositories
             }
 
             return logotypeRepository.LoadLogoFromId(dayLogo.LogoMetadataPath);
+        }
+
+        public void SetDayLogoMetadata(DateTime date, string metadataId)
+        {
+            var existing = dbContext.DayLogo.FirstOrDefault(x => x.Date == date);
+            if (existing == null)
+            {
+                existing = new DayLogo
+                {
+                    Date = date,
+                    LogoMetadataPath = metadataId
+                };
+                dbContext.DayLogo.Add(existing);
+            }
+            else
+            {
+                existing.LogoMetadataPath = metadataId;
+            }
+
+            dbContext.SaveChanges();
         }
 
         public bool PerformGuess(string userName, string guess, DateTime date)
@@ -116,6 +136,21 @@ namespace HomePage.Repositories
 
             dbContext.SaveChanges();
             return false;
+        }
+
+        public bool MayChangeDayLogo(DateTime date)
+        {
+            if (DateHelper.IsInPast(date))
+            {
+                return false;
+            }
+
+            if (dbContext.LogotypeResults.Where(x => x.Date == date).Any(x => x.IsCorrect))
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

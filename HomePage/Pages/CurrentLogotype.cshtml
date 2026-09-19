@@ -36,6 +36,7 @@
     var guessTimeout;
     let answerBox = document.getElementById('answerBox')
     answerBox.value = answer
+    answerBox.focus()
     let letterHints = @Json.Serialize(Model.LetterHints);
 
     let hintCounter = document.getElementById('hintCounter')

@@ -10,6 +10,9 @@
 <div class="page-wrapper wiki-game-page">
     <div class="wiki-game-intro">
         <a class="modern-button primary center-button" href="CurrentLogotype">Dagens logga</a>
+        @if (Model.IsAdmin) {
+            <a class="modern-button secondary" href="DayLogos?fromDate=@DateHelper.ToKey(DateHelper.GetFirstOfWeek(DateHelper.DateNow))">Bestäm loggor</a>
+        }
     </div>
 
     <div class="word-mix-top-bar">
