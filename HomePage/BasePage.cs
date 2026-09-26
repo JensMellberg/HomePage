@@ -16,12 +16,14 @@ namespace HomePage
 
         public bool RequireLogin { get; private set; }
 
+        protected SignInRepository SignInRepository { get; private set; } = signInRepository;
+
         public override void OnPageHandlerExecuting(PageHandlerExecutingContext context)
         {
-            signInRepository.TryLogInFromCookie(HttpContext.Session, HttpContext.Request, HttpContext.Response);
+            SignInRepository.TryLogInFromCookie(HttpContext.Session, HttpContext.Request, HttpContext.Response);
             IsAdmin = SignInRepository.IsLoggedInAsAdmin(HttpContext.Session);
             IsLoggedIn = SignInRepository.IsLoggedIn(HttpContext.Session);
-            LoggedInPerson = signInRepository.LoggedInPerson(HttpContext.Session);
+            LoggedInPerson = SignInRepository.LoggedInPerson(HttpContext.Session);
 
             IsAdminPage = context.HandlerMethod?.MethodInfo.DeclaringType?
                               .GetCustomAttributes(typeof(RequireAdminAttribute), true)

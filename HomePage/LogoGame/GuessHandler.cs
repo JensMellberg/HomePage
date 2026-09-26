@@ -19,7 +19,7 @@ namespace HomePage.LogoGame
 
             int maxLength = Math.Max(guess.Length, answer.Length);
 
-            if (maxLength <= 3)
+            if (maxLength <= 4)
             {
                 return false;
             }

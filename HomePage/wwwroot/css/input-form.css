@@ -62,6 +62,19 @@
 	transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
+.dayfood-form select {
+	height: 42px;
+	min-height: 42px;
+	box-sizing: border-box;
+	-webkit-appearance: none;
+	appearance: none;
+	padding-right: 32px;
+	background-image: linear-gradient(45deg, transparent 50%, #777984 50%), linear-gradient(135deg, #777984 50%, transparent 50%);
+	background-position: calc(100% - 15px) 17px, calc(100% - 10px) 17px;
+	background-size: 5px 5px, 5px 5px;
+	background-repeat: no-repeat;
+}
+
 .dayfood-form textarea {
 	min-height: 100px;
 	resize: vertical;
@@ -75,7 +88,7 @@
 .dayfood-form input[type="color"]:focus,
 .dayfood-form select:focus,
 .dayfood-form textarea:focus {
-	background: #ffffff;
+	background-color: #ffffff;
 	border-color: #8582e8;
 	box-shadow: 0 0 0 3px rgba(133, 130, 232, 0.13);
 }

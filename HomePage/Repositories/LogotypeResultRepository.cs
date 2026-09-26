@@ -1,9 +1,11 @@
-﻿using HomePage.Data;
+﻿using HomePage.Achievements;
+using HomePage.Data;
 using HomePage.LogoGame;
 
 namespace HomePage.Repositories
 {
-    public class LogotypeResultRepository(AppDbContext dbContext, LogotypeRepository logotypeRepository)
+    public class LogotypeResultRepository(AppDbContext dbContext, LogotypeRepository logotypeRepository, 
+        AchievementRepository achievementRepository, DatabaseLogger logger)
     {
         public (LogotypeDayResult? current, List<LogotypeDayResult> previous) GetResultsByDay()
         {
@@ -57,7 +59,8 @@ namespace HomePage.Repositories
                     Date = date,
                     UserName = userName,
                     HintsUsed = 0,
-                    IsCorrect = false
+                    IsCorrect = false,
+                    CreatedAt = DateHelper.DateTimeNow
                 };
                 dbContext.LogotypeResults.Add(existingResult);
                 dbContext.SaveChanges();
@@ -118,10 +121,18 @@ namespace HomePage.Repositories
         public bool PerformGuess(string userName, string guess, DateTime date)
         {
             var result = GetResultForPerson(date, userName);
+            if (result.IsCorrect)
+            {
+                return false;
+            }
+
             var correctAnswers = GetDayLogoMetadata(date)!.Answers;
+            result.Guesses++;
 
             if (!guess.StartsWith(correctAnswers.First()[..result.HintsUsed]))
             {
+                logger.Information($"{userName} guessed wrong on todays logo with answer {guess}, correct answer was {correctAnswers.First()}");
+                dbContext.SaveChanges();
                 return false;
             }
 
@@ -129,9 +140,29 @@ namespace HomePage.Repositories
 
             if (GuessHandler.IsCorrect(guess, correctAnswers))
             {
+                logger.Information($"{userName} guessed correct on todays logo with answer {guess}");
                 result.IsCorrect = true;
+                result.FinishedAt = DateHelper.DateTimeNow;
                 dbContext.SaveChanges();
+                if ((DateHelper.DateTimeNow - result.CreatedAt).TotalSeconds <= 10)
+                {
+                    achievementRepository.EarnAchievement(AchievementRepository.QuickClick, userName);
+                }
+
+                if (Enumerable.Range(1, 4).Select(x => date.AddDays(-x)).All(newDate =>
+                {
+                    var result = dbContext.LogotypeResults.FirstOrDefault(x => x.Date == newDate && x.UserName == userName);
+                    return result?.IsCorrect == true && result.Guesses == 1 && result.HintsUsed == 0;
+                }))
+                {
+                    achievementRepository.EarnAchievement(AchievementRepository.Reklamskadad, userName);
+                }
+
                 return true;
+            }
+            else
+            {
+                logger.Information($"{userName} guessed wrong on todays logo with answer {guess}, correct answer was {correctAnswers.First()}");
             }
 
             dbContext.SaveChanges();

@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="~/css/ingredient-picker.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/input-form.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/modern-button.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/autosearch.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/HomePage.styles.css" asp-append-version="true" />
 </head>
 <body style="background: radial-gradient(circle at 20% 10%, rgba(255, 255, 255, .4), transparent 30%), #d6f5f4;">
@@ -17,6 +18,8 @@
     <script src="~/js/Popup.js"></script>
     <script src="~/js/Alert.js"></script>
     <script src="~/js/HtmlUtils.js"></script>
+    <script src="~/js/JsonResultUnpacker.js"></script>
+    <script src="~/js/AutoSearch.js"></script>
 
     <div class="container">
         <main role="main">
@@ -26,5 +29,21 @@
 
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    @{
+        var error = string.Join("\n", ViewData.ModelState.Values
+            .SelectMany(x => x.Errors)
+            .Select(x => x.ErrorMessage)
+            .Where(x => !string.IsNullOrWhiteSpace(x) && !x.Contains("required")));
+    }
+
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const error = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(error));
+                Alert.openAlert(error);
+            });
+        </script>
+    }
 </body>
 </html>

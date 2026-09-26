@@ -1,7 +1,5 @@
 ﻿using MetadataExtractor.Formats.Exif;
-using MetadataExtractor.Formats.Png;
 using MetadataExtractor;
-using System.IO;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 

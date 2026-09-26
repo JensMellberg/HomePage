@@ -17,12 +17,6 @@ main[role="main"] {
 	box-sizing: border-box;
 }
 
-.home-button {
-	position: absolute;
-	top: 5px;
-	left: 5px;
-}
-
 .button-section-wrapper {
 	display: flex;
 	gap: 8px;
@@ -176,6 +170,17 @@ main[role="main"] {
 	color: #333540;
 	font-size: 13px;
 	font-weight: 600;
+}
+
+.modern-input-wrapper input[type="number"] {
+	max-width: 65%;
+	background: transparent;
+	color: #333540;
+	font-size: 13px;
+	font-weight: 600;
+	padding: 6px;
+	border: 1px solid #dedee5;
+	border-radius: 10px;
 }
 
 .center-button {
@@ -389,7 +394,7 @@ main[role="main"] {
 	margin-top: 14px;
 }
 
-.side-dish-section {
+.multi-select-section {
 	width: 100%;
 	margin: 4px 0 12px;
 	padding: 10px;
@@ -400,7 +405,7 @@ main[role="main"] {
 	box-shadow: 0 2px 8px rgba(30, 32, 50, 0.04);
 }
 
-.side-dish-section > span {
+.multi-select-section > span {
 	display: block;
 	margin: 0 0 6px 2px;
 	padding: 0;
@@ -410,7 +415,7 @@ main[role="main"] {
 }
 
 
-.side-dish-section #existingSideDishes {
+.multi-select-section .existing-multi-select {
 	display: flex;
 	flex-direction: column;
 	gap: 5px;
@@ -419,7 +424,7 @@ main[role="main"] {
 }
 
 
-.side-dish-section .input-wrapper {
+.multi-select-section .input-wrapper {
 	display: flex;
 	align-items: center;
 	gap: 6px;
@@ -434,7 +439,7 @@ main[role="main"] {
 	flex-direction: row;
 }
 
-.side-dish-section .sideDishSelect {
+.multi-select-section .multi-select {
 	flex: 1 1 auto;
 	min-width: 0;
 	width: 100%;
@@ -450,7 +455,7 @@ main[role="main"] {
 	outline: none;
 }
 
-.side-dish-section .recipe-button {
+.multi-select-section .recipe-button {
 	flex: 0 0 30px;
 	width: 30px;
 	height: 30px;
@@ -466,13 +471,13 @@ main[role="main"] {
 	cursor: pointer;
 }
 
-.side-dish-section .recipe-button:hover {
+.multi-select-section .recipe-button:hover {
 	background: #fbe0e2;
 	border-color: #e9b8bd;
 	color: #b9434d;
 }
 
-.side-dish-section > .input-wrapper {
+.multi-select-section > .input-wrapper {
 	margin: 5px 0 0 !important;
 	padding: 0;
 	background: transparent;
@@ -480,7 +485,7 @@ main[role="main"] {
 }
 
 
-.side-dish-section > .input-wrapper .sideDishSelect {
+.multi-select-section > .input-wrapper .multi-select {
 	min-height: 40px;
 	padding: 7px 10px;
 	background: #f1f0ff;
@@ -491,26 +496,26 @@ main[role="main"] {
 	cursor: pointer;
 }
 
-.side-dish-section > .input-wrapper .sideDishSelect:hover {
+.multi-select-section > .input-wrapper .multi-select:hover {
 	background: #eae9ff;
 	border-color: #8d8bea;
 }
 
 
 @media (max-width: 380px) {
-	.side-dish-section {
+	.multi-select-section {
 		margin-bottom: 10px;
 	}
 
-	.side-dish-section .input-wrapper {
+	.multi-select-section .input-wrapper {
 		min-height: 38px;
 	}
 
-	.side-dish-section .sideDishSelect {
+	.multi-select-section .multi-select {
 		font-size: 12px;
 	}
 
-	.side-dish-section > .input-wrapper .sideDishSelect {
+	.multi-select-section > .input-wrapper .multi-select {
 		min-height: 38px;
 		font-size: 12px;
 	}
@@ -549,6 +554,11 @@ main[role="main"] {
 .ingredient-grid {
 	--food-main-column: minmax(0, 1fr);
 	--food-extra-columns: minmax(50px, 70px) minmax(75px, 120px);
+}
+
+.old-goodies-grid {
+	--food-main-column: minmax(0, 225px);
+	--food-extra-columns: repeat(auto-fit, minmax(34px, 60px));
 }
 
 .statistics-grid {

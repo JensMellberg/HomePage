@@ -4,11 +4,11 @@ namespace HomePage.Pages
 {
     public class WordMixStatModel(AppDbContext dbContext, SignInRepository signInRepository, DatabaseLogger logger) : BasePage(signInRepository)
     {
-        public string PersonClass { get; set; }
+        public required Person Person { get; set; }
 
         public int Score { get; set; }
 
-        public string BoardString { get; set; }
+        public required string BoardString { get; set; }
 
         public void OnGet(Guid key)
         {
@@ -20,7 +20,7 @@ namespace HomePage.Pages
                 return;
             }
 
-            PersonClass = result.Person == Person.Jens.Name || result.Person == Person.Anna.Name ? result.Person.ToLower() : "unknown";
+            Person = SignInRepository.GetPerson(result.Person)!;
             Score = result.Score;
             BoardString = result.Board.EncodeForClient();
         }

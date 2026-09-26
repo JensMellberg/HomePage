@@ -16,6 +16,11 @@
         <img class="logo-big" src="Logotypes/@Model.LogoUrl" />
         <h1 style="visibility:hidden;" id="answerText"></h1>
         <input type="text" id="answerBox" oninput="onInput()" class="quiz-input" />
+        @if (!Model.Result.IsCorrect) {
+            <button type="button" id="answerButton" onclick="performGuess()" class="modern-button primary center-button" style="margin-top: 8px; width: 85%; max-width: 85%;justify-content: center; height: 48px;">
+                Gissa
+            </button>
+        }
         <div class="hint-area">
             <button type="button" id="hintButton" class="hint-button" onclick="showHintDialog()">
                 <span class="hint-icon">💡</span>
@@ -64,12 +69,6 @@
             answerBox.value = letterHints
             return
         }
-
-        clearTimeout(guessTimeout);
-
-        guessTimeout = setTimeout(() => {
-            performGuess();
-        }, 300);
     }
 
     function showHintDialog() {
@@ -120,12 +119,16 @@
                     isCompleted = true
                     answerBox.disabled = true
                     hintButton.disabled = true
+
+                    document.getElementById('answerButton').remove()
                     let answerText = document.getElementById('answerText')
                     answerText.style.visibility = null
                     answerText.innerText = data.correctAnswer
                     $('.logo-big').attr('src', 'Logotypes/' + data.url);
                     
                     Alert.openAlert('Rätt!')
+                } else {
+                    Alert.openAlert('Fel!')
                 }
             }
         });

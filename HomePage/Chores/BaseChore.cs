@@ -14,7 +14,7 @@ namespace HomePage.Chores
 
         protected virtual string ConvertStreakPerson(string person) => person;
 
-        protected virtual bool HasStreak => true;
+        public virtual bool HasStreak => true;
 
         public ChoreStreak GetStreak(string person)
         {
@@ -27,6 +27,10 @@ namespace HomePage.Chores
             person = ConvertStreakPerson(person);
             var streak = GetStreak(person);
             streak.Streak = count;
+            if (count > streak.HighestStreak)
+            {
+                streak.HighestStreak = count;
+            }
         }
 
         public string Id => source.Id;
@@ -66,14 +70,18 @@ namespace HomePage.Chores
             return null;
         }
 
+        public virtual bool PersonUsesChore(string person) => true;
+
         private int IncreaseStreak(string person)
         {
+            var streak = GetStreak(person);
+            streak.TotalPerformed++;
             if (!HasStreak)
             {
                 return 0;
             }
 
-            var current = GetStreak(person).Streak;
+            var current = streak.Streak;
             UpdateStreak(person, current + 1);
             return current + 1;
         }

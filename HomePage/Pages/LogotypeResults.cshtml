@@ -20,7 +20,10 @@
             @if (Model.TodaysResult != null) {
                 foreach (var entry in Model.TodaysResult.Results.Where(x => x.IsCorrect).OrderBy(x => x.HintsUsed))
                 {
-                    <span>@Model.DisplayNames[entry.UserName]: (@entry.HintsUsed ledtrådar)</span>
+                    <a @Html.Raw(Model.PersonByUserName[entry.UserName].GetProfileHref) class="profile-name-photo-wrapper">
+                        @Html.Raw(Model.PersonByUserName[entry.UserName].GetPhotoHtml)
+                        <span>@Model.ResultText(entry)</span>
+                    </a>
                 }
             }
         </div>
@@ -42,7 +45,10 @@
                 <div class="word-mix-other-current">
                     @foreach (var entry in dayResult.Results.Where(x => x.IsCorrect).OrderBy(x => x.HintsUsed))
                     {
-                        <span>@Model.DisplayNames[entry.UserName]: (@entry.HintsUsed @(entry.HintsUsed == 1 ? "ledtråd" : "ledtrådar"))</span>
+                        <a @Html.Raw(Model.PersonByUserName[entry.UserName].GetProfileHref) class="profile-name-photo-wrapper">
+                            @Html.Raw(Model.PersonByUserName[entry.UserName].GetPhotoHtml)
+                            <span>@Model.ResultText(entry)</span>
+                        </a>
                     }
                 </div>
             </div>

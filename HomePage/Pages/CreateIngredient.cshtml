@@ -14,7 +14,7 @@
         </div>
         <div class="input-wrapper">
             <span>Enhet</span>
-            <select name="unitType" style="max-width: 80vw" id="unitType" onchange='updateUnits()' required>
+            <select name="unitType" id="unitType" onchange='updateUnits()' required>
                 @foreach (var unitType in UnitTypes.GetUnitTypes)
                 {
                     if (@Model.Ingredient.UnitType == unitType)
@@ -30,7 +30,7 @@
         </div>
         <div class="input-wrapper">
             <span>Kategori</span>
-            <select name="category" style="max-width: 80vw" id="category" required>
+            <select name="category" id="category" required>
                 @foreach (var category in IngredientCategory.Categories.OrderBy(x => x))
                 {
                     if (@Model.Ingredient.CategoryId == category)
@@ -50,13 +50,13 @@
         </div>
         <div class="input-wrapper">
             <span>Standardmått</span>
-            <input type="number" step="any" style="max-width: 40px" value="@Model.Ingredient.StandardAmount" name="standardamount"/>
-            <select name="standardunit" style="max-width: 80vw" id="unitdropdown" required></select>
+            <input type="number" step="any" style="max-width: 60px" value="@Model.Ingredient.StandardAmount" name="standardamount"/>
+            <select name="standardunit" style="max-width: 60px" id="unitdropdown" required></select>
         </div>
 
         <div class="button-wrapper">
-            <input type="submit" value="Spara" />
-            <button type="button" onclick="window.location.href = '/Ingredients';">Avbryt</button>
+            <input class="modern-button primary" type="submit" value="Spara" />
+            <button class="modern-button secondary" type="button" onclick="window.location.href = '/Ingredients';">Avbryt</button>
         </div>
     </form>
 </div>

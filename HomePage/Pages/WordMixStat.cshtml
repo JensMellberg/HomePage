@@ -3,9 +3,10 @@
 @{
     ViewData["Title"] = "Ordmix";
 }
+
 <div class="word-mix-top-bar" style="margin-top: 1px;">
     <div class="word-mix-score-wrapper">
-        <div class="profile-photo @Model.PersonClass"></div>
+        @Html.Raw(Model.Person.GetPhotoHtml)
         <span id="bestScore">@Model.Score</span>
     </div>
     <button onclick="window.location.href='WordMixStats'" style="height: 32px; margin-top: 8px;">Tillbaka</button>

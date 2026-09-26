@@ -40,7 +40,10 @@
                     <div class="divider"></div>
                     @if (Model.IsLoggedIn)
                     {
-                        <a href="/Logout">Logga ut (@Model.LoggedInPerson!.Name)</a>
+                        <a @Html.Raw(Model.LoggedInPerson!.GetProfileHref) class="profile-name-photo-wrapper">
+                            @Html.Raw(Model.LoggedInPerson!.GetPhotoHtml)
+                            <span>@Model.LoggedInPerson!.Name</span>
+                        </a>
                     }
                     else
                     {
@@ -134,9 +137,7 @@
             @if (Model.JensIcons.Count > 0)
             {
                 <div class="person-chores">
-
-                    <div class="profile-photo jens"></div>
-
+                    @Html.Raw(Person.Jens.GetPhotoHtmlWithLink)
                     <div class="chore-icons">
                         @foreach (var icon in Model.JensIcons)
                         {
@@ -149,7 +150,7 @@
             @if (Model.AnnaIcons.Count > 0)
             {
                 <div class="person-chores">
-                    <div class="profile-photo anna"></div>
+                        @Html.Raw(Person.Anna.GetPhotoHtmlWithLink)
                     <div class="chore-icons">
                         @foreach (var icon in Model.AnnaIcons)
                         {

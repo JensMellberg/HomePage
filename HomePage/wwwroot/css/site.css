@@ -53,6 +53,24 @@
     top: 5px;
 }
 
+.profile-name-photo-wrapper {
+    display: flex;
+    gap: 9px;
+    align-items: center;
+}
+
+.profile-name-photo-wrapper .profile-photo {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+}
+
+.top-right-button {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+}
+
 .list-wrapper {
     display: flex;
     flex-direction: column;
@@ -101,16 +119,41 @@
     background-position: center;
 }
 
-.profile-photo.jens {
-    background-image: url(../Jens.png);
+.profile-photo.Flower {
+    background-image: url(../Plant.jpg);
 }
 
-.profile-photo.anna {
-    background-image: url(../Anna.png);
+.profile-photo.Sink {
+    background-image: url(../Sink.png);
 }
 
-.profile-photo.unknown {
-    background-image: url(../Unknown.jpg);
+.profile-photo.Eye {
+    background-image: url(../Eye.png);
+}
+
+.profile-photo.Bed {
+    background-image: url(../Bed.jpg);
+}
+
+.profile-photo.Recycle {
+    background-image: url(../Recycle.png);
+}
+
+.profile-photo.Workout {
+    background-image: url(../Workout.png);
+}
+
+.profile-photo.cat {
+    background-image: url(../Cat.png);
+    position: relative;
+}
+
+.profile-photo.Floss {
+    background-image: url(../Floss.png);
+}
+
+.profile-photo.FlossJens {
+    background-image: url(../Floss.png);
 }
 
 .note-wrapper span {

@@ -1,0 +1,60 @@
+﻿@page
+@model HomePage.Pages.EditProfileModel
+@{
+    ViewData["Title"] = "Redigera profil";
+}
+
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<div class="page-wrapper mainscreen">
+    <form class="dayfood-form" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <span>Redigera profil</span>
+        <div class="input-wrapper">
+            <span>Namn att visa</span>
+            <input type="text" name="displayName" required value="@Model.LoggedInPerson!.Name" />
+        </div>
+        <div class="profile-photo-upload">
+            <label for="profilePhotoInput" class="profile-photo-preview">
+                @Html.Raw(Model.LoggedInPerson!.GetPhotoHtml)
+                <span class="profile-photo-overlay">Välj bild</span>
+            </label>
+
+            <input id="profilePhotoInput"
+                   type="file"
+                   name="profilePhoto"
+                   accept="image/*"
+                   hidden />
+        </div>
+
+        <div class="button-wrapper">
+            <input class="modern-button primary" type="submit" value="Spara" />
+            <button class="modern-button secondary" type="button" onclick="window.history.back();">Avbryt</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const input = document.getElementById('profilePhotoInput');
+    const preview = $('.profile-photo')[0]
+
+    input.onchange = () => {
+        const file = input.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+            input.value = '';
+            return;
+        }
+
+        const url = URL.createObjectURL(file);
+
+        preview.style.backgroundImage = 'url(' + url + ')'
+
+        preview.onload = () => {
+            URL.revokeObjectURL(url);
+        };
+    }
+</script>

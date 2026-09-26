@@ -10,27 +10,24 @@ namespace HomePage.Pages
     [RequireAdmin]
     public class CreateDayFoodModel(AppDbContext dbContext, SignInRepository signInRepository, DatabaseLogger logger, SettingsRepository settingsRepository) : BasePage(signInRepository)
     {
-        public string DateKey { get; set; }
+        public required string DateKey { get; set; }
 
-        public string DateQs { get; set; }
+        public required string DateQs { get; set; }
 
-        public string DateQsFirstOfWeek { get; set; }
+        public required string DateQsFirstOfWeek { get; set; }
 
-        public string CurrentFilter { get; set; }
+        public required DayFood DayFood { get; set; }
 
-        public DayFood? DayFood { get; set; }
+        public required List<Food> ExistingFood { get; set; }
 
-        public List<Food> ExistingFood { get; set; }
-
-        public List<Food> SideDishes { get; set; }
+        public required List<Food> SideDishes { get; set; }
 
         public Guid FoodIdFromQueryString { get; set; }
 
         public bool CanDelete { get; set; }
 
-        public IActionResult OnGet(int year, int month, int day, Guid foodId, string filter)
+        public IActionResult OnGet(int year, int month, int day, Guid foodId)
         {
-            var Regex = string.IsNullOrEmpty(filter) ? null : new Regex("^.*" + filter + ".*$", RegexOptions.IgnoreCase);
             var date = new DateTime(year, month, day);
             DateKey = DateHelper.ToKey(date);
 
@@ -40,7 +37,6 @@ namespace HomePage.Pages
             var allFoods = dbContext.Food.ToList();
             ExistingFood = allFoods
                 .Where(x => !x.IsSideDish)
-                .Where(x => Regex?.IsMatch(x.Name) ?? true)
                 .OrderBy(x => x.Name)
                 .ToList();
             SideDishes = allFoods
@@ -48,7 +44,6 @@ namespace HomePage.Pages
                 .OrderBy(x => x.Name)
                 .ToList();
             FoodIdFromQueryString = foodId;
-            CurrentFilter = filter;
             DateQs = DateHelper.FormatDateForQueryString(date);
             DateQsFirstOfWeek = DateHelper.FormatDateForQueryString(DateHelper.GetFirstOfWeek(date));
             return Page();

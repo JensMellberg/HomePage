@@ -6,13 +6,13 @@ namespace HomePage.Pages.WikiGame
 {
     public class ResultModel(WikiGameRepository wikiGameRepository, SignInRepository signInRepository, DatabaseLogger logger) : BasePage(signInRepository)
     {
-        public string PersonClass { get; set; }
-
         public int Score { get; set; }
 
-        public List<string> PathTaken { get; set; }
+        public required List<string> PathTaken { get; set; }
         
         public bool HasFinished { get; set; }
+
+        public required Person Person { get; set; }
 
         public IActionResult OnGet(DateTime date, string user)
         {
@@ -24,7 +24,7 @@ namespace HomePage.Pages.WikiGame
             }
 
             HasFinished = result.HasFinished;
-            PersonClass = result.UserName == Person.Jens.UserName || result.UserName == Person.Anna.UserName ? result.UserName.ToLower() : "unknown";
+            Person = SignInRepository.GetPerson(result.UserName) ?? Person.MrRobot;
             Score = result.Steps;
             PathTaken = result.PathTaken.Select(x => x.Replace("_", " ")).ToList();
             return Page();

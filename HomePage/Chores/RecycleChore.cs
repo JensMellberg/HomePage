@@ -8,6 +8,6 @@ namespace HomePage.Chores
 
         protected override DateTime GetNextDate() => GetLastUpdatedDate.AddDays(5);
 
-        protected override bool HasStreak => false;
+        public override bool HasStreak => false;
     }
 }

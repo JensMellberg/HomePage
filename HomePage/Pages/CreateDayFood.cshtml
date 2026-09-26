@@ -9,13 +9,10 @@
     <input type="hidden" id="datekey" value="@Model.DateQs" />
     <input type="hidden" id="datekeyFoW" value="@Model.DateQsFirstOfWeek" />
     <form class="dayfood-form" method="post" id="theForm">
-        <input type="hidden" id="sideDishIds" name="sideDishIds" value="@string.Join(",", Model.DayFood.SideDishes.Select(x => x.Id))" />
+        <input type="hidden" id="sideDishIds" name="sideDishIds" />
         <input type="hidden" name="day" value="@Model.DateKey" id="dateKeyCompact"/>
         <input type="hidden" name="delete" id="deleteHidden" value="" />
-        <div class="input-wrapper">
-            <input type="text" value="@Model.CurrentFilter" placeholder="filtrera..." onchange="updateTextFilter(this.value)" />
-            <button class="modern-button secondary wide-button" type="button">Sök</button>
-        </div>
+        <div id="autoSearchPlaceholder"></div>
         <div class="input-wrapper">
             <select name="foodId" id="foodSelector">
                 @foreach (var food in Model.ExistingFood) {
@@ -31,27 +28,7 @@
             <a class="modern-button secondary new" href="CreateFood?date=@Model.DateKey">Ny maträtt</a>
             <a class="modern-button secondary edit" href="#" onclick="editFood()">Ändra mat</a>
         </div>
-        <div class="side-dish-section">
-        <span>Tillbehör</span>
-            <div id="existingSideDishes">
-                @foreach (var sideDishId in Model.DayFood.SideDishes.Select(x => x.Id)) {
-                    <div class="input-wrapper">
-                        <select sideDishId="@sideDishId" class="sideDishSelect" onchange="updateSideDishHidden()">
-                        </select>
-                        <button type="button" class="recipe-button" onclick="deleteSideDish(this)">X</button>
-                    </div>
-                }
-            </div>
-            <div class="input-wrapper">
-                <select sideDishId="" id="newSideDish" class="sideDishSelect" onchange="newSideDishOnChange()">
-                    <option value=""></option>
-                    @foreach (var food in Model.SideDishes)
-                    {
-                        <option value="@food.Id"> @food.Name</option>
-                    }
-                </select>
-            </div>
-        </div>
+        <div id="sideDishPlaceholder"></div>
         <div class="input-wrapper">
             <span>Vegetarisk</span>
             <input type="checkbox" name="isVego" checked="@Model.DayFood.IsVego" />
@@ -72,55 +49,27 @@
     </form>
 </div>
 
+<script src="~/js/MultiSelect.js"></script>
 <script>
-    const allSelects = document.querySelectorAll('.sideDishSelect')
-    Array.from(allSelects).forEach(e => {
-        const selected = e.getAttribute('sideDishId')
-        if (!selected) {
-            return
-        }
+    const sideDishOptions = @Json.Serialize(Model.SideDishes.Select(x => new {
+        id = x.Id,
+        text = x.Name
+    }));
 
-        initSideDishSelect(e, e.getAttribute('sideDishId'))
-    });
+    const existingSideDishIds = @Json.Serialize(Model.DayFood.SideDishes.Select(x => x.Id));
 
-    function updateSideDishHidden() {
-        const allSideDishSelects = document.querySelectorAll('.sideDishSelect')
-        const newValue = Array.from(allSideDishSelects).map(e => e.value).filter(e => e).join(',')
-        $('#sideDishIds').val(newValue)
-    }
+    const sideDishPlaceholder = document.getElementById('sideDishPlaceholder')
+    const sideDishHidden = document.getElementById('sideDishIds')
+    MultiSelect.create(sideDishOptions, existingSideDishIds, sideDishHidden, sideDishPlaceholder, 'Tillbehör')
 
-    function newSideDishOnChange() {
-        const newSideDishSelect = $('#newSideDish')
-        const selectedId = newSideDishSelect.val()
-        newSideDishSelect.val('')
-        const newSelect = document.createElement('select')
-        newSelect.classList = 'sideDishSelect'
-        newSelect.onchange = () => updateSideDishHidden()
-        initSideDishSelect(newSelect, selectedId)
-        const wrapper = document.createElement('div')
-        wrapper.classList = 'input-wrapper'
-        wrapper.appendChild(newSelect)
+    const foodSelect = document.getElementById('foodSelector')
+    const autoSearchPlaceholder = document.getElementById('autoSearchPlaceholder')
+    const existingFoodOptions = @Json.Serialize(Model.ExistingFood.Select(x => new {
+        id = x.Id,
+        text = x.Name
+    }))
+    AutoSearch.create(existingFoodOptions, v => foodSelect.value = v, autoSearchPlaceholder, 'Sök mat..')
 
-        const deleteButton = document.createElement('button')
-        deleteButton.innerText = 'X'
-        deleteButton.onclick = e => deleteSideDish(e.target)
-        deleteButton.classList = 'recipe-button'
-        deleteButton.type = 'button'
-        wrapper.appendChild(deleteButton)
-
-        $('#existingSideDishes').append(wrapper)
-        updateSideDishHidden()
-    }
-
-    function deleteSideDish(e) {
-        e.parentElement.remove()
-        updateSideDishHidden()
-    }
-
-    function updateTextFilter(value) {
-        const date = document.querySelectorAll('#datekey')[0].value
-        window.location = '/CreateDayFood?' + date + '&filter=' + value
-    }
 
      function deleteFood() {
         $('#deleteHidden').val('true')
@@ -133,18 +82,5 @@
         if (selectedFood) {
             window.location = '/CreateFood?date=' + date + '&foodId=' + selectedFood
         }
-    }
-
-    function initSideDishSelect(element, selectedId) {
-        Array.from(document.getElementById('newSideDish').options).forEach(option => {
-            if (!option.value) {
-                return
-            }
-            const newOption = document.createElement('option')
-            newOption.text = option.text
-            newOption.value = option.value
-            newOption.selected = option.value === selectedId
-            element.appendChild(newOption)
-        });
     }
 </script>

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HomePage.Pages
 {
     [RequireLogin]
-    public class CurrentLogotypeModel(LogotypeResultRepository resultRepository, LogotypeRepository logotypeRepository, SignInRepository signInRepository)
+    public class CurrentLogotypeModel(LogotypeResultRepository resultRepository, SignInRepository signInRepository)
         : BasePage(signInRepository)
     {
         public required LogotypeResult Result { get; set; }

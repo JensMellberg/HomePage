@@ -1,0 +1,73 @@
+﻿@page
+@model HomePage.Pages.ProfileModel
+@{
+    ViewData["Title"] = "Profil";
+}
+
+<link rel="stylesheet" href="~/css/profile-page.css" asp-append-version="true" />
+<div class="page-wrapper profile-page">
+    @if (!Model.IsAdmin && Model.LoggedInPerson?.UserName == Model.Person.UserName) {
+        <button class="modern-button secondary top-right-button" onclick="window.location.href = 'EditProfile'">Redigera profil</button>
+    }
+
+    <div class="profile-header">
+        @Html.Raw(Model.Person.GetPhotoHtml)
+
+        <div class="profile-header-info">
+            <h1>@Model.Person.Name</h1>
+            <span class="profile-subtitle">(@Model.Person.UserName)</span>
+        </div>
+        @if (Model.LoggedInPerson?.UserName == Model.Person.UserName)
+        {
+            <a class="modern-button secondary" href="Logout">Logga ut</a>
+        }
+    </div>
+
+    @if (Model.ChoreStats.Count > 0) {
+        <div class="profile-stats">
+            <div class="profile-stats-header">
+                <span>Syssla</span>
+                <span>Gånger utförd</span>
+                <span>Längsta streak</span>
+            </div>
+
+            @foreach (var (choreId, total, longest) in Model.ChoreStats) {
+                <div class="profile-stat">
+                    <div class="profile-photo @choreId">
+                    </div>
+
+                    <strong>@total</strong>
+                    <strong>@longest</strong>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="profile-section">
+        <div class="profile-section-header">
+            <span>Achievements</span>
+            <span class="profile-section-count">@Model.UserAchievements.Count(x => x.IsEarned) / @Model.UserAchievements.Count</span>
+        </div>
+
+        <div class="achievement-list">
+            @foreach (var achievement in Model.UserAchievements) {
+                <div class="achievement @(achievement.IsEarned ? "achievement-unlocked" : "achievement-locked")">
+                    <div class="achievement-icon">@achievement.Achievement.Icon</div>
+
+                    <div class="achievement-content">
+                        <strong>@achievement.Achievement.Title</strong>
+                        <span>@achievement.Achievement.Description</span>
+                    </div>
+
+                    @if (achievement.IsEarned) {
+                        <div class="achievement-check">✓</div>
+                    }
+                    else
+                    {
+                        <div class="achievement-lock">🔒</div>
+                    } 
+                </div>
+            }
+        </div>
+    </div>
+</div>

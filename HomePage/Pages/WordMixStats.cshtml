@@ -22,11 +22,11 @@
         <div class="word-mix-score-wrapper">
             @if (Model.JensScore?.Key != null)
             {
-                <a class="profile-photo jens" href="CurrentWordMix?board=@Model.JensScore.Key.EncodeForClient()"></a>
+                <a class="profile-photo" style="background-image: url(UserPhotos/@Person.Jens.PhotoUrl);" href="CurrentWordMix?board=@Model.JensScore.Key.EncodeForClient()"></a>
             }
             else
             {
-                <div class="profile-photo jens"></div>
+                @Html.Raw(Person.Jens.GetPhotoHtml)
             }
             <span>@Model.ConvertScore(Model.JensScore?.Score)</span>
         </div>
@@ -34,11 +34,11 @@
             <span>@Model.ConvertScore(Model.AnnaScore?.Score)</span>
             @if (Model.AnnaScore?.Key != null)
             {
-                <a class="profile-photo anna" href="CurrentWordMix?board=@Model.AnnaScore.Key.EncodeForClient()"></a>
+                <a class="profile-photo" style="background-image: url(UserPhotos/@Person.Anna.PhotoUrl);" href="CurrentWordMix?board=@Model.AnnaScore.Key.EncodeForClient()"></a>
             }
             else
             {
-                <div class="profile-photo anna"></div>
+                @Html.Raw(Person.Anna.GetPhotoHtml)
             }
         </div>
     </div>
@@ -65,10 +65,10 @@
                 </div>
                 <div class="word-mix-score-wrapper">
                     @if (history.jensScore?.Score > 0) {
-                        <a class="profile-photo jens" href="WordMixStat?key=@history.jensScore.Key"></a>
+                        <a class="profile-photo" style="background-image: url(UserPhotos/@Person.Jens.PhotoUrl);" href="WordMixStat?key=@history.jensScore.Key"></a>
                     }
                     else {
-                        <div class="profile-photo jens"></div>
+                        @Html.Raw(Person.Jens.GetPhotoHtml)
                     }
                     <span>@Model.ConvertScore(history.jensScore?.Score)</span>
                 </div>
@@ -82,11 +82,11 @@
                     <span>@Model.ConvertScore(history.annaScore?.Score)</span>
                     @if (history.annaScore?.Score > 0)
                     {
-                        <a class="profile-photo anna" href="WordMixStat?key=@history.annaScore.Key"></a>
+                        <a class="profile-photo" style="background-image: url(UserPhotos/@Person.Anna.PhotoUrl);" href="WordMixStat?key=@history.annaScore.Key"></a>
                     }
                     else
                     {
-                        <div class="profile-photo anna"></div>
+                        @Html.Raw(Person.Anna.GetPhotoHtml)
                     }
                 </div>
             </div>

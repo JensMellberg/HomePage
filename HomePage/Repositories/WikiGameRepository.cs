@@ -1,11 +1,13 @@
-﻿using HomePage.Data;
+﻿using HomePage.Achievements;
+using HomePage.Data;
 using HomePage.Model;
 using HomePage.WikiGame;
 using Microsoft.Extensions.Options;
 
 namespace HomePage.Repositories
 {
-    public class WikiGameRepository(AppDbContext dbContext, DatabaseLogger logger, IOptions<RobotConfig> robotConfig, IServiceScopeFactory scopeFactory)
+    public class WikiGameRepository(AppDbContext dbContext, DatabaseLogger logger, IOptions<RobotConfig> robotConfig,
+        AchievementRepository achievementRepository, IServiceScopeFactory scopeFactory)
     {
         private const int MinimumGoalPageLinks = 100;
         private const int MinimumGoalPageViews = 15000;
@@ -45,6 +47,19 @@ namespace HomePage.Repositories
             var readableGoalTitle = WikipediaClient.GetPageInfo(goal, startPage.Language).Title;
             var nextPageInfo = WikipediaClient.GetPageInfo(title, startPage.Language);
             var isWin = nextPageInfo.Title == readableGoalTitle;
+            if (isWin && username != Person.MrRobot.UserName)
+            {
+                if (DateHelper.DateTimeNow.Hour < 1 && date == DateHelper.DateNow)
+                {
+                    achievementRepository.EarnAchievement(AchievementRepository.Nattsurfare, username);
+                }
+
+                var mrRobotResult = GetUserResultForDate(Person.MrRobot.UserName, date);
+                if (mrRobotResult?.HasFinished == true && currentPage.steps + 1 <= mrRobotResult.Steps)
+                {
+                    achievementRepository.EarnAchievement(AchievementRepository.WikiNerd, username);
+                }
+            }
 
             var newPage = GetPageContent(title, startPage.Language, isWin);
             

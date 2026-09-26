@@ -64,6 +64,15 @@ namespace HomePage.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FinishedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Guesses")
+                        .HasColumnType("int");
+
                     b.Property<int>("HintsUsed")
                         .HasColumnType("int");
 
@@ -199,7 +208,13 @@ namespace HomePage.Migrations
                     b.Property<string>("Person")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("HighestStreak")
+                        .HasColumnType("int");
+
                     b.Property<int>("Streak")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalPerformed")
                         .HasColumnType("int");
 
                     b.HasKey("ChoreId", "Person");
@@ -653,6 +668,24 @@ namespace HomePage.Migrations
                     b.ToTable("ToDo");
                 });
 
+            modelBuilder.Entity("HomePage.Model.UserAchievement", b =>
+                {
+                    b.Property<int>("AchievementId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("DateEarned")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("AchievementId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserAchievements");
+                });
+
             modelBuilder.Entity("HomePage.Model.UserGroup", b =>
                 {
                     b.Property<Guid>("Id")
@@ -686,6 +719,10 @@ namespace HomePage.Migrations
                     b.Property<byte[]>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<Guid?>("UserGroupId")
                         .HasColumnType("uniqueidentifier");
@@ -983,6 +1020,17 @@ namespace HomePage.Migrations
                 {
                     b.HasOne("HomePage.Model.UserInfo", "User")
                         .WithMany("Cookies")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HomePage.Model.UserAchievement", b =>
+                {
+                    b.HasOne("HomePage.Model.UserInfo", "User")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

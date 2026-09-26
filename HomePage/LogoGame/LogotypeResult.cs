@@ -7,12 +7,18 @@ namespace HomePage.LogoGame
     {
         public required string UserName { get; set; }
 
-        public DateTime Date { get; set; }
+        public required DateTime Date { get; set; }
 
         public required string Answer { get; set; }
 
         public int HintsUsed { get; set; }
 
         public bool IsCorrect { get; set; }
+
+        public int Guesses { get; set; }
+
+        public required DateTime CreatedAt { get; set; }
+
+        public DateTime? FinishedAt { get; set; }
     }
 }

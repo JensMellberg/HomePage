@@ -1,9 +1,11 @@
-﻿using HomePage.Data;
+﻿using HomePage.Achievements;
+using HomePage.Data;
 using HomePage.Model;
 
 namespace HomePage.Repositories
 {
-    public class WordMixResultRepository(AppDbContext dbContext, CurrentWordMixRepository currentWordMixRepository, DatabaseLogger logger)
+    public class WordMixResultRepository(AppDbContext dbContext, CurrentWordMixRepository currentWordMixRepository,
+        AchievementRepository achievementRepository, DatabaseLogger logger)
     {
         public List<IGrouping<DateTime, WordMixResult>> GetResultsByDay()
         {
@@ -65,6 +67,10 @@ namespace HomePage.Repositories
 
             dbContext.SaveChanges();
             logger.Information($"User {person} set a new word mix score of {score}.", person);
+            if (score >= (GetForDateAndPerson(date, Person.MrRobot.UserName)?.Score ?? int.MaxValue))
+            {
+                achievementRepository.EarnAchievement(AchievementRepository.LevandeOrdlista, person);
+            }
         }
     }
 }

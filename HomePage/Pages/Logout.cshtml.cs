@@ -6,7 +6,7 @@ namespace HomePage.Pages
     {
         public IActionResult OnGet()
         {
-            signInRepository.LogOut(HttpContext.Session);
+            SignInRepository.LogOut(HttpContext.Session);
             return new RedirectResult("/Index");
         }
     }

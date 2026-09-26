@@ -1,0 +1,128 @@
+﻿.auto-search-wrapper {
+	position: relative;
+	width: 100%;
+	max-width: 520px;
+	box-sizing: border-box;
+	margin-bottom: 15px;
+}
+
+.auto-search-input-wrapper {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	min-height: 42px;
+	padding: 0 10px;
+	box-sizing: border-box;
+	background: #f8f8fa;
+	border: 1px solid #dfe1e8;
+	border-radius: 10px;
+	transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.auto-search-input-wrapper:focus-within {
+	background: #ffffff;
+	border-color: #8582e8;
+	box-shadow: 0 0 0 3px rgba(133, 130, 232, .11);
+}
+
+.auto-search-icon {
+	flex: 0 0 auto;
+	margin-right: 7px;
+	color: #858793;
+	font-size: 22px;
+	line-height: 1;
+	margin-bottom: 5px;
+}
+
+.auto-search-wrapper .auto-search-input-wrapper .auto-search {
+	width: 100%;
+	min-width: 0;
+	padding: 8px 2px;
+	border: none;
+	outline: none;
+	background: transparent;
+	color: #292b35;
+	font: inherit;
+	font-size: 13px;
+}
+
+.auto-search:focus {
+	outline: none !important;
+	border: none !important;
+	box-shadow: none !important;
+}
+
+.auto-search::placeholder {
+	color: #9698a3;
+}
+
+.auto-search-results {
+	position: absolute;
+	top: calc(100% + 5px);
+	left: 0;
+	right: 0;
+	z-index: 100;
+	display: none;
+	flex-direction: column;
+	gap: 4px;
+	max-height: 240px;
+	padding: 5px;
+	box-sizing: border-box;
+	overflow-y: auto;
+	overflow-x: hidden;
+	background: #ffffff;
+	border: 1px solid #e1e2e8;
+	border-radius: 11px;
+	box-shadow: 0 8px 20px rgba(20, 22, 40, .10), 0 2px 6px rgba(20, 22, 40, .06);
+}
+
+.auto-search-results.visible {
+	display: flex;
+}
+
+.auto-search-result {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	min-height: 40px;
+	margin: 0;
+	padding: 7px 9px;
+	box-sizing: border-box;
+	background: #f7f7fa;
+	color: #30323d;
+	border: 1px solid #e5e6eb;
+	border-radius: 8px;
+	font: inherit;
+	font-size: 12px;
+	font-weight: 650;
+	text-align: left;
+	cursor: pointer;
+}
+
+.auto-search-result:active {
+	background: #eeeeF6;
+	transform: scale(.995);
+}
+
+.auto-search-result-text {
+	min-width: 0;
+	color: #30323d;
+	overflow-wrap: anywhere;
+}
+
+@media (max-width: 380px) {
+
+	.auto-search-input-wrapper {
+		min-height: 40px;
+	}
+
+	.auto-search-result {
+		min-height: 38px;
+		padding: 6px 8px;
+		font-size: 11px;
+	}
+
+	.auto-search-results {
+		max-height: 210px;
+	}
+}

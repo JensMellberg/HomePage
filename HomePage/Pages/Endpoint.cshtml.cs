@@ -1,3 +1,4 @@
+using HomePage.Achievements;
 using HomePage.Chores;
 using HomePage.Data;
 using HomePage.Model;
@@ -14,6 +15,7 @@ namespace HomePage.Pages
         SignInRepository signInRepository,
         ChoreRepository choreRepository, 
         DatabaseLogger logger,
+        AchievementRepository achievementRepository,
         SettingsRepository settingsRepository) : BasePage(signInRepository)
     {
         public void OnGet()
@@ -138,6 +140,16 @@ namespace HomePage.Pages
                 logger.Information($"{chorePerson} performed chore {chore.Id} with a new streak of {streak}.", null);
                 dbContext.SaveChanges();
                 settingsRepository.UpdateHomePageChange();
+                if (streak > 49 && chore is FlossChoreBase)
+                {
+                    achievementRepository.EarnAchievement(AchievementRepository.FinaTender, chorePerson);
+                }
+
+                if (streak > 19 && chore is FlowerChore)
+                {
+                    achievementRepository.EarnAchievement(AchievementRepository.GreenFingers, chorePerson);
+                }
+
                 return Utils.CreateClientResult(new { streak });
             }
 

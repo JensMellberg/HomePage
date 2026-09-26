@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.RegularExpressions;
 using HomePage.Model;
 using Microsoft.AspNetCore.Mvc;
 
@@ -45,5 +46,21 @@ namespace HomePage
         public static string GetTextOrNothing(double text) => text == 0 ? "-" : text.ToString();
 
         public static string Truncate(this string s, int length) => s.Length > length ? s[..length] : s;
+
+        public static bool IsAcceptableName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return false;
+            }
+                
+
+            if (!Regex.IsMatch(name, @"^[A-Za-zÅÄÖåäö0-9][A-Za-zÅÄÖåäö0-9 _-]{0,49}$"))
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

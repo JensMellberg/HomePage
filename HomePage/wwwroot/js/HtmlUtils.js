@@ -14,4 +14,17 @@
 
 		return element;
 	}
+
+	static fillDropdown(element, options, selectedId) {
+		for (const option of options) {
+			if (!option.id) {
+				return
+			}
+
+			const optionElement = HtmlUtils.addElement('option', '', element)
+			optionElement.value = option.id
+			optionElement.innerText = option.text
+			optionElement.selected = option.id === selectedId
+		}
+	}
 }

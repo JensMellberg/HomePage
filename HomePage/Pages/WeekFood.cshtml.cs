@@ -1,15 +1,16 @@
 using System.Globalization;
+using HomePage.Achievements;
 using HomePage.Data;
 using HomePage.Model;
 using HomePage.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 
 namespace HomePage.Pages
 {
     [IgnoreAntiforgeryToken]
-    public class WeekFoodModel(FoodStorageRepository foodStorageRepository, DayFoodRepository dayFoodRepository, AppDbContext dbContext, DatabaseLogger logger, SignInRepository signInRepository) : BasePage(signInRepository)
+    public class WeekFoodModel(FoodStorageRepository foodStorageRepository, DayFoodRepository dayFoodRepository,
+        AppDbContext dbContext, DatabaseLogger logger,
+        AchievementRepository achievementRepository, SignInRepository signInRepository) : BasePage(signInRepository)
     {
         public List<DayFood> DayFoods { get; set; } = new List<DayFood>();
 
@@ -96,7 +97,8 @@ namespace HomePage.Pages
             }
 
             var convertedDate = DateHelper.FromKey(date);
-            var dayFood = dayFoodRepository.GetPopulatedDayFood()
+            var allDayFood = dayFoodRepository.GetPopulatedDayFood();
+            var dayFood = allDayFood
                 .FirstOrDefault(x => x.Date == convertedDate);
 
             if (dayFood == null)
@@ -149,6 +151,48 @@ namespace HomePage.Pages
 
             logger.Information($"{person} gave food {dayFood.CombinedName} a score of {ranking}", person);
             dbContext.SaveChanges();
+
+            if (dayFood.GetCategories(dbContext).Any(x => x.Name == "Vegetariskt"))
+            {
+                var firstOfWeek = DateHelper.GetFirstOfWeek(convertedDate);
+                var totalVego = 0;
+                for (var weekDelta = -1; weekDelta > -10; weekDelta--)
+                {
+                    var weekDate = firstOfWeek.AddDays(7 * weekDelta);
+                    var hasVego = false;
+                    for (var i = 0; i < 7; i++)
+                    {
+                        var crnt = weekDate.AddDays(i);
+                        var dayFoodOfDay = allDayFood
+                            .FirstOrDefault(x => x.Date == crnt);
+                        if (dayFoodOfDay == null)
+                        {
+                            continue;
+                        }
+
+                        if (dayFoodOfDay.GetCategories(dbContext).Any(x => x.Name == "Vegetariskt"))
+                        {
+                            hasVego = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasVego)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        totalVego++;
+                    }
+                }
+                if (totalVego >= 10)
+                {
+                    achievementRepository.EarnAchievement(AchievementRepository.AnimalFriend, Person.Jens.UserName);
+                    achievementRepository.EarnAchievement(AchievementRepository.AnimalFriend, Person.Anna.UserName);
+                }
+            }
+
             return new OkResult();
         }
     }

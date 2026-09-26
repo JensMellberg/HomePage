@@ -38,19 +38,6 @@ body {
 	max-width: fit-content;
 }
 
-.profile-photo.jens {
-	background-image: url(../Jens.png);
-}
-
-.profile-photo.anna {
-	background-image: url(../Anna.png);
-}
-
-.profile-photo.unknown {
-	background-image: url(../Unknown.jpg);
-}
-
-
 .chore {
 	border: 2px solid yellow;
 	position: relative;
@@ -365,43 +352,6 @@ body {
 	text-align: center;
 	justify-content: center;
 	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-}
-
-.profile-photo.Flower {
-	background-image: url(../Plant.jpg);
-}
-
-.profile-photo.Sink {
-	background-image: url(../Sink.png);
-}
-
-.profile-photo.Eye {
-	background-image: url(../Eye.png);
-}
-
-.profile-photo.Bed {
-	background-image: url(../Bed.jpg);
-}
-
-.profile-photo.Recycle {
-	background-image: url(../Recycle.png);
-}
-
-.profile-photo.Workout {
-	background-image: url(../Workout.png);
-}
-
-.profile-photo.cat {
-	background-image: url(../Cat.png);
-	position: relative;
-}
-
-.profile-photo.Floss {
-	background-image: url(../Floss.png);
-}
-
-.profile-photo.FlossJens {
-	background-image: url(../Floss.png);
 }
 
 .random-button {

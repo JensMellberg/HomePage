@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 using System.Text;
 using HomePage.Data;
 using HomePage.Model;
@@ -23,6 +24,11 @@ namespace HomePage
         public bool CreateAccount(string username, string password, string name)
         {
             if (dbContext.UserInfo.ToList().Any(x => x.UserName.Equals(username, StringComparison.InvariantCultureIgnoreCase))) {
+                return false;
+            }
+
+            if (!Utils.IsAcceptableName(name) || !Utils.IsAcceptableName(username))
+            {
                 return false;
             }
 
@@ -129,6 +135,25 @@ namespace HomePage
             }
         }
 
+        public UserInfo? GetUserInfo(string userName) =>
+            dbContext.UserInfo.Include(x => x.Cookies).Include(x => x.UserGroup).FirstOrDefault(x => x.UserName == userName);
+
+        public Person? GetPerson(string userName)
+        {
+            if (userName == Person.MrRobot.UserName)
+            {
+                return Person.MrRobot;
+            }
+
+            var userInfo = GetUserInfo(userName);
+            if (userInfo == null)
+            {
+                return null;
+            }
+
+            return Person.FromUserInfo(userInfo);
+        }
+
         public Person? LoggedInPerson(ISession session)
         {
            var userInfo = GetLoggedInUserInfo(session);
@@ -139,6 +164,12 @@ namespace HomePage
 
             return Person.FromUserInfo(userInfo);
         }
+
+        public Dictionary<string, Person> GetPersonByUserNames() => dbContext.UserInfo
+            .Select(x => Person.FromUserInfo(x))
+            .ToList()
+            .Concat([Person.MrRobot])
+            .ToDictionary(x => x.UserName, x => x);
 
         private UserInfo? GetLoggedInUserInfo(ISession session)
         {

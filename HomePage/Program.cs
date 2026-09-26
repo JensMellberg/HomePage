@@ -1,3 +1,4 @@
+using HomePage.Achievements;
 using HomePage.Chores;
 using HomePage.Data;
 using HomePage.Repositories;
@@ -34,6 +35,7 @@ namespace HomePage
             builder.Services.AddTransient<LogotypeResultRepository>();
             builder.Services.AddTransient<SettingsRepository>();
             builder.Services.AddTransient<DatabaseLogger>();
+            builder.Services.AddTransient<AchievementRepository>();
             builder.Services.AddTransient<ChoreRepository>();
             builder.Services.AddTransient<WikiGameRepository>();
             builder.Services.AddRazorPages();
@@ -54,11 +56,9 @@ namespace HomePage
                 db.Database.Migrate();
             }
 
-            // Configure the HTTP request pipeline.
             app.UseExceptionHandler("/Error");
             if (!app.Environment.IsDevelopment())
             {
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -69,6 +69,13 @@ namespace HomePage
                 FileProvider = new PhysicalFileProvider(
                     Path.Combine(Directory.GetCurrentDirectory(), "Pictures")),
                     RequestPath = "/Pictures"
+            });
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "UserPhotos")),
+                RequestPath = "/UserPhotos"
             });
 
             app.UseRouting();

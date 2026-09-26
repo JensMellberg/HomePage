@@ -10,7 +10,7 @@
 <div class="page-wrapper game-result-page">
     <div class="game-score-result-wrapper" style="margin-top: 1px;">
         <div class="game-score-result">
-            <div class="profile-photo @Model.PersonClass"></div>
+            @Html.Raw(Model.Person.GetPhotoHtml.Replace("UserPhotos", "../UserPhotos"))
             <span>@Model.Score</span>
         </div>
         <button class="modern-button secondary" onclick="window.location.href='Results'" style="height: 32px; margin-top: 8px;">Tillbaka</button>

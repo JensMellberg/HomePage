@@ -13,5 +13,7 @@ namespace HomePage.Chores
         protected override string GetNextPerson() => PersonName;
 
         protected override string ConvertStreakPerson(string person) => PersonName;
+
+        public override bool PersonUsesChore(string person) => person == PersonName;
     }
 }

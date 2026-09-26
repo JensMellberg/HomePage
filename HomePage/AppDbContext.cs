@@ -13,6 +13,8 @@ namespace HomePage.Data
         {
         }
 
+        public DbSet<UserAchievement> UserAchievements { get; set; }
+
         public DbSet<ToDoItem> ToDo { get; set; }
 
         public DbSet<LogotypeResult> LogotypeResults { get; set; }

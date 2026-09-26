@@ -12,27 +12,29 @@
         <input type="text" value="@Model.CurrentFilter" placeholder="filtrera..." onchange="updateTextFilter(this.value)" />
         <input type="hidden" value="@Model.CurrentFilter" id="currentfilter" />
     </div>
-    <div class="food-grid ingredient-grid">
-        @foreach (var ingredient in Model.Ingredients)
-        {
-            <div class="food-row">
-                <div class="food-grid-cell">
-                    <a href="CreateIngredient?Id=@ingredient.Id">
-                        @ingredient.Name
-                    </a>
+    <div class="food-grid-wrapper">
+        <div class="food-grid ingredient-grid">
+            @foreach (var ingredient in Model.Ingredients)
+            {
+                <div class="food-row">
+                    <div class="food-grid-cell">
+                        <a href="CreateIngredient?Id=@ingredient.Id">
+                            @ingredient.Name
+                        </a>
+                    </div>
+                    <div class="food-grid-cell">
+                        <span>
+                            @ingredient.UnitType
+                        </span>
+                    </div>
+                    <div class="food-grid-cell">
+                        <span>
+                            @ingredient.CategoryId
+                        </span>
+                    </div>
                 </div>
-                <div class="food-grid-cell">
-                    <span>
-                        @ingredient.UnitType
-                    </span>
-                </div>
-                <div class="food-grid-cell">
-                    <span>
-                        @ingredient.CategoryId
-                    </span>
-                </div>
-            </div>
-        }
+            }
+        </div>
     </div>
 </div>
 

@@ -13,6 +13,9 @@ namespace HomePage.Model
 
         public required byte[] PasswordHash { get; set; }
 
+        [MaxLength(64)]
+        public string? PhotoUrl { get; set; }
+
         public List<SignInCookie> Cookies { get; set; } = [];
 
         public bool IsAdmin => UserGroup?.IsAdmin == true;
