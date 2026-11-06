@@ -8,10 +8,14 @@
 
         public string? OriginalLogoUrl { get; set; }
 
+        public string? Creator { get; set; }
+
         public int HintsAvailable { get; set; }
 
         public string Id { get; set; } = "";
 
         public string GetOriginalLogo => OriginalLogoUrl ?? LogoUrl;
+
+        public string GetCreator => Creator ?? Person.Jens.UserName;
     }
 }

@@ -20,5 +20,7 @@ namespace HomePage.LogoGame
         public required DateTime CreatedAt { get; set; }
 
         public DateTime? FinishedAt { get; set; }
+
+        public bool WasFastResult => FinishedAt.HasValue && FinishedAt < CreatedAt.AddSeconds(15);
     }
 }

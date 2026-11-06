@@ -1,0 +1,50 @@
+﻿@page
+@model HomePage.Pages.ListLogosModel
+@{
+    ViewData["Title"] = "Dina logotyper";
+}
+
+@Html.AntiForgeryToken()
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/logotype-game.css" asp-append-version="true" />
+<div class="page-wrapper">
+    <button class="modern-button secondary center-button" onclick="goBack()" type="button">Tillbaka</button>
+    <a class="modern-button primary center-button" href="CreateLogotype">Skapa ny logotyp</a>
+    <div class="logo-picker-wrapper">
+        @foreach (var logoMetadata in Model.AllLogos)
+        {
+            <img src="Logotypes/@logoMetadata.LogoUrl" class="logo-small" onclick="showDialog('@logoMetadata.Id', this)" />
+        }
+    </div>
+</div>
+
+<script>
+    function showDialog(id, element) {
+          Alert.openDialog('Vill du ta bort loggan?', [
+            {text: 'Ja!', action: () => {Popup.closePopup(); deleteLogo(id, element);}},
+            {text: 'Nä', action: () => {Popup.closePopup();}}
+        ])
+    }
+
+    function deleteLogo(id, element) {
+        let token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        $.ajax({
+            type: "POST",
+            data: {
+                logoId: id,
+                __RequestVerificationToken: token
+            },
+            url: "/ListLogos",
+            success: (data) => {
+                const result = JsonResultUnpacker.unpackResult(data)
+                if (result) {
+                    element.remove()
+                }
+            }
+        });
+    }
+
+    function goBack() {
+        window.location.href = 'LogotypeResults'
+    }
+</script>

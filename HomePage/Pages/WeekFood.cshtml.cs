@@ -14,11 +14,11 @@ namespace HomePage.Pages
     {
         public List<DayFood> DayFoods { get; set; } = new List<DayFood>();
 
-        public Dictionary<string, FoodRanking[]> FoodRankings = new Dictionary<string, FoodRanking[]>();
+        public Dictionary<string, FoodRanking[]> FoodRankings = new();
 
-        public string PrevWeekQs { get; set; }
+        public required string PrevWeekQs { get; set; }
 
-        public string NextWeekQs { get; set; }
+        public required string NextWeekQs { get; set; }
 
         public int Week { get; set; }
 
@@ -26,11 +26,9 @@ namespace HomePage.Pages
 
         public List<WeekGoals> WeekGoals { get; set; } = [];
 
-        public string ShopListFrom { get; set; }
+        public required string ShopListFrom { get; set; }
 
-        public string ShopListTo { get; set; }
-
-        public Dictionary<string, string> RankingCommentsPerDay { get; set; }
+        public required string ShopListTo { get; set; }
 
         public IActionResult OnGet(int year, int month, int day)
         {
@@ -78,7 +76,7 @@ namespace HomePage.Pages
                 FoodRankings.Add(DateHelper.ToKey(crntDate), [ranking1, ranking2]);
             }
 
-            WeekGoals = weekGoalsPerCategoryId.Values.ToList();
+            WeekGoals = [.. weekGoalsPerCategoryId.Values];
 
             var today = DateHelper.DateNow;
 
@@ -152,45 +150,10 @@ namespace HomePage.Pages
             logger.Information($"{person} gave food {dayFood.CombinedName} a score of {ranking}", person);
             dbContext.SaveChanges();
 
-            if (dayFood.GetCategories(dbContext).Any(x => x.Name == "Vegetariskt"))
+            if (dayFood.GetCategories(dbContext).Any(x => x.Name == "Vegetariskt") && AnimalFriend.WasEarned(convertedDate, dbContext, allDayFood))
             {
-                var firstOfWeek = DateHelper.GetFirstOfWeek(convertedDate);
-                var totalVego = 0;
-                for (var weekDelta = -1; weekDelta > -10; weekDelta--)
-                {
-                    var weekDate = firstOfWeek.AddDays(7 * weekDelta);
-                    var hasVego = false;
-                    for (var i = 0; i < 7; i++)
-                    {
-                        var crnt = weekDate.AddDays(i);
-                        var dayFoodOfDay = allDayFood
-                            .FirstOrDefault(x => x.Date == crnt);
-                        if (dayFoodOfDay == null)
-                        {
-                            continue;
-                        }
-
-                        if (dayFoodOfDay.GetCategories(dbContext).Any(x => x.Name == "Vegetariskt"))
-                        {
-                            hasVego = true;
-                            break;
-                        }
-                    }
-
-                    if (!hasVego)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        totalVego++;
-                    }
-                }
-                if (totalVego >= 10)
-                {
-                    achievementRepository.EarnAchievement(AchievementRepository.AnimalFriend, Person.Jens.UserName);
-                    achievementRepository.EarnAchievement(AchievementRepository.AnimalFriend, Person.Anna.UserName);
-                }
+                achievementRepository.EarnAchievement(AchievementRepository.AnimalFriend, Person.Jens.UserName);
+                achievementRepository.EarnAchievement(AchievementRepository.AnimalFriend, Person.Anna.UserName);
             }
 
             return new OkResult();

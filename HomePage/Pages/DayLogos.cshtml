@@ -17,12 +17,17 @@
                 @if (dayLogoPair.metadata != null) {
                     @if (Model.MayChangeDay(dayLogoPair.date)) {
                         <a href="ChooseDayLogo?date=@DateHelper.ToKey(dayLogoPair.date)">@dayLogoPair.metadata.Answers.First()</a>
-                    } 
+                        <img class="logo-small" src="Logotypes/@dayLogoPair.metadata.LogoUrl" />
+                        <img class="logo-small" src="Logotypes/@dayLogoPair.metadata.GetOriginalLogo" />
+                    }
+                    else if (dayLogoPair.isHidden) {
+                        <span>Hemligt</span>
+                    }
                     else {
                         <span>@dayLogoPair.metadata.Answers.First()</span>
+                        <img class="logo-small" src="Logotypes/@dayLogoPair.metadata.LogoUrl" />
+                        <img class="logo-small" src="Logotypes/@dayLogoPair.metadata.GetOriginalLogo" />
                     }
-                    <img class="logo-small" src="Logotypes/@dayLogoPair.metadata.LogoUrl" />
-                    <img class="logo-small" src="Logotypes/@dayLogoPair.metadata.GetOriginalLogo" />
                 }
                 else {
                     @if (Model.MayChangeDay(dayLogoPair.date))

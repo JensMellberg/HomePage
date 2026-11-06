@@ -150,6 +150,11 @@ namespace HomePage.Pages
                     achievementRepository.EarnAchievement(AchievementRepository.GreenFingers, chorePerson);
                 }
 
+                if (chore is FlowerChore && DateHelper.DateTimeNow.Hour < 8)
+                {
+                    achievementRepository.EarnAchievement(AchievementRepository.MorningPerson, chorePerson);
+                }
+
                 return Utils.CreateClientResult(new { streak });
             }
 

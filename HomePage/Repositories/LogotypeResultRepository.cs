@@ -48,6 +48,8 @@ namespace HomePage.Repositories
             }
         }
 
+        public List<LogotypeResult> GetResultsForDay(DateTime date) => dbContext.LogotypeResults.Where(x => x.Date == date && x.IsCorrect).ToList();
+
         public LogotypeResult GetResultForPerson(DateTime date, string userName)
         {
             var existingResult = dbContext.LogotypeResults.FirstOrDefault(x => x.Date == date && x.UserName == userName);
@@ -96,6 +98,43 @@ namespace HomePage.Repositories
             }
 
             return logotypeRepository.LoadLogoFromId(dayLogo.LogoMetadataPath);
+        }
+
+        public LogotypeMetadata GenerateNewDayLogo()
+        {
+            var previousDays = dbContext.DayLogo.OrderByDescending(x => x.Date).ToList();
+            var seenUsers = new HashSet<string>();
+            var seenLogos = new HashSet<string>();
+            var users = new List<string>();
+            foreach (var day in previousDays)
+            {
+                var logo = logotypeRepository.LoadLogoFromId(day.LogoMetadataPath);
+                seenLogos.Add(logo.Id);
+                if (seenUsers.Add(logo.GetCreator))
+                {
+                    users.Add(logo.GetCreator);
+                }
+            }
+
+            users.AddRange(dbContext.UserInfo.Select(x => x.UserName).Where(x => !seenUsers.Contains(x)));
+            for (var i = users.Count - 1; i >= 0; i--)
+            {
+                var logo = TryPickLogoFromUser(users[i]);
+                if (logo != null)
+                {
+                    SetDayLogoMetadata(DateHelper.DateNow, logo.Id);
+                    return logo;
+                }
+            }
+
+            var lastLogo = logotypeRepository.LoadLogoFromId(seenLogos.Last());
+            SetDayLogoMetadata(DateHelper.DateNow, lastLogo.Id);
+            return lastLogo;
+            LogotypeMetadata? TryPickLogoFromUser(string userName)
+            {
+                var userLogos = logotypeRepository.LoadLogos(userName).Where(x => !seenLogos.Contains(x.Id));
+                return userLogos.FirstOrDefault();
+            }
         }
 
         public void SetDayLogoMetadata(DateTime date, string metadataId)
@@ -149,7 +188,7 @@ namespace HomePage.Repositories
                     achievementRepository.EarnAchievement(AchievementRepository.QuickClick, userName);
                 }
 
-                if (Enumerable.Range(1, 4).Select(x => date.AddDays(-x)).All(newDate =>
+                if (result.HintsUsed == 0 && result.Guesses == 1 && Enumerable.Range(1, 4).Select(x => date.AddDays(-x)).All(newDate =>
                 {
                     var result = dbContext.LogotypeResults.FirstOrDefault(x => x.Date == newDate && x.UserName == userName);
                     return result?.IsCorrect == true && result.Guesses == 1 && result.HintsUsed == 0;
@@ -169,7 +208,7 @@ namespace HomePage.Repositories
             return false;
         }
 
-        public bool MayChangeDayLogo(DateTime date)
+        public bool MayChangeDayLogo(DateTime date, string username)
         {
             if (DateHelper.IsInPast(date))
             {
@@ -181,7 +220,13 @@ namespace HomePage.Repositories
                 return false;
             }
 
+            if ((GetDayLogoMetadata(date)?.GetCreator ?? username) != username)
+            {
+                return false;
+            }
             return true;
         }
+
+        public static IEnumerable<LogotypeResult> OrderResults(IEnumerable<LogotypeResult> results) => results.Where(x => x.IsCorrect).OrderBy(x => x.HintsUsed).ThenBy(x => x.Guesses).ThenBy(x => (x.FinishedAt - x.CreatedAt)?.TotalSeconds);
     }
 }

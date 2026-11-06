@@ -1,4 +1,5 @@
 ﻿@page
+@using HomePage.Repositories
 @model HomePage.Pages.LogotypeResultsModel
 @{
     ViewData["Title"] = "Gissa logotyp";
@@ -10,6 +11,7 @@
 <div class="page-wrapper wiki-game-page">
     <div class="wiki-game-intro">
         <a class="modern-button primary center-button" href="CurrentLogotype">Dagens logga</a>
+        <a class="modern-button secondary" href="ListLogos">Dina logotyper</a>
         @if (Model.IsAdmin) {
             <a class="modern-button secondary" href="DayLogos?fromDate=@DateHelper.ToKey(DateHelper.GetFirstOfWeek(DateHelper.DateNow))">Bestäm loggor</a>
         }
@@ -18,9 +20,9 @@
     <div class="word-mix-top-bar">
         <div class="word-mix-other-current">
             @if (Model.TodaysResult != null) {
-                foreach (var entry in Model.TodaysResult.Results.Where(x => x.IsCorrect).OrderBy(x => x.HintsUsed))
+                foreach (var entry in LogotypeResultRepository.OrderResults(Model.TodaysResult.Results))
                 {
-                    <a @Html.Raw(Model.PersonByUserName[entry.UserName].GetProfileHref) class="profile-name-photo-wrapper">
+                    <a @Html.Raw(Model.PersonByUserName[entry.UserName].GetProfileHref) class="profile-name-photo-wrapper @(entry.WasFastResult ? "fast-result" : "")">
                         @Html.Raw(Model.PersonByUserName[entry.UserName].GetPhotoHtml)
                         <span>@Model.ResultText(entry)</span>
                     </a>
@@ -39,13 +41,14 @@
                         <span>@dayResult.LogotypeMetadata.Answers.First()</span>
                         <img class="logo-small" src="Logotypes/@dayResult.LogotypeMetadata.GetOriginalLogo"
                             onclick="showBigLogo('@dayResult.LogotypeMetadata.GetOriginalLogo')" />
+                        <span>@Model.PersonByUserName[@dayResult.LogotypeMetadata.GetCreator].Name</span>
                     </div>
                     
                 </div>
                 <div class="word-mix-other-current">
-                    @foreach (var entry in dayResult.Results.Where(x => x.IsCorrect).OrderBy(x => x.HintsUsed))
+                    @foreach (var entry in LogotypeResultRepository.OrderResults(dayResult.Results))
                     {
-                        <a @Html.Raw(Model.PersonByUserName[entry.UserName].GetProfileHref) class="profile-name-photo-wrapper">
+                        <a @Html.Raw(Model.PersonByUserName[entry.UserName].GetProfileHref) class="profile-name-photo-wrapper @(entry.WasFastResult ? "fast-result" : "")">
                             @Html.Raw(Model.PersonByUserName[entry.UserName].GetPhotoHtml)
                             <span>@Model.ResultText(entry)</span>
                         </a>

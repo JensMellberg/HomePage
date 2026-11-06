@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace HomePage.Pages
 {
     [RequireAdmin]
-    public class DayLogosModel(LogotypeResultRepository resultRepository, LogotypeRepository logotypeRepository, SignInRepository signInRepository)
+    public class DayLogosModel(LogotypeResultRepository resultRepository, SignInRepository signInRepository)
         : BasePage(signInRepository)
     {
-        public List<(DateTime date, LogotypeMetadata? metadata)> DayLogos { get; set; } = [];
+        public List<(DateTime date, LogotypeMetadata? metadata, bool isHidden)> DayLogos { get; set; } = [];
 
         public required string PreviousWeek { get; set; }
 
@@ -23,12 +23,12 @@ namespace HomePage.Pages
             {
                 var crntDate = date.AddDays(i);
                 var dayLogo = resultRepository.GetDayLogoMetadata(crntDate);
-                DayLogos.Add((crntDate, dayLogo));
+                DayLogos.Add((crntDate, dayLogo, dayLogo?.GetCreator != LoggedInPerson!.UserName));
             }
 
             return Page();
         }
 
-        public bool MayChangeDay(DateTime date) => resultRepository.MayChangeDayLogo(date);
+        public bool MayChangeDay(DateTime date) => resultRepository.MayChangeDayLogo(date, LoggedInPerson!.UserName);
     }
 }

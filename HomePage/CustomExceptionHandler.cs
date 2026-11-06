@@ -1,5 +1,4 @@
-﻿using HomePage.Data;
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
 
 namespace HomePage
 {

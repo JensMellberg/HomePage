@@ -23,7 +23,7 @@ namespace HomePage.Pages
             var logoMetadata = resultRepository.GetDayLogoMetadata(DateHelper.DateNow);
             if (logoMetadata == null)
             {
-                return NotFound();
+                logoMetadata = resultRepository.GenerateNewDayLogo();
             }
 
             Result = resultRepository.GetResultForPerson(DateHelper.DateNow, LoggedInPerson!.UserName);

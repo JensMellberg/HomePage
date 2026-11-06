@@ -28,7 +28,7 @@ namespace HomePage.Pages
         public IActionResult OnPost(string date, string logoId)
         {
             var convertedDate = DateHelper.FromKey(date);
-            if (!IsAdmin || !resultRepository.MayChangeDayLogo(convertedDate))
+            if (!IsAdmin || !resultRepository.MayChangeDayLogo(convertedDate, LoggedInPerson!.UserName))
             {
                 return BadRequest();
             }

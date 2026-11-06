@@ -62,5 +62,36 @@ namespace HomePage
 
             return true;
         }
+
+        public static string? ValidateImage(IFormFile image)
+        {
+            const long maxFileSize = 10 * 1024 * 1024;
+            var allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ".jpg",
+                    ".jpeg",
+                    ".png",
+                    ".webp",
+                    ".bmp"
+                };
+
+            if (image.Length > maxFileSize)
+            {
+                return "Bilden får vara högst 10 MB.";
+            }
+
+            if (!image.ContentType.StartsWith("image/"))
+            {
+                return "Bilden har inte en godkänd content type.";
+            }
+
+            var fileExtension = Path.GetExtension(image.FileName);
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                return "Bilden har inte en godkänd filtyp.";
+            }
+
+            return null;
+        }
     }
 }

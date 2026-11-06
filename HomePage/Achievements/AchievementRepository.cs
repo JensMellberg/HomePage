@@ -12,6 +12,8 @@ namespace HomePage.Achievements
         public static AnimalFriend AnimalFriend = new();
         public static QuickClick QuickClick = new();
         public static Reklamskadad Reklamskadad = new();
+        public static Taskig Taskig = new();
+        public static MorningPerson MorningPerson = new();
 
         public static Achievement[] AllAchievements = [
             FinaTender,
@@ -21,6 +23,8 @@ namespace HomePage.Achievements
             LevandeOrdlista,
             QuickClick,
             AnimalFriend,
+            Taskig,
+            MorningPerson,
             Reklamskadad
         ];
 

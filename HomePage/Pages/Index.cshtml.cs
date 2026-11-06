@@ -1,11 +1,9 @@
-using System.Text;
+using HomePage.Achievements;
 using HomePage.Chores;
 using HomePage.Data;
 using HomePage.Model;
 using HomePage.Repositories;
-using HomePage.WikiGame;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePage.Pages
 {
@@ -38,7 +36,9 @@ namespace HomePage.Pages
         SettingsRepository settingsRepository,
         ChoreRepository choreRepository,
         CurrentWordMixRepository currentWordMixRepository,
-        WikiGameRepository wikiGameRepository) : BasePage(signInRepository)
+        LogotypeResultRepository logotypeResultRepository,
+        WikiGameRepository wikiGameRepository,
+        AchievementRepository achievementRepository) : BasePage(signInRepository)
     {
 
         public int Day { get; set; }
@@ -111,9 +111,7 @@ namespace HomePage.Pages
                 AnniverseryString = $"{yearsPassed} år{monthString}";
             }
 
-            settingsRepository.PerformBackupAsync(false);
-            currentWordMixRepository.GetCurrent();
-            wikiGameRepository.GetStartPage(DateHelper.DateNow);
+            PerformDailyTasks();
 
             var dayFoods = dayFoodRepository.GetPopulatedDayFood();
             var todaysFood = dayFoods.FirstOrDefault(x => x.Date == today.Date);
@@ -163,6 +161,19 @@ namespace HomePage.Pages
                 var streak = chore.GetStreak(person).Streak;
                 (person == Person.Anna.Name ? AnnaIcons : JensIcons).Add(new PersonIcon { Id = chore.Id, Streak = streak, WasDoneToday = wasDoneToday });
             }
+        }
+
+        private void PerformDailyTasks()
+        {
+            settingsRepository.PerformBackupAsync(false);
+            currentWordMixRepository.GetCurrent();
+            wikiGameRepository.GetStartPage(DateHelper.DateNow);
+
+            var taskigEarner = Taskig.WasEarnedYesterday(logotypeResultRepository);
+            if (taskigEarner != null)
+            {
+                achievementRepository.EarnAchievement(AchievementRepository.Taskig, taskigEarner);
+            } 
         }
 
         private static string GetFirstOfWeekQueryString(DateTime date)

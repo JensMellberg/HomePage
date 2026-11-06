@@ -1,0 +1,82 @@
+﻿@page
+@model HomePage.Pages.CreateLogotypeModel
+@{
+    ViewData["Title"] = "Skapa logotyp";
+}
+
+<link rel="stylesheet" href="~/css/modern-grid.css" asp-append-version="true" />
+<div class="page-wrapper mainscreen">
+    <form class="dayfood-form" method="post" enctype="multipart/form-data">
+        <div class="input-wrapper">
+            <span>Rätt svar</span>
+            <input type="text" asp-for="Answer" required />
+        </div>
+        <div class="input-wrapper">
+            <span>Antal ledtrådar</span>
+            <input type="number" asp-for="Hints" required />
+        </div>
+        <div class="profile-photo-upload">
+            <label for="logoInput" class="profile-photo-preview">
+                @Html.Raw(Person.MrRobot.GetPhotoHtml)
+                <span class="profile-photo-overlay">Logotyp att gissa på</span>
+            </label>
+
+            <input id="logoInput"
+                   type="file"
+                   name="logo"
+                   accept="image/*"
+                   required
+                   hidden />
+        </div>
+
+        <div class="profile-photo-upload">
+            <label for="originalLogoInput" class="profile-photo-preview">
+                @Html.Raw(Person.MrRobot.GetPhotoHtml)
+                <span class="profile-photo-overlay">Hela loggan (visas vid rätt svar, valfritt)</span>
+            </label>
+
+            <input id="originalLogoInput"
+                   type="file"
+                   name="originalLogo"
+                   accept="image/*"
+                   hidden />
+        </div>
+
+        <div class="button-wrapper">
+            <input type="submit" class="modern-button primary" value="Spara" />
+            <button type="button" class="modern-button secondary" onclick="window.location.href = '/ListLogos'">Avbryt</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const logoInput = document.getElementById('logoInput');
+    const preview = $('.profile-photo')[0]
+    bindEvents(logoInput, preview)
+    const originalLogoInput = document.getElementById('originalLogoInput');
+    const preview2 = $('.profile-photo')[1]
+    bindEvents(originalLogoInput, preview2)
+
+    function bindEvents(element, preview) {
+        element.onchange = () => {
+            const file = element.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                element.value = '';
+                return;
+            }
+
+            const url = URL.createObjectURL(file);
+
+            preview.style.backgroundImage = 'url(' + url + ')'
+
+            preview.onload = () => {
+                URL.revokeObjectURL(url);
+            };
+        }
+    }
+</script>

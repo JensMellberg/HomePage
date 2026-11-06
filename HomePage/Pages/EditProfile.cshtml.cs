@@ -24,32 +24,10 @@ namespace HomePage.Pages
 
             if (profilePhoto != null && profilePhoto.Length > 0)
             {
-                const long maxFileSize = 10 * 1024 * 1024;
-                var allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                var validationError = Utils.ValidateImage(profilePhoto);
+                if (validationError != null)
                 {
-                    ".jpg",
-                    ".jpeg",
-                    ".png",
-                    ".webp",
-                    ".bmp"
-                };
-
-                if (profilePhoto.Length > maxFileSize)
-                {
-                    ModelState.AddModelError(nameof(profilePhoto), "Bilden får vara högst 10 MB.");
-                    return Page();
-                }
-
-                if (!profilePhoto.ContentType.StartsWith("image/"))
-                {
-                    ModelState.AddModelError(nameof(profilePhoto), "Bilden har inte en godkänd content type.");
-                    return Page();
-                }
-
-                var fileExtension = Path.GetExtension(profilePhoto.FileName);
-                if (!allowedExtensions.Contains(fileExtension))
-                {
-                    ModelState.AddModelError(nameof(profilePhoto), "Bilden har inte en godkänd filtyp.");
+                    ModelState.AddModelError(nameof(profilePhoto), validationError);
                     return Page();
                 }
 
@@ -57,6 +35,7 @@ namespace HomePage.Pages
                     Directory.GetCurrentDirectory(),
                     "UserPhotos");
 
+                var fileExtension = Path.GetExtension(profilePhoto.FileName);
                 var fileName = Guid.NewGuid() + fileExtension;
                 var filePath = Path.Combine(folder, fileName);
 
@@ -70,7 +49,7 @@ namespace HomePage.Pages
             }
 
             dbContext.SaveChanges();
-            return Redirect($"/Profile?userName={userInfo.UserName}");
+            return RedirectToPage("/Profile", new { userName = userInfo.UserName });
         }
     }
 }
